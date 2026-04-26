@@ -20,6 +20,37 @@ export type ChatNote = {
   users: NoteAuthor | NoteAuthor[];
 };
 
+// Palette for other users' bubbles. The current user always gets blue.
+// Tailwind's scanner needs these as literal strings so it bundles the
+// classes — keep the strings as written below.
+const OTHER_BUBBLES = [
+  { bg: "bg-purple-200", text: "text-purple-900" },
+  { bg: "bg-pink-200", text: "text-pink-900" },
+  { bg: "bg-amber-200", text: "text-amber-900" },
+  { bg: "bg-emerald-200", text: "text-emerald-900" },
+  { bg: "bg-cyan-200", text: "text-cyan-900" },
+  { bg: "bg-rose-200", text: "text-rose-900" },
+  { bg: "bg-indigo-200", text: "text-indigo-900" },
+  { bg: "bg-lime-200", text: "text-lime-900" },
+  { bg: "bg-teal-200", text: "text-teal-900" },
+  { bg: "bg-fuchsia-200", text: "text-fuchsia-900" },
+] as const;
+
+const ME_BUBBLE = { bg: "bg-blue-500", text: "text-white" } as const;
+
+function hashCode(s: string): number {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) {
+    h = (h * 31 + s.charCodeAt(i)) | 0;
+  }
+  return Math.abs(h);
+}
+
+function bubbleColour(userId: string, isMe: boolean) {
+  if (isMe) return ME_BUBBLE;
+  return OTHER_BUBBLES[hashCode(userId) % OTHER_BUBBLES.length];
+}
+
 function authorOf(note: ChatNote): string {
   const u = Array.isArray(note.users) ? note.users[0] : note.users;
   if (!u) return "Unknown";
@@ -54,13 +85,11 @@ export default function ChatView({
   const scrollRef = useRef<HTMLDivElement>(null);
   const lastCountRef = useRef(notes.length);
 
-  // Scroll to bottom on mount.
   useEffect(() => {
     const el = scrollRef.current;
     if (el) el.scrollTop = el.scrollHeight;
   }, []);
 
-  // Scroll to bottom when a new message is added.
   useEffect(() => {
     if (notes.length > lastCountRef.current) {
       const el = scrollRef.current;
@@ -155,14 +184,24 @@ export default function ChatView({
         {notes.length === 0 ? (
           <p className="text-sm text-neutral-500">No messages yet.</p>
         ) : (
-          <ul className="flex flex-col gap-4">
+          <ul className="flex flex-col gap-3">
             {notes.map((n) => {
-              const canEdit =
-                currentRole === "owner" || n.user_id === currentUserId;
+              const isMe = n.user_id === currentUserId;
+              const canEdit = currentRole === "owner" || isMe;
               const isEditing = editingId === n.id;
+              const colour = bubbleColour(n.user_id, isMe);
               return (
-                <li key={n.id} className="group flex flex-col gap-1">
-                  <div className="flex items-baseline gap-2 text-xs">
+                <li
+                  key={n.id}
+                  className={`group flex flex-col gap-1 ${
+                    isMe ? "items-end" : "items-start"
+                  }`}
+                >
+                  <div
+                    className={`flex items-baseline gap-2 text-xs ${
+                      isMe ? "flex-row-reverse" : ""
+                    }`}
+                  >
                     <span className="font-medium text-neutral-700">
                       {authorOf(n)}
                     </span>
@@ -172,31 +211,10 @@ export default function ChatView({
                     {n.updated_at !== n.created_at && (
                       <span className="text-neutral-400">(edited)</span>
                     )}
-                    {canEdit && !isEditing && (
-                      <span className="ml-auto flex gap-2 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
-                        <button
-                          type="button"
-                          onClick={() => startEdit(n)}
-                          className="text-xs text-neutral-500 hover:underline"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleDelete(n.id)}
-                          disabled={isPending}
-                          className="text-xs text-red-700 hover:underline disabled:opacity-50"
-                        >
-                          Delete
-                        </button>
-                      </span>
-                    )}
                   </div>
-                  {n.subject && !isEditing && (
-                    <p className="text-sm font-semibold">{n.subject}</p>
-                  )}
+
                   {isEditing ? (
-                    <div className="flex flex-col gap-2">
+                    <div className="flex w-full max-w-[80%] flex-col gap-2">
                       <textarea
                         value={editingBody}
                         onChange={(e) => setEditingBody(e.target.value)}
@@ -208,7 +226,9 @@ export default function ChatView({
                       {editError && (
                         <p className="text-xs text-red-700">{editError}</p>
                       )}
-                      <div className="flex gap-2">
+                      <div
+                        className={`flex gap-2 ${isMe ? "justify-end" : ""}`}
+                      >
                         <button
                           type="button"
                           onClick={() => saveEdit(n.id)}
@@ -228,7 +248,38 @@ export default function ChatView({
                       </div>
                     </div>
                   ) : (
-                    <p className="whitespace-pre-wrap text-sm">{n.body}</p>
+                    <div
+                      className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm ${colour.bg} ${colour.text}`}
+                    >
+                      {n.subject && (
+                        <p className="font-semibold">{n.subject}</p>
+                      )}
+                      <p className="whitespace-pre-wrap">{n.body}</p>
+                    </div>
+                  )}
+
+                  {canEdit && !isEditing && (
+                    <div
+                      className={`flex gap-3 text-xs opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100 ${
+                        isMe ? "self-end" : "self-start"
+                      }`}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => startEdit(n)}
+                        className="text-neutral-500 hover:underline"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDelete(n.id)}
+                        disabled={isPending}
+                        className="text-red-700 hover:underline disabled:opacity-50"
+                      >
+                        Delete
+                      </button>
+                    </div>
                   )}
                 </li>
               );
