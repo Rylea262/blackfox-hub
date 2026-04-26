@@ -3,6 +3,11 @@ export const TOOL_CATEGORIES = [
   { value: "hand_tools", label: "Hand Tools" },
   { value: "safety", label: "Safety Equipment" },
   { value: "lasers", label: "Lasers" },
+  { value: "trowel_machines", label: "Trowel Machines" },
+  { value: "ride_on_trowel", label: "Ride on Trowel Machine" },
+  { value: "vibrators", label: "Vibrators" },
+  { value: "dust_management", label: "Dust Management" },
+  { value: "generators", label: "Generators" },
   { value: "specialized", label: "Specialized Equipment" },
   { value: "other", label: "Other" },
 ] as const;
