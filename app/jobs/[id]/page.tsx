@@ -6,6 +6,7 @@ import { formatCurrency } from "@/lib/format/currency";
 import UploadForm from "./upload-form";
 import DocumentList from "./document-list";
 import DeleteJobButton from "./delete-job-button";
+import NotesSection, { type NoteRow } from "./notes-section";
 
 export default async function JobDetailPage({
   params,
@@ -26,6 +27,12 @@ export default async function JobDetailPage({
   const { data: documents } = await supabase
     .from("documents")
     .select("id, file_name, doc_type, file_url, created_at")
+    .eq("job_id", params.id)
+    .order("created_at", { ascending: false });
+
+  const { data: notes } = await supabase
+    .from("job_notes")
+    .select("id, body, created_at, users(name, email)")
     .eq("job_id", params.id)
     .order("created_at", { ascending: false });
 
@@ -81,6 +88,21 @@ export default async function JobDetailPage({
         </summary>
         <div className="mt-2">
           <UploadForm jobId={job.id} userId={user.id} />
+        </div>
+      </details>
+
+      <details open className="mt-8">
+        <summary className="cursor-pointer select-none text-lg font-semibold">
+          Notes{" "}
+          <span className="text-sm font-normal text-neutral-500">
+            ({notes?.length ?? 0})
+          </span>
+        </summary>
+        <div className="mt-2">
+          <NotesSection
+            jobId={job.id}
+            notes={(notes ?? []) as unknown as NoteRow[]}
+          />
         </div>
       </details>
 
