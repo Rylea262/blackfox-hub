@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { inviteEmployee } from "./invite-actions";
+import { addEmployee } from "./add-actions";
 import { POSITIONS } from "@/lib/employees/constants";
 
 const ROLES = [
@@ -28,7 +28,7 @@ export default function AddEmployeeButton() {
     setError(null);
     const fd = new FormData(e.currentTarget);
     startTransition(async () => {
-      const result = await inviteEmployee(fd);
+      const result = await addEmployee(fd);
       if (result?.error) {
         setError(result.error);
         return;
@@ -59,7 +59,7 @@ export default function AddEmployeeButton() {
           >
             <h2 className="text-lg font-semibold">Add new employee</h2>
             <p className="mt-1 text-xs text-neutral-500">
-              They&apos;ll get an email invite to set their password.
+              Adds the employee record. No invite email is sent.
             </p>
             <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-3">
               <label className="flex flex-col gap-1 text-sm">
@@ -124,7 +124,7 @@ export default function AddEmployeeButton() {
                   disabled={isPending}
                   className="rounded bg-black px-3 py-1.5 text-sm text-white disabled:opacity-50"
                 >
-                  {isPending ? "Sending invite…" : "Send invite"}
+                  {isPending ? "Adding…" : "Add employee"}
                 </button>
                 <button
                   type="button"
