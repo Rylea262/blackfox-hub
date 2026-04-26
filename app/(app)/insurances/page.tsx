@@ -1,10 +1,36 @@
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
 import AddInsuranceButton from "./add-insurance-button";
+import CertCell from "./cert-cell";
+
+type ExpiryStatus = "expired" | "soon" | "ok" | "none";
 
 function formatDate(iso: string | null): string {
   if (!iso) return "—";
   return new Date(iso).toLocaleDateString();
+}
+
+function expiryStatus(iso: string | null): ExpiryStatus {
+  if (!iso) return "none";
+  const expiry = new Date(iso);
+  if (Number.isNaN(expiry.getTime())) return "none";
+  const days = Math.floor(
+    (expiry.getTime() - Date.now()) / (1000 * 60 * 60 * 24),
+  );
+  if (days < 0) return "expired";
+  if (days < 30) return "soon";
+  return "ok";
+}
+
+function expiryClass(status: ExpiryStatus): string {
+  switch (status) {
+    case "expired":
+      return "text-red-700 font-semibold";
+    case "soon":
+      return "text-amber-700 font-medium";
+    default:
+      return "";
+  }
 }
 
 export default async function InsurancesPage() {
@@ -13,8 +39,15 @@ export default async function InsurancesPage() {
 
   const { data: insurances, error } = await supabase
     .from("insurances")
-    .select("id, name, provider, policy_number, start_date, expiry_date, created_at")
+    .select(
+      "id, name, provider, policy_number, start_date, expiry_date, certificate_url, created_at",
+    )
     .order("expiry_date", { ascending: true, nullsFirst: false });
+
+  const expiredCount =
+    insurances?.filter((i) => expiryStatus(i.expiry_date) === "expired").length ?? 0;
+  const soonCount =
+    insurances?.filter((i) => expiryStatus(i.expiry_date) === "soon").length ?? 0;
 
   return (
     <main className="mx-auto max-w-5xl p-6">
@@ -24,6 +57,23 @@ export default async function InsurancesPage() {
           <p className="mt-1 text-sm text-neutral-500">
             Insurance policies the business holds.
           </p>
+          {(expiredCount > 0 || soonCount > 0) && (
+            <p className="mt-1 text-sm">
+              {expiredCount > 0 && (
+                <span className="text-red-700 font-medium">
+                  {expiredCount} expired
+                </span>
+              )}
+              {expiredCount > 0 && soonCount > 0 && (
+                <span className="text-neutral-400"> · </span>
+              )}
+              {soonCount > 0 && (
+                <span className="text-amber-700 font-medium">
+                  {soonCount} expiring within 30 days
+                </span>
+              )}
+            </p>
+          )}
         </div>
         <AddInsuranceButton />
       </div>
@@ -49,18 +99,30 @@ export default async function InsurancesPage() {
               <th className="py-2">Policy #</th>
               <th className="py-2">Start</th>
               <th className="py-2">Expiry</th>
+              <th className="py-2">Certificate</th>
             </tr>
           </thead>
           <tbody>
-            {insurances.map((ins) => (
-              <tr key={ins.id} className="border-b">
-                <td className="py-2">{ins.name}</td>
-                <td className="py-2">{ins.provider ?? "—"}</td>
-                <td className="py-2">{ins.policy_number ?? "—"}</td>
-                <td className="py-2">{formatDate(ins.start_date)}</td>
-                <td className="py-2">{formatDate(ins.expiry_date)}</td>
-              </tr>
-            ))}
+            {insurances.map((ins) => {
+              const status = expiryStatus(ins.expiry_date);
+              return (
+                <tr key={ins.id} className="border-b align-top">
+                  <td className="py-2">{ins.name}</td>
+                  <td className="py-2">{ins.provider ?? "—"}</td>
+                  <td className="py-2">{ins.policy_number ?? "—"}</td>
+                  <td className="py-2">{formatDate(ins.start_date)}</td>
+                  <td className={`py-2 ${expiryClass(status)}`}>
+                    {formatDate(ins.expiry_date)}
+                  </td>
+                  <td className="py-2">
+                    <CertCell
+                      insuranceId={ins.id}
+                      certUrl={ins.certificate_url}
+                    />
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       )}
