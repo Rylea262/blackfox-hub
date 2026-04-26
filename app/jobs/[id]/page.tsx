@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
 import UploadForm from "./upload-form";
 import DocumentList from "./document-list";
+import DeleteJobButton from "./delete-job-button";
 
 export default async function JobDetailPage({
   params,
@@ -59,6 +60,17 @@ export default async function JobDetailPage({
       <section className="mt-8">
         <h2 className="text-lg font-semibold">Upload</h2>
         <UploadForm jobId={job.id} userId={user.id} />
+      </section>
+
+      <section className="mt-12 border-t border-neutral-200 pt-6">
+        <h2 className="text-lg font-semibold text-red-700">Danger zone</h2>
+        <p className="mt-1 text-sm text-neutral-600">
+          Deleting this job will also remove all attached documents and their
+          files. This cannot be undone.
+        </p>
+        <div className="mt-3">
+          <DeleteJobButton jobId={job.id} />
+        </div>
       </section>
     </main>
   );
