@@ -1,5 +1,6 @@
 "use server";
 
+import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireRole } from "@/lib/auth/require-role";
@@ -9,7 +10,7 @@ const VALID_ROLES = ["owner", "office", "leading_hand"] as const;
 const VALID_POSITIONS: string[] = POSITIONS.map((p) => p.value);
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export async function inviteEmployee(
+export async function addEmployee(
   formData: FormData,
 ): Promise<{ error?: string } | void> {
   await requireRole(["owner", "office"]);
@@ -31,34 +32,26 @@ export async function inviteEmployee(
     return { error: "Invalid position" };
   }
 
+  // Data-only employee: a public.users row with a fresh UUID, no auth.users
+  // entry. The user can't log in. If they later sign up via Supabase Auth
+  // with this same email, the handle_new_user trigger will link their auth
+  // record to this row by updating its id.
+  const insert: Record<string, string | null> = {
+    id: randomUUID(),
+    email,
+    role,
+  };
+  if (name) insert.name = name;
+  if (position !== null) insert.position = position;
+
   const admin = createAdminClient();
+  const { error } = await admin.from("users").insert(insert);
 
-  const { data, error: inviteErr } =
-    await admin.auth.admin.inviteUserByEmail(email);
-
-  if (inviteErr) {
-    return { error: inviteErr.message };
-  }
-  if (!data?.user) {
-    return { error: "Invite did not return a user" };
-  }
-
-  // The handle_new_user trigger has already created a public.users row
-  // with role = leading_hand. Patch it with the name, chosen role, and
-  // position.
-  const updates: Record<string, string | null> = { role };
-  if (name) updates.name = name;
-  if (position !== null) updates.position = position;
-
-  const { error: updateErr } = await admin
-    .from("users")
-    .update(updates)
-    .eq("id", data.user.id);
-
-  if (updateErr) {
-    return {
-      error: `Invite sent, but failed to set details: ${updateErr.message}`,
-    };
+  if (error) {
+    if (error.code === "23505") {
+      return { error: "An employee with this email already exists" };
+    }
+    return { error: error.message };
   }
 
   revalidatePath("/employees");
