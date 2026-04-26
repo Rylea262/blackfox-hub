@@ -26,12 +26,18 @@ export async function addTool(
   const location = String(formData.get("location") ?? "").trim() || null;
   const notes = String(formData.get("notes") ?? "").trim() || null;
 
+  // Only laser tools track a service due date.
+  const dueRaw = String(formData.get("next_service_due") ?? "").trim();
+  const next_service_due =
+    category === "lasers" && dueRaw ? dueRaw : null;
+
   const { error } = await supabase.from("tools").insert({
     name,
     category,
     serial_number,
     location,
     notes,
+    next_service_due,
     created_by: user.id,
   });
 

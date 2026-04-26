@@ -12,18 +12,21 @@ export type ToolForEdit = {
   serial_number: string | null;
   location: string | null;
   notes: string | null;
+  next_service_due: string | null;
 };
 
 export default function EditToolButton({ tool }: { tool: ToolForEdit }) {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [category, setCategory] = useState(tool.category);
   const [isPending, startTransition] = useTransition();
 
   function close() {
     if (isPending) return;
     setIsOpen(false);
     setError(null);
+    setCategory(tool.category);
   }
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -79,7 +82,8 @@ export default function EditToolButton({ tool }: { tool: ToolForEdit }) {
                 <select
                   name="category"
                   required
-                  defaultValue={tool.category}
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
                   className="rounded border p-2"
                   disabled={isPending}
                 >
@@ -110,6 +114,18 @@ export default function EditToolButton({ tool }: { tool: ToolForEdit }) {
                   disabled={isPending}
                 />
               </label>
+              {category === "lasers" && (
+                <label className="flex flex-col gap-1 text-sm">
+                  Next service due
+                  <input
+                    type="date"
+                    name="next_service_due"
+                    defaultValue={tool.next_service_due ?? ""}
+                    className="rounded border p-2"
+                    disabled={isPending}
+                  />
+                </label>
+              )}
               <label className="flex flex-col gap-1 text-sm">
                 Notes
                 <textarea

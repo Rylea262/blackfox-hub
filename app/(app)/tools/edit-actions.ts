@@ -27,9 +27,22 @@ export async function updateTool(
   const location = String(formData.get("location") ?? "").trim() || null;
   const notes = String(formData.get("notes") ?? "").trim() || null;
 
+  // Only laser tools track a service due date. Switching out of Lasers
+  // clears it; switching into Lasers without a date leaves it null.
+  const dueRaw = String(formData.get("next_service_due") ?? "").trim();
+  const next_service_due =
+    category === "lasers" && dueRaw ? dueRaw : null;
+
   const { error } = await supabase
     .from("tools")
-    .update({ name, category, serial_number, location, notes })
+    .update({
+      name,
+      category,
+      serial_number,
+      location,
+      notes,
+      next_service_due,
+    })
     .eq("id", toolId);
 
   if (error) return { error: error.message };

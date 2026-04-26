@@ -9,12 +9,14 @@ export default function AddToolButton() {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [category, setCategory] = useState("");
   const [isPending, startTransition] = useTransition();
 
   function close() {
     if (isPending) return;
     setIsOpen(false);
     setError(null);
+    setCategory("");
   }
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -28,6 +30,7 @@ export default function AddToolButton() {
         return;
       }
       setIsOpen(false);
+      setCategory("");
       router.refresh();
     });
   }
@@ -70,7 +73,8 @@ export default function AddToolButton() {
                 <select
                   name="category"
                   required
-                  defaultValue=""
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
                   className="rounded border p-2"
                   disabled={isPending}
                 >
@@ -103,6 +107,17 @@ export default function AddToolButton() {
                   disabled={isPending}
                 />
               </label>
+              {category === "lasers" && (
+                <label className="flex flex-col gap-1 text-sm">
+                  Next service due
+                  <input
+                    type="date"
+                    name="next_service_due"
+                    className="rounded border p-2"
+                    disabled={isPending}
+                  />
+                </label>
+              )}
               <label className="flex flex-col gap-1 text-sm">
                 Notes
                 <textarea

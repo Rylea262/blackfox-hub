@@ -15,8 +15,11 @@ type Tool = {
   serial_number: string | null;
   location: string | null;
   notes: string | null;
+  next_service_due: string | null;
   created_at: string;
 };
+
+type DueStatus = "overdue" | "soon" | "ok" | "none";
 
 function categoryLabel(value: string): string {
   return TOOL_CATEGORY_LABELS[value] ?? value;
@@ -31,13 +34,45 @@ function compareCategories(a: string, b: string): number {
   return categoryLabel(a).localeCompare(categoryLabel(b));
 }
 
+function formatDate(iso: string | null): string {
+  if (!iso) return "—";
+  return new Date(iso).toLocaleDateString();
+}
+
+function dueStatus(iso: string | null): DueStatus {
+  if (!iso) return "none";
+  const due = new Date(iso);
+  if (Number.isNaN(due.getTime())) return "none";
+  const days = Math.floor(
+    (due.getTime() - Date.now()) / (1000 * 60 * 60 * 24),
+  );
+  if (days < 0) return "overdue";
+  if (days < 30) return "soon";
+  return "ok";
+}
+
+function dueClass(status: DueStatus): string {
+  switch (status) {
+    case "overdue":
+      return "text-red-700 font-semibold";
+    case "soon":
+      return "text-orange-700 font-medium";
+    case "ok":
+      return "text-green-700";
+    default:
+      return "";
+  }
+}
+
 export default async function ToolsPage() {
   await requireRole(["owner", "office"]);
   const supabase = createClient();
 
   const { data: tools, error } = await supabase
     .from("tools")
-    .select("id, name, category, serial_number, location, notes, created_at")
+    .select(
+      "id, name, category, serial_number, location, notes, next_service_due, created_at",
+    )
     .order("name", { ascending: true });
 
   const all = (tools ?? []) as Tool[];
@@ -77,6 +112,7 @@ export default async function ToolsPage() {
       <div className="mt-4 flex flex-col gap-3">
         {categoryKeys.map((cat) => {
           const items = grouped.get(cat)!;
+          const showService = cat === "lasers";
           return (
             <details
               key={cat}
@@ -95,39 +131,51 @@ export default async function ToolsPage() {
                       <th className="py-1.5">Name</th>
                       <th className="py-1.5">Serial</th>
                       <th className="py-1.5">Location</th>
+                      {showService && (
+                        <th className="py-1.5">Next service</th>
+                      )}
                       <th className="py-1.5">Notes</th>
                       <th className="py-1.5">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {items.map((t) => (
-                      <tr key={t.id} className="border-b align-top">
-                        <td className="py-2">{t.name}</td>
-                        <td className="py-2">{t.serial_number ?? "—"}</td>
-                        <td className="py-2">{t.location ?? "—"}</td>
-                        <td className="py-2 whitespace-pre-wrap">
-                          {t.notes ?? "—"}
-                        </td>
-                        <td className="py-2">
-                          <div className="flex flex-col items-start gap-1">
-                            <EditToolButton
-                              tool={{
-                                id: t.id,
-                                name: t.name,
-                                category: t.category,
-                                serial_number: t.serial_number,
-                                location: t.location,
-                                notes: t.notes,
-                              }}
-                            />
-                            <DeleteToolButton
-                              toolId={t.id}
-                              toolName={t.name}
-                            />
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
+                    {items.map((t) => {
+                      const status = dueStatus(t.next_service_due);
+                      return (
+                        <tr key={t.id} className="border-b align-top">
+                          <td className="py-2">{t.name}</td>
+                          <td className="py-2">{t.serial_number ?? "—"}</td>
+                          <td className="py-2">{t.location ?? "—"}</td>
+                          {showService && (
+                            <td className={`py-2 ${dueClass(status)}`}>
+                              {formatDate(t.next_service_due)}
+                            </td>
+                          )}
+                          <td className="py-2 whitespace-pre-wrap">
+                            {t.notes ?? "—"}
+                          </td>
+                          <td className="py-2">
+                            <div className="flex flex-col items-start gap-1">
+                              <EditToolButton
+                                tool={{
+                                  id: t.id,
+                                  name: t.name,
+                                  category: t.category,
+                                  serial_number: t.serial_number,
+                                  location: t.location,
+                                  notes: t.notes,
+                                  next_service_due: t.next_service_due,
+                                }}
+                              />
+                              <DeleteToolButton
+                                toolId={t.id}
+                                toolName={t.name}
+                              />
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
