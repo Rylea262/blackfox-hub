@@ -172,7 +172,7 @@ export default function ChatView({
   }
 
   return (
-    <div className="flex h-[calc(100dvh-3.25rem)] flex-col">
+    <div className="mx-auto flex h-[calc(100dvh-8rem)] max-w-4xl flex-col rounded border border-neutral-200 bg-white shadow-sm md:my-4">
       <header className="border-b border-neutral-200 px-6 py-3">
         <h1 className="text-lg font-bold">Notepad</h1>
         <p className="text-xs text-neutral-500">
