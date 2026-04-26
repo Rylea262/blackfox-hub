@@ -72,6 +72,21 @@ export default async function JobDetailPage({
 
       <details open className="mt-8">
         <summary className="cursor-pointer select-none text-lg font-semibold">
+          Notes{" "}
+          <span className="text-sm font-normal text-neutral-500">
+            ({notes?.length ?? 0})
+          </span>
+        </summary>
+        <div className="mt-2">
+          <NotesSection
+            jobId={job.id}
+            notes={(notes ?? []) as unknown as NoteRow[]}
+          />
+        </div>
+      </details>
+
+      <details open className="mt-8">
+        <summary className="cursor-pointer select-none text-lg font-semibold">
           Documents{" "}
           <span className="text-sm font-normal text-neutral-500">
             ({documents?.length ?? 0})
@@ -88,21 +103,6 @@ export default async function JobDetailPage({
         </summary>
         <div className="mt-2">
           <UploadForm jobId={job.id} userId={user.id} />
-        </div>
-      </details>
-
-      <details open className="mt-8">
-        <summary className="cursor-pointer select-none text-lg font-semibold">
-          Notes{" "}
-          <span className="text-sm font-normal text-neutral-500">
-            ({notes?.length ?? 0})
-          </span>
-        </summary>
-        <div className="mt-2">
-          <NotesSection
-            jobId={job.id}
-            notes={(notes ?? []) as unknown as NoteRow[]}
-          />
         </div>
       </details>
 
