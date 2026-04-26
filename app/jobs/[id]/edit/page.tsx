@@ -17,7 +17,7 @@ export default async function EditJobPage({
 
   const { data: job } = await supabase
     .from("jobs")
-    .select("id, name, address, client, status, start_date")
+    .select("id, name, address, client, status, start_date, project_value")
     .eq("id", params.id)
     .maybeSingle();
 
@@ -71,6 +71,19 @@ export default async function EditJobPage({
             name="start_date"
             type="date"
             defaultValue={job.start_date ?? ""}
+            className="rounded border p-2"
+          />
+        </label>
+        <label className="flex flex-col gap-1 text-sm">
+          Project value (AUD)
+          <input
+            name="project_value"
+            type="number"
+            min="0"
+            step="0.01"
+            inputMode="decimal"
+            placeholder="e.g. 1500000"
+            defaultValue={job.project_value ?? ""}
             className="rounded border p-2"
           />
         </label>

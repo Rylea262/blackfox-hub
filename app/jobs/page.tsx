@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
+import { formatCurrency } from "@/lib/format/currency";
 import { JOB_STATUSES } from "@/lib/jobs/constants";
 
 const STATUS_FILTERS = [
@@ -20,7 +21,7 @@ export default async function JobsListPage({
 
   let query = supabase
     .from("jobs")
-    .select("id, name, client, status, created_at")
+    .select("id, name, client, status, project_value, created_at")
     .order("created_at", { ascending: false });
 
   if (status !== "all") {
@@ -77,6 +78,7 @@ export default async function JobsListPage({
               <th className="py-2">Name</th>
               <th className="py-2">Client</th>
               <th className="py-2">Status</th>
+              <th className="py-2 text-right">Value</th>
               <th className="py-2">Created</th>
               <th className="py-2"></th>
             </tr>
@@ -87,6 +89,9 @@ export default async function JobsListPage({
                 <td className="py-2">{j.name}</td>
                 <td className="py-2">{j.client ?? "—"}</td>
                 <td className="py-2">{j.status}</td>
+                <td className="py-2 text-right tabular-nums">
+                  {formatCurrency(j.project_value)}
+                </td>
                 <td className="py-2">
                   {new Date(j.created_at).toLocaleDateString()}
                 </td>

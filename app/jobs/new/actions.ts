@@ -20,6 +20,18 @@ export async function createJob(formData: FormData) {
   const start_date = startDateRaw || null;
   const status = String(formData.get("status") ?? "active");
 
+  const projectValueRaw = String(formData.get("project_value") ?? "").trim();
+  let project_value: number | null = null;
+  if (projectValueRaw) {
+    const parsed = Number(projectValueRaw);
+    if (!Number.isFinite(parsed) || parsed < 0) {
+      redirect(
+        `/jobs/new?error=${encodeURIComponent("Project value must be a non-negative number")}`,
+      );
+    }
+    project_value = parsed;
+  }
+
   const { data, error } = await supabase
     .from("jobs")
     .insert({
@@ -28,6 +40,7 @@ export async function createJob(formData: FormData) {
       client,
       start_date,
       status,
+      project_value,
       created_by: user.id,
     })
     .select("id")

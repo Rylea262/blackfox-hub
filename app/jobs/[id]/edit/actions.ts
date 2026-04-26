@@ -22,9 +22,21 @@ export async function updateJob(jobId: string, formData: FormData) {
   const start_date = startDateRaw || null;
   const status = String(formData.get("status") ?? "active");
 
+  const projectValueRaw = String(formData.get("project_value") ?? "").trim();
+  let project_value: number | null = null;
+  if (projectValueRaw) {
+    const parsed = Number(projectValueRaw);
+    if (!Number.isFinite(parsed) || parsed < 0) {
+      redirect(
+        `/jobs/${jobId}/edit?error=${encodeURIComponent("Project value must be a non-negative number")}`,
+      );
+    }
+    project_value = parsed;
+  }
+
   const { error } = await supabase
     .from("jobs")
-    .update({ name, address, client, start_date, status })
+    .update({ name, address, client, start_date, status, project_value })
     .eq("id", jobId);
 
   if (error) {

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
+import { formatCurrency } from "@/lib/format/currency";
 import UploadForm from "./upload-form";
 import DocumentList from "./document-list";
 import DeleteJobButton from "./delete-job-button";
@@ -16,7 +17,7 @@ export default async function JobDetailPage({
 
   const { data: job } = await supabase
     .from("jobs")
-    .select("id, name, address, client, status, start_date, created_at")
+    .select("id, name, address, client, status, start_date, project_value, created_at")
     .eq("id", params.id)
     .maybeSingle();
 
@@ -57,6 +58,8 @@ export default async function JobDetailPage({
               ? new Date(job.start_date).toLocaleDateString()
               : "—"}
           </dd>
+          <dt className="text-neutral-500">Value</dt>
+          <dd>{formatCurrency(job.project_value)}</dd>
         </dl>
       </header>
 
