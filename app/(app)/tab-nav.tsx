@@ -9,10 +9,12 @@ export default function TabNav({
   dashboardHref,
   showJobs,
   showEmployees,
+  showInsurances,
 }: {
   dashboardHref: string;
   showJobs: boolean;
   showEmployees: boolean;
+  showInsurances: boolean;
 }) {
   const pathname = usePathname();
 
@@ -22,6 +24,12 @@ export default function TabNav({
   if (showJobs) tabs.push({ href: "/jobs", label: "Jobs", match: "/jobs" });
   if (showEmployees)
     tabs.push({ href: "/employees", label: "Employees", match: "/employees" });
+  if (showInsurances)
+    tabs.push({
+      href: "/insurances",
+      label: "Insurances",
+      match: "/insurances",
+    });
 
   return (
     <div className="flex items-center gap-6 text-sm">
