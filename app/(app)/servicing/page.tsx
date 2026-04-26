@@ -3,6 +3,8 @@ import { requireRole } from "@/lib/auth/require-role";
 import { ASSET_TYPE_LABELS } from "@/lib/servicing/constants";
 import AddAssetButton from "./add-asset-button";
 import AddServicingButton from "./add-servicing-button";
+import EditAssetButton from "./edit-asset-button";
+import DeleteAssetButton from "./delete-asset-button";
 
 type DueStatus = "overdue" | "soon" | "ok" | "none";
 
@@ -183,6 +185,18 @@ export default async function ServicingPage() {
                     {assetServices.length}{" "}
                     {assetServices.length === 1 ? "service" : "services"}
                   </span>
+                  <EditAssetButton
+                    asset={{
+                      id: asset.id,
+                      name: asset.name,
+                      type: asset.type,
+                    }}
+                  />
+                  <DeleteAssetButton
+                    assetId={asset.id}
+                    assetName={asset.name}
+                    serviceCount={assetServices.length}
+                  />
                 </span>
               </summary>
               <div className="border-t border-neutral-200 bg-white p-4">
