@@ -2,9 +2,10 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { addServicing } from "./add-actions";
+import { addAsset } from "./asset-actions";
+import { ASSET_TYPES } from "@/lib/servicing/constants";
 
-export default function AddServicingButton({ assetId }: { assetId: string }) {
+export default function AddAssetButton() {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -21,7 +22,7 @@ export default function AddServicingButton({ assetId }: { assetId: string }) {
     setError(null);
     const fd = new FormData(e.currentTarget);
     startTransition(async () => {
-      const result = await addServicing(assetId, fd);
+      const result = await addAsset(fd);
       if (result?.error) {
         setError(result.error);
         return;
@@ -36,9 +37,9 @@ export default function AddServicingButton({ assetId }: { assetId: string }) {
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className="rounded border border-neutral-300 px-3 py-1.5 text-sm hover:bg-neutral-50"
+        className="rounded bg-black px-3 py-1.5 text-sm text-white"
       >
-        + Add servicing
+        + Add plant or vehicle
       </button>
 
       {isOpen && (
@@ -47,50 +48,41 @@ export default function AddServicingButton({ assetId }: { assetId: string }) {
           onClick={close}
         >
           <div
-            className="w-full max-w-md rounded bg-white p-6 shadow-lg"
+            className="w-full max-w-sm rounded bg-white p-6 shadow-lg"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="text-lg font-semibold">Add servicing record</h2>
+            <h2 className="text-lg font-semibold">Add plant or vehicle</h2>
             <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-3">
-              <div className="flex gap-3">
-                <label className="flex flex-1 flex-col gap-1 text-sm">
-                  Last serviced
-                  <input
-                    type="date"
-                    name="service_date"
-                    autoFocus
-                    className="rounded border p-2"
-                    disabled={isPending}
-                  />
-                </label>
-                <label className="flex flex-1 flex-col gap-1 text-sm">
-                  Next service due
-                  <input
-                    type="date"
-                    name="next_service_date"
-                    className="rounded border p-2"
-                    disabled={isPending}
-                  />
-                </label>
-              </div>
               <label className="flex flex-col gap-1 text-sm">
-                Serviced by
+                Name *
                 <input
                   type="text"
-                  name="serviced_by"
-                  placeholder="e.g. Carter's Mechanical"
+                  name="name"
+                  required
+                  autoFocus
+                  placeholder="e.g. Hilux SR5 (1ABC123) or 5T Excavator"
                   className="rounded border p-2"
                   disabled={isPending}
                 />
               </label>
               <label className="flex flex-col gap-1 text-sm">
-                Notes
-                <textarea
-                  name="notes"
-                  rows={2}
-                  className="resize-y rounded border p-2"
+                Type *
+                <select
+                  name="type"
+                  required
+                  defaultValue=""
+                  className="rounded border p-2"
                   disabled={isPending}
-                />
+                >
+                  <option value="" disabled>
+                    Select type…
+                  </option>
+                  {ASSET_TYPES.map((a) => (
+                    <option key={a.value} value={a.value}>
+                      {a.label}
+                    </option>
+                  ))}
+                </select>
               </label>
               {error && (
                 <p className="rounded border border-red-300 bg-red-50 p-2 text-sm text-red-700">
@@ -103,7 +95,7 @@ export default function AddServicingButton({ assetId }: { assetId: string }) {
                   disabled={isPending}
                   className="rounded bg-black px-3 py-1.5 text-sm text-white disabled:opacity-50"
                 >
-                  {isPending ? "Adding…" : "Add servicing"}
+                  {isPending ? "Adding…" : "Add"}
                 </button>
                 <button
                   type="button"

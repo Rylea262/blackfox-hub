@@ -1,9 +1,27 @@
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
 import { ASSET_TYPE_LABELS } from "@/lib/servicing/constants";
+import AddAssetButton from "./add-asset-button";
 import AddServicingButton from "./add-servicing-button";
 
 type DueStatus = "overdue" | "soon" | "ok" | "none";
+
+type Asset = {
+  id: string;
+  name: string;
+  type: string;
+  created_at: string;
+};
+
+type Service = {
+  id: string;
+  asset_id: string;
+  service_date: string | null;
+  next_service_date: string | null;
+  serviced_by: string | null;
+  notes: string | null;
+  created_at: string;
+};
 
 function formatDate(iso: string | null): string {
   if (!iso) return "—";
@@ -22,14 +40,29 @@ function dueStatus(iso: string | null): DueStatus {
   return "ok";
 }
 
-function dueClass(status: DueStatus): string {
+function statusBg(status: DueStatus): string {
   switch (status) {
     case "overdue":
-      return "text-red-700 font-semibold";
+      return "bg-red-50 border-red-200";
     case "soon":
-      return "text-amber-700 font-medium";
+      return "bg-orange-50 border-orange-200";
+    case "ok":
+      return "bg-green-50 border-green-200";
     default:
-      return "";
+      return "bg-white border-neutral-200";
+  }
+}
+
+function statusText(status: DueStatus): string {
+  switch (status) {
+    case "overdue":
+      return "text-red-700";
+    case "soon":
+      return "text-orange-700";
+    case "ok":
+      return "text-green-700";
+    default:
+      return "text-neutral-500";
   }
 }
 
@@ -37,17 +70,52 @@ export default async function ServicingPage() {
   await requireRole(["owner", "office"]);
   const supabase = createClient();
 
-  const { data: records, error } = await supabase
-    .from("servicing")
-    .select(
-      "id, asset_name, asset_type, service_date, next_service_date, serviced_by, created_at",
-    )
-    .order("next_service_date", { ascending: true, nullsFirst: false });
+  const [assetsRes, servicesRes] = await Promise.all([
+    supabase
+      .from("assets")
+      .select("id, name, type, created_at"),
+    supabase
+      .from("servicing")
+      .select(
+        "id, asset_id, service_date, next_service_date, serviced_by, notes, created_at",
+      )
+      .order("service_date", { ascending: false, nullsFirst: false }),
+  ]);
 
-  const overdueCount =
-    records?.filter((r) => dueStatus(r.next_service_date) === "overdue").length ?? 0;
-  const soonCount =
-    records?.filter((r) => dueStatus(r.next_service_date) === "soon").length ?? 0;
+  const assets = (assetsRes.data ?? []) as Asset[];
+  const services = (servicesRes.data ?? []) as Service[];
+
+  const servicesByAsset = new Map<string, Service[]>();
+  for (const s of services) {
+    const arr = servicesByAsset.get(s.asset_id);
+    if (arr) arr.push(s);
+    else servicesByAsset.set(s.asset_id, [s]);
+  }
+
+  function soonestNext(assetId: string): string | null {
+    const list = servicesByAsset.get(assetId) ?? [];
+    const dates = list
+      .map((s) => s.next_service_date)
+      .filter((d): d is string => Boolean(d));
+    if (dates.length === 0) return null;
+    return dates.sort()[0];
+  }
+
+  const sortedAssets = [...assets].sort((a, b) => {
+    const aNext = soonestNext(a.id);
+    const bNext = soonestNext(b.id);
+    if (!aNext && !bNext) return a.name.localeCompare(b.name);
+    if (!aNext) return 1;
+    if (!bNext) return -1;
+    return aNext.localeCompare(bNext);
+  });
+
+  const overdueCount = sortedAssets.filter(
+    (a) => dueStatus(soonestNext(a.id)) === "overdue",
+  ).length;
+  const soonCount = sortedAssets.filter(
+    (a) => dueStatus(soonestNext(a.id)) === "soon",
+  ).length;
 
   return (
     <main className="mx-auto max-w-5xl p-6">
@@ -68,59 +136,97 @@ export default async function ServicingPage() {
                 <span className="text-neutral-400"> · </span>
               )}
               {soonCount > 0 && (
-                <span className="font-medium text-amber-700">
+                <span className="font-medium text-orange-700">
                   {soonCount} due within 30 days
                 </span>
               )}
             </p>
           )}
         </div>
-        <AddServicingButton />
+        <AddAssetButton />
       </div>
 
-      {error && (
+      {assetsRes.error && (
         <p className="mt-4 rounded border border-red-300 bg-red-50 p-2 text-sm text-red-700">
-          {error.message}
+          {assetsRes.error.message}
         </p>
       )}
 
-      {!error && (!records || records.length === 0) && (
+      {!assetsRes.error && sortedAssets.length === 0 && (
         <p className="mt-6 rounded border border-dashed border-neutral-300 p-8 text-center text-sm text-neutral-500">
-          No servicing records yet. Add the first one.
+          No plant or vehicles yet. Add the first one.
         </p>
       )}
 
-      {records && records.length > 0 && (
-        <table className="mt-4 w-full border-collapse text-sm">
-          <thead>
-            <tr className="border-b text-left">
-              <th className="py-2">Asset</th>
-              <th className="py-2">Type</th>
-              <th className="py-2">Last serviced</th>
-              <th className="py-2">Next service</th>
-              <th className="py-2">Serviced by</th>
-            </tr>
-          </thead>
-          <tbody>
-            {records.map((r) => {
-              const status = dueStatus(r.next_service_date);
-              return (
-                <tr key={r.id} className="border-b align-top">
-                  <td className="py-2">{r.asset_name}</td>
-                  <td className="py-2">
-                    {ASSET_TYPE_LABELS[r.asset_type] ?? r.asset_type}
-                  </td>
-                  <td className="py-2">{formatDate(r.service_date)}</td>
-                  <td className={`py-2 ${dueClass(status)}`}>
-                    {formatDate(r.next_service_date)}
-                  </td>
-                  <td className="py-2">{r.serviced_by ?? "—"}</td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      )}
+      <div className="mt-4 flex flex-col gap-3">
+        {sortedAssets.map((asset) => {
+          const assetServices = servicesByAsset.get(asset.id) ?? [];
+          const next = soonestNext(asset.id);
+          const status = dueStatus(next);
+          return (
+            <details
+              key={asset.id}
+              className={`rounded border ${statusBg(status)}`}
+            >
+              <summary className="flex cursor-pointer select-none flex-wrap items-center gap-3 px-4 py-3">
+                <span className="font-semibold">{asset.name}</span>
+                <span className="text-xs text-neutral-500">
+                  {ASSET_TYPE_LABELS[asset.type] ?? asset.type}
+                </span>
+                <span className="ml-auto flex items-center gap-3 text-xs">
+                  <span className={statusText(status)}>
+                    {next
+                      ? `Next: ${formatDate(next)}`
+                      : "No service scheduled"}
+                  </span>
+                  <span className="text-neutral-500">
+                    {assetServices.length}{" "}
+                    {assetServices.length === 1 ? "service" : "services"}
+                  </span>
+                </span>
+              </summary>
+              <div className="border-t border-neutral-200 bg-white p-4">
+                {assetServices.length === 0 ? (
+                  <p className="mb-3 text-sm text-neutral-500">
+                    No service records yet.
+                  </p>
+                ) : (
+                  <table className="mb-3 w-full border-collapse text-sm">
+                    <thead>
+                      <tr className="border-b text-left text-xs text-neutral-500">
+                        <th className="py-1.5">Last serviced</th>
+                        <th className="py-1.5">Next service</th>
+                        <th className="py-1.5">Serviced by</th>
+                        <th className="py-1.5">Notes</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {assetServices.map((s) => {
+                        const sStatus = dueStatus(s.next_service_date);
+                        return (
+                          <tr key={s.id} className="border-b align-top">
+                            <td className="py-1.5">
+                              {formatDate(s.service_date)}
+                            </td>
+                            <td className={`py-1.5 ${statusText(sStatus)}`}>
+                              {formatDate(s.next_service_date)}
+                            </td>
+                            <td className="py-1.5">{s.serviced_by ?? "—"}</td>
+                            <td className="py-1.5 whitespace-pre-wrap">
+                              {s.notes ?? "—"}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                )}
+                <AddServicingButton assetId={asset.id} />
+              </div>
+            </details>
+          );
+        })}
+      </div>
     </main>
   );
 }
