@@ -3,9 +3,13 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
-import { TOOL_CATEGORIES } from "@/lib/tools/constants";
+import {
+  TOOL_CATEGORIES,
+  POWER_TOOL_BRANDS,
+} from "@/lib/tools/constants";
 
 const VALID_CATEGORIES: string[] = TOOL_CATEGORIES.map((c) => c.value);
+const VALID_BRANDS: string[] = POWER_TOOL_BRANDS.map((b) => b.value);
 
 export async function addTool(
   formData: FormData,
@@ -30,6 +34,15 @@ export async function addTool(
   const next_service_due =
     category === "lasers" && dueRaw ? dueRaw : null;
 
+  const brandRaw = String(formData.get("brand") ?? "").trim();
+  let brand: string | null = null;
+  if (category === "power_tools" && brandRaw) {
+    if (!VALID_BRANDS.includes(brandRaw)) {
+      return { error: "Invalid brand" };
+    }
+    brand = brandRaw;
+  }
+
   const valueRaw = String(formData.get("value") ?? "").trim();
   let value: number | null = null;
   if (valueRaw) {
@@ -50,6 +63,7 @@ export async function addTool(
       notes,
       next_service_due,
       value,
+      brand,
       created_by: user.id,
     })
     .select("id")

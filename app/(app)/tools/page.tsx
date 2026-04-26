@@ -4,6 +4,7 @@ import { formatCurrency } from "@/lib/format/currency";
 import {
   TOOL_CATEGORY_LABELS,
   TOOL_CATEGORY_ORDER,
+  POWER_TOOL_BRAND_LABELS,
 } from "@/lib/tools/constants";
 import AddToolButton from "./add-tool-button";
 import EditToolButton from "./edit-tool-button";
@@ -20,6 +21,7 @@ type Tool = {
   next_service_due: string | null;
   value: number | string | null;
   receipt_url: string | null;
+  brand: string | null;
   created_at: string;
 };
 
@@ -75,7 +77,7 @@ export default async function ToolsPage() {
   const { data: tools, error } = await supabase
     .from("tools")
     .select(
-      "id, name, category, serial_number, location, notes, next_service_due, value, receipt_url, created_at",
+      "id, name, category, serial_number, location, notes, next_service_due, value, receipt_url, brand, created_at",
     )
     .order("name", { ascending: true });
 
@@ -132,6 +134,7 @@ export default async function ToolsPage() {
         {categoryKeys.map((cat) => {
           const items = grouped.get(cat)!;
           const showService = cat === "lasers";
+          const showBrand = cat === "power_tools";
           return (
             <details
               key={cat}
@@ -148,6 +151,7 @@ export default async function ToolsPage() {
                   <thead>
                     <tr className="border-b text-left text-xs text-neutral-500">
                       <th className="py-1.5">Name</th>
+                      {showBrand && <th className="py-1.5">Brand</th>}
                       <th className="py-1.5">Serial</th>
                       <th className="py-1.5">Location</th>
                       <th className="py-1.5 text-right">Value</th>
@@ -165,6 +169,13 @@ export default async function ToolsPage() {
                       return (
                         <tr key={t.id} className="border-b align-top">
                           <td className="py-2">{t.name}</td>
+                          {showBrand && (
+                            <td className="py-2">
+                              {t.brand
+                                ? POWER_TOOL_BRAND_LABELS[t.brand] ?? t.brand
+                                : "—"}
+                            </td>
+                          )}
                           <td className="py-2">{t.serial_number ?? "—"}</td>
                           <td className="py-2">{t.location ?? "—"}</td>
                           <td className="py-2 text-right tabular-nums">
@@ -196,6 +207,7 @@ export default async function ToolsPage() {
                                   notes: t.notes,
                                   next_service_due: t.next_service_due,
                                   value: t.value,
+                                  brand: t.brand,
                                 }}
                               />
                               <DeleteToolButton

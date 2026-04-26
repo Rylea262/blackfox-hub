@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { updateTool } from "./edit-actions";
-import { TOOL_CATEGORIES } from "@/lib/tools/constants";
+import { TOOL_CATEGORIES, POWER_TOOL_BRANDS } from "@/lib/tools/constants";
 
 export type ToolForEdit = {
   id: string;
@@ -14,6 +14,7 @@ export type ToolForEdit = {
   notes: string | null;
   next_service_due: string | null;
   value: number | string | null;
+  brand: string | null;
 };
 
 export default function EditToolButton({ tool }: { tool: ToolForEdit }) {
@@ -95,6 +96,24 @@ export default function EditToolButton({ tool }: { tool: ToolForEdit }) {
                   ))}
                 </select>
               </label>
+              {category === "power_tools" && (
+                <label className="flex flex-col gap-1 text-sm">
+                  Brand
+                  <select
+                    name="brand"
+                    defaultValue={tool.brand ?? ""}
+                    className="rounded border p-2"
+                    disabled={isPending}
+                  >
+                    <option value="">— None —</option>
+                    {POWER_TOOL_BRANDS.map((b) => (
+                      <option key={b.value} value={b.value}>
+                        {b.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
               <label className="flex flex-col gap-1 text-sm">
                 Serial number
                 <input

@@ -21,3 +21,18 @@ export const TOOL_CATEGORY_LABELS: Record<string, string> = Object.fromEntries(
 );
 
 export const TOOL_CATEGORY_ORDER: string[] = TOOL_CATEGORIES.map((c) => c.value);
+
+export const POWER_TOOL_BRANDS = [
+  { value: "makita", label: "Makita" },
+  { value: "dewalt", label: "DeWalt" },
+  { value: "milwaukee", label: "Milwaukee" },
+  { value: "bosch", label: "Bosch" },
+  { value: "hilti", label: "Hilti" },
+  { value: "hikoki", label: "Hikoki" },
+  { value: "festool", label: "Festool" },
+  { value: "ryobi", label: "Ryobi" },
+] as const;
+
+export const POWER_TOOL_BRAND_LABELS: Record<string, string> = Object.fromEntries(
+  POWER_TOOL_BRANDS.map((b) => [b.value, b.label]),
+);

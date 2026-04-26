@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { addTool } from "./add-actions";
 import { updateReceiptPath } from "./receipt-actions";
 import { createClient } from "@/lib/supabase/client";
-import { TOOL_CATEGORIES } from "@/lib/tools/constants";
+import { TOOL_CATEGORIES, POWER_TOOL_BRANDS } from "@/lib/tools/constants";
 
 export default function AddToolButton() {
   const router = useRouter();
@@ -125,6 +125,24 @@ export default function AddToolButton() {
                   ))}
                 </select>
               </label>
+              {category === "power_tools" && (
+                <label className="flex flex-col gap-1 text-sm">
+                  Brand
+                  <select
+                    name="brand"
+                    defaultValue=""
+                    className="rounded border p-2"
+                    disabled={isPending}
+                  >
+                    <option value="">— None —</option>
+                    {POWER_TOOL_BRANDS.map((b) => (
+                      <option key={b.value} value={b.value}>
+                        {b.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
               <label className="flex flex-col gap-1 text-sm">
                 Serial number
                 <input
