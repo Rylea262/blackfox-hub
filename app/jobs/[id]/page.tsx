@@ -75,10 +75,14 @@ export default async function JobDetailPage({
         </div>
       </details>
 
-      <section className="mt-8">
-        <h2 className="text-lg font-semibold">Upload</h2>
-        <UploadForm jobId={job.id} userId={user.id} />
-      </section>
+      <details open className="mt-8">
+        <summary className="cursor-pointer select-none text-lg font-semibold">
+          Upload
+        </summary>
+        <div className="mt-2">
+          <UploadForm jobId={job.id} userId={user.id} />
+        </div>
+      </details>
 
       <section className="mt-12 border-t border-neutral-200 pt-6">
         <h2 className="text-lg font-semibold text-red-700">Danger zone</h2>
