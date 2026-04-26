@@ -70,7 +70,7 @@ export default async function JobDetailPage({
         </dl>
       </header>
 
-      <details open className="mt-8">
+      <details className="mt-8">
         <summary className="cursor-pointer select-none text-lg font-semibold">
           Notes{" "}
           <span className="text-sm font-normal text-neutral-500">
@@ -85,7 +85,7 @@ export default async function JobDetailPage({
         </div>
       </details>
 
-      <details open className="mt-8">
+      <details className="mt-8">
         <summary className="cursor-pointer select-none text-lg font-semibold">
           Documents{" "}
           <span className="text-sm font-normal text-neutral-500">
@@ -97,7 +97,7 @@ export default async function JobDetailPage({
         </div>
       </details>
 
-      <details open className="mt-8">
+      <details className="mt-8">
         <summary className="cursor-pointer select-none text-lg font-semibold">
           Upload
         </summary>
