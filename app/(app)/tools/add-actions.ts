@@ -9,7 +9,7 @@ const VALID_CATEGORIES: string[] = TOOL_CATEGORIES.map((c) => c.value);
 
 export async function addTool(
   formData: FormData,
-): Promise<{ error?: string } | void> {
+): Promise<{ error: string } | { id: string }> {
   const { user } = await requireRole(["owner", "office"]);
   const supabase = createClient();
 
@@ -26,22 +26,38 @@ export async function addTool(
   const location = String(formData.get("location") ?? "").trim() || null;
   const notes = String(formData.get("notes") ?? "").trim() || null;
 
-  // Only laser tools track a service due date.
   const dueRaw = String(formData.get("next_service_due") ?? "").trim();
   const next_service_due =
     category === "lasers" && dueRaw ? dueRaw : null;
 
-  const { error } = await supabase.from("tools").insert({
-    name,
-    category,
-    serial_number,
-    location,
-    notes,
-    next_service_due,
-    created_by: user.id,
-  });
+  const valueRaw = String(formData.get("value") ?? "").trim();
+  let value: number | null = null;
+  if (valueRaw) {
+    const parsed = Number(valueRaw);
+    if (!Number.isFinite(parsed) || parsed < 0) {
+      return { error: "Value must be a non-negative number" };
+    }
+    value = parsed;
+  }
+
+  const { data, error } = await supabase
+    .from("tools")
+    .insert({
+      name,
+      category,
+      serial_number,
+      location,
+      notes,
+      next_service_due,
+      value,
+      created_by: user.id,
+    })
+    .select("id")
+    .single();
 
   if (error) return { error: error.message };
+  if (!data) return { error: "Insert returned no row" };
 
   revalidatePath("/tools");
+  return { id: data.id };
 }

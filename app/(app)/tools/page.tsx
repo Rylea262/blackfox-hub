@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
+import { formatCurrency } from "@/lib/format/currency";
 import {
   TOOL_CATEGORY_LABELS,
   TOOL_CATEGORY_ORDER,
@@ -7,6 +8,7 @@ import {
 import AddToolButton from "./add-tool-button";
 import EditToolButton from "./edit-tool-button";
 import DeleteToolButton from "./delete-tool-button";
+import ReceiptCell from "./receipt-cell";
 
 type Tool = {
   id: string;
@@ -16,6 +18,8 @@ type Tool = {
   location: string | null;
   notes: string | null;
   next_service_due: string | null;
+  value: number | string | null;
+  receipt_url: string | null;
   created_at: string;
 };
 
@@ -71,7 +75,7 @@ export default async function ToolsPage() {
   const { data: tools, error } = await supabase
     .from("tools")
     .select(
-      "id, name, category, serial_number, location, notes, next_service_due, created_at",
+      "id, name, category, serial_number, location, notes, next_service_due, value, receipt_url, created_at",
     )
     .order("name", { ascending: true });
 
@@ -86,7 +90,7 @@ export default async function ToolsPage() {
   const categoryKeys = Array.from(grouped.keys()).sort(compareCategories);
 
   return (
-    <main className="mx-auto max-w-5xl p-6">
+    <main className="mx-auto max-w-6xl p-6">
       <div className="flex items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold">Tools and Equipment</h1>
@@ -124,16 +128,18 @@ export default async function ToolsPage() {
                   {items.length} {items.length === 1 ? "tool" : "tools"}
                 </span>
               </summary>
-              <div className="border-t border-neutral-200 p-4">
+              <div className="border-t border-neutral-200 p-4 overflow-x-auto">
                 <table className="w-full border-collapse text-sm">
                   <thead>
                     <tr className="border-b text-left text-xs text-neutral-500">
                       <th className="py-1.5">Name</th>
                       <th className="py-1.5">Serial</th>
                       <th className="py-1.5">Location</th>
+                      <th className="py-1.5 text-right">Value</th>
                       {showService && (
                         <th className="py-1.5">Next service</th>
                       )}
+                      <th className="py-1.5">Receipt</th>
                       <th className="py-1.5">Notes</th>
                       <th className="py-1.5">Actions</th>
                     </tr>
@@ -146,11 +152,20 @@ export default async function ToolsPage() {
                           <td className="py-2">{t.name}</td>
                           <td className="py-2">{t.serial_number ?? "—"}</td>
                           <td className="py-2">{t.location ?? "—"}</td>
+                          <td className="py-2 text-right tabular-nums">
+                            {formatCurrency(t.value)}
+                          </td>
                           {showService && (
                             <td className={`py-2 ${dueClass(status)}`}>
                               {formatDate(t.next_service_due)}
                             </td>
                           )}
+                          <td className="py-2">
+                            <ReceiptCell
+                              toolId={t.id}
+                              receiptUrl={t.receipt_url}
+                            />
+                          </td>
                           <td className="py-2 whitespace-pre-wrap">
                             {t.notes ?? "—"}
                           </td>
@@ -165,6 +180,7 @@ export default async function ToolsPage() {
                                   location: t.location,
                                   notes: t.notes,
                                   next_service_due: t.next_service_due,
+                                  value: t.value,
                                 }}
                               />
                               <DeleteToolButton

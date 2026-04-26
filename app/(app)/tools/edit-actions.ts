@@ -27,11 +27,19 @@ export async function updateTool(
   const location = String(formData.get("location") ?? "").trim() || null;
   const notes = String(formData.get("notes") ?? "").trim() || null;
 
-  // Only laser tools track a service due date. Switching out of Lasers
-  // clears it; switching into Lasers without a date leaves it null.
   const dueRaw = String(formData.get("next_service_due") ?? "").trim();
   const next_service_due =
     category === "lasers" && dueRaw ? dueRaw : null;
+
+  const valueRaw = String(formData.get("value") ?? "").trim();
+  let value: number | null = null;
+  if (valueRaw) {
+    const parsed = Number(valueRaw);
+    if (!Number.isFinite(parsed) || parsed < 0) {
+      return { error: "Value must be a non-negative number" };
+    }
+    value = parsed;
+  }
 
   const { error } = await supabase
     .from("tools")
@@ -42,6 +50,7 @@ export async function updateTool(
       location,
       notes,
       next_service_due,
+      value,
     })
     .eq("id", toolId);
 
@@ -56,9 +65,27 @@ export async function deleteTool(
   await requireRole(["owner", "office"]);
   const supabase = createClient();
 
-  const { error } = await supabase.from("tools").delete().eq("id", toolId);
+  // Capture receipt path before deleting so we can clean it up after.
+  const { data: existing } = await supabase
+    .from("tools")
+    .select("receipt_url")
+    .eq("id", toolId)
+    .maybeSingle();
 
+  const { error } = await supabase.from("tools").delete().eq("id", toolId);
   if (error) return { error: error.message };
+
+  // Best-effort Storage cleanup. DB is the source of truth.
+  if (existing?.receipt_url) {
+    const { error: removeErr } = await supabase.storage
+      .from("tool-receipts")
+      .remove([existing.receipt_url]);
+    if (removeErr) {
+      console.error(
+        `Storage cleanup failed for tool ${toolId}: ${removeErr.message}`,
+      );
+    }
+  }
 
   revalidatePath("/tools");
 }

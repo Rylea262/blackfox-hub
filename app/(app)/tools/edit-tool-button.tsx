@@ -13,6 +13,7 @@ export type ToolForEdit = {
   location: string | null;
   notes: string | null;
   next_service_due: string | null;
+  value: number | string | null;
 };
 
 export default function EditToolButton({ tool }: { tool: ToolForEdit }) {
@@ -110,6 +111,19 @@ export default function EditToolButton({ tool }: { tool: ToolForEdit }) {
                   type="text"
                   name="location"
                   defaultValue={tool.location ?? ""}
+                  className="rounded border p-2"
+                  disabled={isPending}
+                />
+              </label>
+              <label className="flex flex-col gap-1 text-sm">
+                Value (AUD)
+                <input
+                  type="number"
+                  name="value"
+                  min="0"
+                  step="0.01"
+                  inputMode="decimal"
+                  defaultValue={tool.value ?? ""}
                   className="rounded border p-2"
                   disabled={isPending}
                 />
