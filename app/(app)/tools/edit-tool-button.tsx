@@ -15,6 +15,8 @@ export type ToolForEdit = {
   next_service_due: string | null;
   value: number | string | null;
   brand: string | null;
+  current_hours: number | null;
+  next_service_hours: number | null;
 };
 
 export default function EditToolButton({ tool }: { tool: ToolForEdit }) {
@@ -158,6 +160,36 @@ export default function EditToolButton({ tool }: { tool: ToolForEdit }) {
                     disabled={isPending}
                   />
                 </label>
+              )}
+              {category === "ride_on_trowel" && (
+                <div className="flex gap-3">
+                  <label className="flex flex-1 flex-col gap-1 text-sm">
+                    Current hours
+                    <input
+                      type="number"
+                      name="current_hours"
+                      min="0"
+                      step="1"
+                      inputMode="numeric"
+                      defaultValue={tool.current_hours ?? ""}
+                      className="rounded border p-2"
+                      disabled={isPending}
+                    />
+                  </label>
+                  <label className="flex flex-1 flex-col gap-1 text-sm">
+                    Next service (hrs)
+                    <input
+                      type="number"
+                      name="next_service_hours"
+                      min="0"
+                      step="1"
+                      inputMode="numeric"
+                      defaultValue={tool.next_service_hours ?? ""}
+                      className="rounded border p-2"
+                      disabled={isPending}
+                    />
+                  </label>
+                </div>
               )}
               <label className="flex flex-col gap-1 text-sm">
                 Notes

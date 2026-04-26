@@ -22,8 +22,23 @@ type Tool = {
   value: number | string | null;
   receipt_url: string | null;
   brand: string | null;
+  current_hours: number | null;
+  next_service_hours: number | null;
   created_at: string;
 };
+
+const HOURS_WARNING_THRESHOLD = 50;
+
+function hoursStatus(
+  current: number | null,
+  next: number | null,
+): DueStatus {
+  if (current == null || next == null) return "none";
+  const remaining = next - current;
+  if (remaining <= 0) return "overdue";
+  if (remaining < HOURS_WARNING_THRESHOLD) return "soon";
+  return "ok";
+}
 
 type DueStatus = "overdue" | "soon" | "ok" | "none";
 
@@ -77,7 +92,7 @@ export default async function ToolsPage() {
   const { data: tools, error } = await supabase
     .from("tools")
     .select(
-      "id, name, category, serial_number, location, notes, next_service_due, value, receipt_url, brand, created_at",
+      "id, name, category, serial_number, location, notes, next_service_due, value, receipt_url, brand, current_hours, next_service_hours, created_at",
     )
     .order("name", { ascending: true });
 
@@ -135,6 +150,7 @@ export default async function ToolsPage() {
           const items = grouped.get(cat)!;
           const showService = cat === "lasers";
           const showBrand = cat === "power_tools";
+          const showHours = cat === "ride_on_trowel";
           return (
             <details
               key={cat}
@@ -158,6 +174,12 @@ export default async function ToolsPage() {
                       {showService && (
                         <th className="py-1.5">Next service</th>
                       )}
+                      {showHours && (
+                        <>
+                          <th className="py-1.5 text-right">Current hrs</th>
+                          <th className="py-1.5 text-right">Next service hrs</th>
+                        </>
+                      )}
                       <th className="py-1.5">Receipt</th>
                       <th className="py-1.5">Notes</th>
                       <th className="py-1.5">Actions</th>
@@ -166,6 +188,10 @@ export default async function ToolsPage() {
                   <tbody>
                     {items.map((t) => {
                       const status = dueStatus(t.next_service_due);
+                      const hStatus = hoursStatus(
+                        t.current_hours,
+                        t.next_service_hours,
+                      );
                       return (
                         <tr key={t.id} className="border-b align-top">
                           <td className="py-2">{t.name}</td>
@@ -185,6 +211,18 @@ export default async function ToolsPage() {
                             <td className={`py-2 ${dueClass(status)}`}>
                               {formatDate(t.next_service_due)}
                             </td>
+                          )}
+                          {showHours && (
+                            <>
+                              <td className="py-2 text-right tabular-nums">
+                                {t.current_hours ?? "—"}
+                              </td>
+                              <td
+                                className={`py-2 text-right tabular-nums ${dueClass(hStatus)}`}
+                              >
+                                {t.next_service_hours ?? "—"}
+                              </td>
+                            </>
                           )}
                           <td className="py-2">
                             <ReceiptCell
@@ -208,6 +246,8 @@ export default async function ToolsPage() {
                                   next_service_due: t.next_service_due,
                                   value: t.value,
                                   brand: t.brand,
+                                  current_hours: t.current_hours,
+                                  next_service_hours: t.next_service_hours,
                                 }}
                               />
                               <DeleteToolButton

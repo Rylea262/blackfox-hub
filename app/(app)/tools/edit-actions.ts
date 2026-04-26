@@ -44,6 +44,27 @@ export async function updateTool(
     brand = brandRaw;
   }
 
+  let current_hours: number | null = null;
+  let next_service_hours: number | null = null;
+  if (category === "ride_on_trowel") {
+    const currentRaw = String(formData.get("current_hours") ?? "").trim();
+    const nextRaw = String(formData.get("next_service_hours") ?? "").trim();
+    if (currentRaw) {
+      const parsed = Number.parseInt(currentRaw, 10);
+      if (!Number.isFinite(parsed) || parsed < 0) {
+        return { error: "Current hours must be a non-negative whole number" };
+      }
+      current_hours = parsed;
+    }
+    if (nextRaw) {
+      const parsed = Number.parseInt(nextRaw, 10);
+      if (!Number.isFinite(parsed) || parsed < 0) {
+        return { error: "Next service hours must be a non-negative whole number" };
+      }
+      next_service_hours = parsed;
+    }
+  }
+
   const valueRaw = String(formData.get("value") ?? "").trim();
   let value: number | null = null;
   if (valueRaw) {
@@ -65,6 +86,8 @@ export async function updateTool(
       next_service_due,
       value,
       brand,
+      current_hours,
+      next_service_hours,
     })
     .eq("id", toolId);
 

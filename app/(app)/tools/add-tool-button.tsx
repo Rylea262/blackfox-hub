@@ -186,6 +186,36 @@ export default function AddToolButton() {
                   />
                 </label>
               )}
+              {category === "ride_on_trowel" && (
+                <div className="flex gap-3">
+                  <label className="flex flex-1 flex-col gap-1 text-sm">
+                    Current hours
+                    <input
+                      type="number"
+                      name="current_hours"
+                      min="0"
+                      step="1"
+                      inputMode="numeric"
+                      placeholder="e.g. 1247"
+                      className="rounded border p-2"
+                      disabled={isPending}
+                    />
+                  </label>
+                  <label className="flex flex-1 flex-col gap-1 text-sm">
+                    Next service (hrs)
+                    <input
+                      type="number"
+                      name="next_service_hours"
+                      min="0"
+                      step="1"
+                      inputMode="numeric"
+                      placeholder="e.g. 1500"
+                      className="rounded border p-2"
+                      disabled={isPending}
+                    />
+                  </label>
+                </div>
+              )}
               <label className="flex flex-col gap-1 text-sm">
                 Notes
                 <textarea
