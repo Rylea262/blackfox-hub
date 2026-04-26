@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
 import RoleSelect from "./role-select";
+import PositionSelect from "./position-select";
 import AddEmployeeButton from "./add-employee-button";
 
 export default async function EmployeesPage() {
@@ -9,7 +10,7 @@ export default async function EmployeesPage() {
 
   const { data: users, error } = await supabase
     .from("users")
-    .select("id, name, email, role, created_at")
+    .select("id, name, email, role, position, created_at")
     .order("created_at", { ascending: true });
 
   return (
@@ -38,6 +39,7 @@ export default async function EmployeesPage() {
               <th className="py-2">Name</th>
               <th className="py-2">Email</th>
               <th className="py-2">Role</th>
+              <th className="py-2">Position</th>
               <th className="py-2">Joined</th>
             </tr>
           </thead>
@@ -51,6 +53,12 @@ export default async function EmployeesPage() {
                     userId={u.id}
                     currentRole={u.role}
                     isSelf={u.id === currentUser.id}
+                  />
+                </td>
+                <td className="py-2">
+                  <PositionSelect
+                    userId={u.id}
+                    currentPosition={u.position}
                   />
                 </td>
                 <td className="py-2">

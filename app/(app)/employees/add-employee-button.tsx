@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { inviteEmployee } from "./invite-actions";
+import { POSITIONS } from "@/lib/employees/constants";
 
 const ROLES = [
   { value: "leading_hand", label: "Leading hand" },
@@ -92,6 +93,22 @@ export default function AddEmployeeButton() {
                   {ROLES.map((r) => (
                     <option key={r.value} value={r.value}>
                       {r.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="flex flex-col gap-1 text-sm">
+                Position
+                <select
+                  name="position"
+                  defaultValue=""
+                  className="rounded border p-2"
+                  disabled={isPending}
+                >
+                  <option value="">—</option>
+                  {POSITIONS.map((p) => (
+                    <option key={p.value} value={p.value}>
+                      {p.label}
                     </option>
                   ))}
                 </select>
