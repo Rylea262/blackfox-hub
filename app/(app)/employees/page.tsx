@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
 import RoleSelect from "./role-select";
+import AddEmployeeButton from "./add-employee-button";
 
 export default async function EmployeesPage() {
   const { user: currentUser } = await requireRole(["owner", "office"]);
@@ -13,10 +14,16 @@ export default async function EmployeesPage() {
 
   return (
     <main className="mx-auto max-w-4xl p-6">
-      <h1 className="text-2xl font-bold">Employees</h1>
-      <p className="mt-1 text-sm text-neutral-500">
-        Manage user roles. New signups default to “leading_hand” until promoted.
-      </p>
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold">Employees</h1>
+          <p className="mt-1 text-sm text-neutral-500">
+            Manage user roles. New signups default to &ldquo;leading_hand&rdquo;
+            until promoted.
+          </p>
+        </div>
+        <AddEmployeeButton />
+      </div>
 
       {error && (
         <p className="mt-4 rounded border border-red-300 bg-red-50 p-2 text-sm text-red-700">
