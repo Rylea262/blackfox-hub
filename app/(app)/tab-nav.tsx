@@ -28,7 +28,7 @@ export default function TabNav({
     { href: dashboardHref, label: "Dashboard", match: "/dashboard" },
   ];
   if (showNotes)
-    tabs.push({ href: "/notes", label: "Notes", match: "/notes" });
+    tabs.push({ href: "/notes", label: "Notepad", match: "/notes" });
   if (showJobs) tabs.push({ href: "/jobs", label: "Jobs", match: "/jobs" });
   if (showEmployees)
     tabs.push({ href: "/employees", label: "Employees", match: "/employees" });

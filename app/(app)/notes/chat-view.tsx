@@ -174,7 +174,7 @@ export default function ChatView({
   return (
     <div className="flex h-[calc(100dvh-3.25rem)] flex-col">
       <header className="border-b border-neutral-200 px-6 py-3">
-        <h1 className="text-lg font-bold">Notes</h1>
+        <h1 className="text-lg font-bold">Notepad</h1>
         <p className="text-xs text-neutral-500">
           Shared office log. Anyone in the office can post.
         </p>
