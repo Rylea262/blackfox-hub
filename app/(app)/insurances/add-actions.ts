@@ -6,7 +6,7 @@ import { requireRole } from "@/lib/auth/require-role";
 
 export async function addInsurance(
   formData: FormData,
-): Promise<{ error?: string } | void> {
+): Promise<{ error: string } | { id: string }> {
   const { user } = await requireRole(["owner", "office"]);
   const supabase = createClient();
 
@@ -20,17 +20,23 @@ export async function addInsurance(
   const expiryRaw = String(formData.get("expiry_date") ?? "").trim();
   const notes = String(formData.get("notes") ?? "").trim() || null;
 
-  const { error } = await supabase.from("insurances").insert({
-    name,
-    provider,
-    policy_number,
-    start_date: startRaw || null,
-    expiry_date: expiryRaw || null,
-    notes,
-    created_by: user.id,
-  });
+  const { data, error } = await supabase
+    .from("insurances")
+    .insert({
+      name,
+      provider,
+      policy_number,
+      start_date: startRaw || null,
+      expiry_date: expiryRaw || null,
+      notes,
+      created_by: user.id,
+    })
+    .select("id")
+    .single();
 
   if (error) return { error: error.message };
+  if (!data) return { error: "Insert returned no row" };
 
   revalidatePath("/insurances");
+  return { id: data.id };
 }
