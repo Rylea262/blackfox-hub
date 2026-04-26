@@ -8,6 +8,8 @@ export const TOOL_CATEGORIES = [
   { value: "vibrators", label: "Vibrators" },
   { value: "dust_management", label: "Dust Management" },
   { value: "generators", label: "Generators" },
+  { value: "concrete_cutting", label: "Concrete Cutting" },
+  { value: "demolition", label: "Demolition" },
   { value: "specialized", label: "Specialized Equipment" },
   { value: "other", label: "Other" },
 ] as const;
