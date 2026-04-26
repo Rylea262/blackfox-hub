@@ -22,6 +22,7 @@ export default function UploadForm({
   const [files, setFiles] = useState<File[]>([]);
   const [statuses, setStatuses] = useState<FileStatus[]>([]);
   const [docType, setDocType] = useState<string>(DOC_TYPES[0].value);
+  const [otherType, setOtherType] = useState("");
   const [dragOver, setDragOver] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [, startTransition] = useTransition();
@@ -35,8 +36,14 @@ export default function UploadForm({
     setFiles((prev) => prev.filter((_, i) => i !== idx));
   }
 
+  const isOther = docType === "other";
+  const trimmedOther = otherType.trim();
+  const effectiveDocType = isOther ? trimmedOther : docType;
+  const canUpload =
+    files.length > 0 && !isUploading && (!isOther || trimmedOther.length > 0);
+
   async function upload() {
-    if (files.length === 0 || isUploading) return;
+    if (!canUpload) return;
     setIsUploading(true);
     const supabase = createClient();
     const initial: FileStatus[] = files.map((f) => ({
@@ -75,7 +82,7 @@ export default function UploadForm({
         job_id: jobId,
         file_url: path,
         file_name: f.name,
-        doc_type: docType,
+        doc_type: effectiveDocType,
         uploaded_by: userId,
       });
 
@@ -121,6 +128,21 @@ export default function UploadForm({
           ))}
         </select>
       </label>
+
+      {isOther && (
+        <label className="flex flex-col gap-1 text-sm">
+          Describe document type
+          <input
+            type="text"
+            value={otherType}
+            onChange={(e) => setOtherType(e.target.value)}
+            placeholder="e.g. permit, council letter, variation"
+            className="rounded border p-2"
+            disabled={isUploading}
+            required
+          />
+        </label>
+      )}
 
       <div
         onDragOver={(e) => {
@@ -197,7 +219,7 @@ export default function UploadForm({
       <button
         type="button"
         onClick={upload}
-        disabled={files.length === 0 || isUploading}
+        disabled={!canUpload}
         className="self-start rounded bg-black px-3 py-1.5 text-sm text-white disabled:opacity-50"
       >
         {isUploading
