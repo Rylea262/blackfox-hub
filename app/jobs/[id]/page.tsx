@@ -35,7 +35,15 @@ export default async function JobDetailPage({
       </Link>
 
       <header className="mt-4">
-        <h1 className="text-2xl font-bold">{job.name}</h1>
+        <div className="flex items-center justify-between gap-3">
+          <h1 className="text-2xl font-bold">{job.name}</h1>
+          <Link
+            href={`/jobs/${job.id}/edit`}
+            className="rounded border border-neutral-300 px-3 py-1 text-sm hover:bg-neutral-50"
+          >
+            Edit
+          </Link>
+        </div>
         <dl className="mt-2 grid grid-cols-[max-content_1fr] gap-x-4 gap-y-1 text-sm">
           <dt className="text-neutral-500">Client</dt>
           <dd>{job.client ?? "—"}</dd>
