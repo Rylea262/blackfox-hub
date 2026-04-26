@@ -3,6 +3,8 @@ import { requireRole } from "@/lib/auth/require-role";
 import { COMPANY_LABELS } from "@/lib/insurances/constants";
 import AddInsuranceButton from "./add-insurance-button";
 import CertCell from "./cert-cell";
+import EditInsuranceButton from "./edit-insurance-button";
+import DeleteInsuranceButton from "./delete-insurance-button";
 
 type ExpiryStatus = "expired" | "soon" | "ok" | "none";
 
@@ -41,7 +43,7 @@ export default async function InsurancesPage() {
   const { data: insurances, error } = await supabase
     .from("insurances")
     .select(
-      "id, name, company, provider, policy_number, start_date, expiry_date, certificate_url, created_at",
+      "id, name, company, provider, policy_number, start_date, expiry_date, notes, certificate_url, created_at",
     )
     .order("expiry_date", { ascending: true, nullsFirst: false });
 
@@ -102,6 +104,7 @@ export default async function InsurancesPage() {
               <th className="py-2">Start</th>
               <th className="py-2">Expiry</th>
               <th className="py-2">Certificate</th>
+              <th className="py-2">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -124,6 +127,26 @@ export default async function InsurancesPage() {
                       insuranceId={ins.id}
                       certUrl={ins.certificate_url}
                     />
+                  </td>
+                  <td className="py-2">
+                    <div className="flex flex-col items-start gap-1">
+                      <EditInsuranceButton
+                        insurance={{
+                          id: ins.id,
+                          name: ins.name,
+                          company: ins.company,
+                          provider: ins.provider,
+                          policy_number: ins.policy_number,
+                          start_date: ins.start_date,
+                          expiry_date: ins.expiry_date,
+                          notes: ins.notes,
+                        }}
+                      />
+                      <DeleteInsuranceButton
+                        insuranceId={ins.id}
+                        insuranceName={ins.name}
+                      />
+                    </div>
                   </td>
                 </tr>
               );
