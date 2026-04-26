@@ -39,6 +39,7 @@ export default async function AppLayout({
         </Link>
         <TabNav
           dashboardHref={dashboardHref}
+          showNotes={isAdmin}
           showJobs={isAdmin}
           showEmployees={isAdmin}
           showInsurances={isAdmin}

@@ -7,6 +7,7 @@ type Tab = { href: string; label: string; match: string };
 
 export default function TabNav({
   dashboardHref,
+  showNotes,
   showJobs,
   showEmployees,
   showInsurances,
@@ -14,6 +15,7 @@ export default function TabNav({
   showTools,
 }: {
   dashboardHref: string;
+  showNotes: boolean;
   showJobs: boolean;
   showEmployees: boolean;
   showInsurances: boolean;
@@ -25,6 +27,8 @@ export default function TabNav({
   const tabs: Tab[] = [
     { href: dashboardHref, label: "Dashboard", match: "/dashboard" },
   ];
+  if (showNotes)
+    tabs.push({ href: "/notes", label: "Notes", match: "/notes" });
   if (showJobs) tabs.push({ href: "/jobs", label: "Jobs", match: "/jobs" });
   if (showEmployees)
     tabs.push({ href: "/employees", label: "Employees", match: "/employees" });
