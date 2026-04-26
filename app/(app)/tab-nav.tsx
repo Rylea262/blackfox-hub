@@ -10,11 +10,13 @@ export default function TabNav({
   showJobs,
   showEmployees,
   showInsurances,
+  showServicing,
 }: {
   dashboardHref: string;
   showJobs: boolean;
   showEmployees: boolean;
   showInsurances: boolean;
+  showServicing: boolean;
 }) {
   const pathname = usePathname();
 
@@ -29,6 +31,12 @@ export default function TabNav({
       href: "/insurances",
       label: "Insurances",
       match: "/insurances",
+    });
+  if (showServicing)
+    tabs.push({
+      href: "/servicing",
+      label: "Servicing",
+      match: "/servicing",
     });
 
   return (
