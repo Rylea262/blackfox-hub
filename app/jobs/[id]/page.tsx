@@ -70,7 +70,7 @@ export default async function JobDetailPage({
         </dl>
       </header>
 
-      <details className="mt-8">
+      <details open className="mt-8">
         <summary className="cursor-pointer select-none text-lg font-semibold">
           Notes{" "}
           <span className="text-sm font-normal text-neutral-500">
