@@ -25,12 +25,14 @@ function expiryStatus(iso: string | null): ExpiryStatus {
   return "ok";
 }
 
-function expiryClass(status: ExpiryStatus): string {
+function rowClass(status: ExpiryStatus): string {
   switch (status) {
     case "expired":
-      return "text-red-700 font-semibold";
+      return "bg-red-50";
     case "soon":
-      return "text-amber-700 font-medium";
+      return "bg-orange-50";
+    case "ok":
+      return "bg-green-50";
     default:
       return "";
   }
@@ -71,7 +73,7 @@ export default async function InsurancesPage() {
                 <span className="text-neutral-400"> · </span>
               )}
               {soonCount > 0 && (
-                <span className="text-amber-700 font-medium">
+                <span className="text-orange-700 font-medium">
                   {soonCount} expiring within 30 days
                 </span>
               )}
@@ -111,7 +113,10 @@ export default async function InsurancesPage() {
             {insurances.map((ins) => {
               const status = expiryStatus(ins.expiry_date);
               return (
-                <tr key={ins.id} className="border-b align-top">
+                <tr
+                  key={ins.id}
+                  className={`border-b align-top ${rowClass(status)}`}
+                >
                   <td className="py-2">{ins.name}</td>
                   <td className="py-2">
                     {ins.company ? COMPANY_LABELS[ins.company] ?? ins.company : "—"}
@@ -119,7 +124,7 @@ export default async function InsurancesPage() {
                   <td className="py-2">{ins.provider ?? "—"}</td>
                   <td className="py-2">{ins.policy_number ?? "—"}</td>
                   <td className="py-2">{formatDate(ins.start_date)}</td>
-                  <td className={`py-2 ${expiryClass(status)}`}>
+                  <td className="py-2">
                     {formatDate(ins.expiry_date)}
                   </td>
                   <td className="py-2">
