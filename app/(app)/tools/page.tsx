@@ -81,6 +81,12 @@ export default async function ToolsPage() {
 
   const all = (tools ?? []) as Tool[];
 
+  const totalValue = all.reduce((sum, t) => {
+    const v = typeof t.value === "string" ? Number(t.value) : t.value;
+    if (v == null || !Number.isFinite(v)) return sum;
+    return sum + (v as number);
+  }, 0);
+
   const grouped = new Map<string, Tool[]>();
   for (const t of all) {
     const arr = grouped.get(t.category);
@@ -96,6 +102,15 @@ export default async function ToolsPage() {
           <h1 className="text-2xl font-bold">Tools and Equipment</h1>
           <p className="mt-1 text-sm text-neutral-500">
             Register of company tools, grouped by category.
+          </p>
+          <p className="mt-1 text-sm">
+            <span className="text-neutral-500">Total value: </span>
+            <span className="font-semibold tabular-nums">
+              {formatCurrency(totalValue)}
+            </span>
+            <span className="ml-2 text-xs text-neutral-500">
+              ({all.length} {all.length === 1 ? "tool" : "tools"})
+            </span>
           </p>
         </div>
         <AddToolButton />
