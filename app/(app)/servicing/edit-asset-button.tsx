@@ -9,12 +9,15 @@ export type AssetForEdit = {
   id: string;
   name: string;
   type: string;
+  current_hours: number | null;
+  next_service_hours: number | null;
 };
 
 export default function EditAssetButton({ asset }: { asset: AssetForEdit }) {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [type, setType] = useState(asset.type);
   const [isPending, startTransition] = useTransition();
 
   function open(e: React.MouseEvent) {
@@ -27,6 +30,7 @@ export default function EditAssetButton({ asset }: { asset: AssetForEdit }) {
     if (isPending) return;
     setIsOpen(false);
     setError(null);
+    setType(asset.type);
   }
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -82,7 +86,8 @@ export default function EditAssetButton({ asset }: { asset: AssetForEdit }) {
                 <select
                   name="type"
                   required
-                  defaultValue={asset.type}
+                  value={type}
+                  onChange={(e) => setType(e.target.value)}
                   className="rounded border p-2"
                   disabled={isPending}
                 >
@@ -93,6 +98,36 @@ export default function EditAssetButton({ asset }: { asset: AssetForEdit }) {
                   ))}
                 </select>
               </label>
+              {type === "plant" && (
+                <div className="flex gap-3">
+                  <label className="flex flex-1 flex-col gap-1 text-sm">
+                    Current hours
+                    <input
+                      type="number"
+                      name="current_hours"
+                      min="0"
+                      step="1"
+                      inputMode="numeric"
+                      defaultValue={asset.current_hours ?? ""}
+                      className="rounded border p-2"
+                      disabled={isPending}
+                    />
+                  </label>
+                  <label className="flex flex-1 flex-col gap-1 text-sm">
+                    Next service (hrs)
+                    <input
+                      type="number"
+                      name="next_service_hours"
+                      min="0"
+                      step="1"
+                      inputMode="numeric"
+                      defaultValue={asset.next_service_hours ?? ""}
+                      className="rounded border p-2"
+                      disabled={isPending}
+                    />
+                  </label>
+                </div>
+              )}
               {error && (
                 <p className="rounded border border-red-300 bg-red-50 p-2 text-sm text-red-700">
                   {error}

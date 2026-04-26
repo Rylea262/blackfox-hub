@@ -7,6 +7,18 @@ import { ASSET_TYPES } from "@/lib/servicing/constants";
 
 const VALID_TYPES: string[] = ASSET_TYPES.map((a) => a.value);
 
+function parseHours(
+  raw: string,
+  label: string,
+): { value: number | null } | { error: string } {
+  if (!raw) return { value: null };
+  const parsed = Number.parseInt(raw, 10);
+  if (!Number.isFinite(parsed) || parsed < 0) {
+    return { error: `${label} must be a non-negative whole number` };
+  }
+  return { value: parsed };
+}
+
 export async function addAsset(
   formData: FormData,
 ): Promise<{ error?: string } | void> {
@@ -21,9 +33,31 @@ export async function addAsset(
     return { error: "Type must be vehicle or plant" };
   }
 
-  const { error } = await supabase
-    .from("assets")
-    .insert({ name, type, created_by: user.id });
+  let current_hours: number | null = null;
+  let next_service_hours: number | null = null;
+  if (type === "plant") {
+    const cur = parseHours(
+      String(formData.get("current_hours") ?? "").trim(),
+      "Current hours",
+    );
+    if ("error" in cur) return { error: cur.error };
+    current_hours = cur.value;
+
+    const nxt = parseHours(
+      String(formData.get("next_service_hours") ?? "").trim(),
+      "Next service hours",
+    );
+    if ("error" in nxt) return { error: nxt.error };
+    next_service_hours = nxt.value;
+  }
+
+  const { error } = await supabase.from("assets").insert({
+    name,
+    type,
+    current_hours,
+    next_service_hours,
+    created_by: user.id,
+  });
 
   if (error) {
     if (error.code === "23505") {
@@ -50,9 +84,27 @@ export async function updateAsset(
     return { error: "Type must be vehicle or plant" };
   }
 
+  let current_hours: number | null = null;
+  let next_service_hours: number | null = null;
+  if (type === "plant") {
+    const cur = parseHours(
+      String(formData.get("current_hours") ?? "").trim(),
+      "Current hours",
+    );
+    if ("error" in cur) return { error: cur.error };
+    current_hours = cur.value;
+
+    const nxt = parseHours(
+      String(formData.get("next_service_hours") ?? "").trim(),
+      "Next service hours",
+    );
+    if ("error" in nxt) return { error: nxt.error };
+    next_service_hours = nxt.value;
+  }
+
   const { error } = await supabase
     .from("assets")
-    .update({ name, type })
+    .update({ name, type, current_hours, next_service_hours })
     .eq("id", assetId);
 
   if (error) {

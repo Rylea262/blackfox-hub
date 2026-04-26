@@ -12,8 +12,23 @@ type Asset = {
   id: string;
   name: string;
   type: string;
+  current_hours: number | null;
+  next_service_hours: number | null;
   created_at: string;
 };
+
+const HOURS_WARNING_THRESHOLD = 50;
+
+function hoursStatus(
+  current: number | null,
+  next: number | null,
+): DueStatus {
+  if (current == null || next == null) return "none";
+  const remaining = next - current;
+  if (remaining <= 0) return "overdue";
+  if (remaining < HOURS_WARNING_THRESHOLD) return "soon";
+  return "ok";
+}
 
 type Service = {
   id: string;
@@ -75,7 +90,7 @@ export default async function ServicingPage() {
   const [assetsRes, servicesRes] = await Promise.all([
     supabase
       .from("assets")
-      .select("id, name, type, created_at"),
+      .select("id, name, type, current_hours, next_service_hours, created_at"),
     supabase
       .from("servicing")
       .select(
@@ -175,6 +190,20 @@ export default async function ServicingPage() {
                 <span className="text-xs text-neutral-500">
                   {ASSET_TYPE_LABELS[asset.type] ?? asset.type}
                 </span>
+                {asset.type === "plant" &&
+                  asset.current_hours != null &&
+                  asset.next_service_hours != null && (
+                    <span
+                      className={`text-xs tabular-nums ${statusText(
+                        hoursStatus(
+                          asset.current_hours,
+                          asset.next_service_hours,
+                        ),
+                      )}`}
+                    >
+                      {asset.current_hours} / {asset.next_service_hours} hrs
+                    </span>
+                  )}
                 <span className="ml-auto flex items-center gap-3 text-xs">
                   <span className={statusText(status)}>
                     {next
@@ -190,6 +219,8 @@ export default async function ServicingPage() {
                       id: asset.id,
                       name: asset.name,
                       type: asset.type,
+                      current_hours: asset.current_hours,
+                      next_service_hours: asset.next_service_hours,
                     }}
                   />
                   <DeleteAssetButton

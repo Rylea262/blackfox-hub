@@ -9,12 +9,14 @@ export default function AddAssetButton() {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [type, setType] = useState("");
   const [isPending, startTransition] = useTransition();
 
   function close() {
     if (isPending) return;
     setIsOpen(false);
     setError(null);
+    setType("");
   }
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -28,6 +30,7 @@ export default function AddAssetButton() {
         return;
       }
       setIsOpen(false);
+      setType("");
       router.refresh();
     });
   }
@@ -70,7 +73,8 @@ export default function AddAssetButton() {
                 <select
                   name="type"
                   required
-                  defaultValue=""
+                  value={type}
+                  onChange={(e) => setType(e.target.value)}
                   className="rounded border p-2"
                   disabled={isPending}
                 >
@@ -84,6 +88,36 @@ export default function AddAssetButton() {
                   ))}
                 </select>
               </label>
+              {type === "plant" && (
+                <div className="flex gap-3">
+                  <label className="flex flex-1 flex-col gap-1 text-sm">
+                    Current hours
+                    <input
+                      type="number"
+                      name="current_hours"
+                      min="0"
+                      step="1"
+                      inputMode="numeric"
+                      placeholder="e.g. 1247"
+                      className="rounded border p-2"
+                      disabled={isPending}
+                    />
+                  </label>
+                  <label className="flex flex-1 flex-col gap-1 text-sm">
+                    Next service (hrs)
+                    <input
+                      type="number"
+                      name="next_service_hours"
+                      min="0"
+                      step="1"
+                      inputMode="numeric"
+                      placeholder="e.g. 1500"
+                      className="rounded border p-2"
+                      disabled={isPending}
+                    />
+                  </label>
+                </div>
+              )}
               {error && (
                 <p className="rounded border border-red-300 bg-red-50 p-2 text-sm text-red-700">
                   {error}
