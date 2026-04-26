@@ -3,6 +3,9 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
+import { COMPANIES } from "@/lib/insurances/constants";
+
+const VALID_COMPANIES: string[] = COMPANIES.map((c) => c.value);
 
 export async function addInsurance(
   formData: FormData,
@@ -12,6 +15,12 @@ export async function addInsurance(
 
   const name = String(formData.get("name") ?? "").trim();
   if (!name) return { error: "Name is required" };
+
+  const company = String(formData.get("company") ?? "").trim();
+  if (!company) return { error: "Company is required" };
+  if (!VALID_COMPANIES.includes(company)) {
+    return { error: "Invalid company" };
+  }
 
   const provider = String(formData.get("provider") ?? "").trim() || null;
   const policy_number =
@@ -24,6 +33,7 @@ export async function addInsurance(
     .from("insurances")
     .insert({
       name,
+      company,
       provider,
       policy_number,
       start_date: startRaw || null,

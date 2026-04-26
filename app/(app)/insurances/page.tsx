@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
+import { COMPANY_LABELS } from "@/lib/insurances/constants";
 import AddInsuranceButton from "./add-insurance-button";
 import CertCell from "./cert-cell";
 
@@ -40,7 +41,7 @@ export default async function InsurancesPage() {
   const { data: insurances, error } = await supabase
     .from("insurances")
     .select(
-      "id, name, provider, policy_number, start_date, expiry_date, certificate_url, created_at",
+      "id, name, company, provider, policy_number, start_date, expiry_date, certificate_url, created_at",
     )
     .order("expiry_date", { ascending: true, nullsFirst: false });
 
@@ -95,6 +96,7 @@ export default async function InsurancesPage() {
           <thead>
             <tr className="border-b text-left">
               <th className="py-2">Name</th>
+              <th className="py-2">Company</th>
               <th className="py-2">Provider</th>
               <th className="py-2">Policy #</th>
               <th className="py-2">Start</th>
@@ -108,6 +110,9 @@ export default async function InsurancesPage() {
               return (
                 <tr key={ins.id} className="border-b align-top">
                   <td className="py-2">{ins.name}</td>
+                  <td className="py-2">
+                    {ins.company ? COMPANY_LABELS[ins.company] ?? ins.company : "—"}
+                  </td>
                   <td className="py-2">{ins.provider ?? "—"}</td>
                   <td className="py-2">{ins.policy_number ?? "—"}</td>
                   <td className="py-2">{formatDate(ins.start_date)}</td>

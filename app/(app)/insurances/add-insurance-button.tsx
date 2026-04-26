@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { addInsurance } from "./add-actions";
 import { updateCertPath } from "./cert-actions";
 import { createClient } from "@/lib/supabase/client";
+import { COMPANIES } from "@/lib/insurances/constants";
 
 export default function AddInsuranceButton() {
   const router = useRouter();
@@ -100,6 +101,25 @@ export default function AddInsuranceButton() {
                   className="rounded border p-2"
                   disabled={isPending}
                 />
+              </label>
+              <label className="flex flex-col gap-1 text-sm">
+                Company *
+                <select
+                  name="company"
+                  required
+                  defaultValue=""
+                  className="rounded border p-2"
+                  disabled={isPending}
+                >
+                  <option value="" disabled>
+                    Select a company…
+                  </option>
+                  {COMPANIES.map((c) => (
+                    <option key={c.value} value={c.value}>
+                      {c.label}
+                    </option>
+                  ))}
+                </select>
               </label>
               <label className="flex flex-col gap-1 text-sm">
                 Provider
