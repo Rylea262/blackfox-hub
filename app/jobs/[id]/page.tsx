@@ -63,10 +63,17 @@ export default async function JobDetailPage({
         </dl>
       </header>
 
-      <section className="mt-8">
-        <h2 className="text-lg font-semibold">Documents</h2>
-        <DocumentList documents={documents ?? []} />
-      </section>
+      <details open className="mt-8">
+        <summary className="cursor-pointer select-none text-lg font-semibold">
+          Documents{" "}
+          <span className="text-sm font-normal text-neutral-500">
+            ({documents?.length ?? 0})
+          </span>
+        </summary>
+        <div className="mt-2">
+          <DocumentList documents={documents ?? []} />
+        </div>
+      </details>
 
       <section className="mt-8">
         <h2 className="text-lg font-semibold">Upload</h2>

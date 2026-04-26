@@ -69,11 +69,6 @@ export default function DocumentList({
 
   return (
     <>
-      <p className="mt-2 text-xs text-neutral-500">
-        {documents.length} {documents.length === 1 ? "document" : "documents"}{" "}
-        across {groupKeys.length}{" "}
-        {groupKeys.length === 1 ? "type" : "types"}.
-      </p>
       {error && (
         <p className="mt-2 rounded border border-red-300 bg-red-50 p-2 text-sm text-red-700">
           {error}
