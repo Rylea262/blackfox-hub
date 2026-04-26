@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { signOut } from "./actions";
+import TabNav from "./tab-nav";
 
 const ROLE_TO_SLUG: Record<string, string> = {
   owner: "owner",
@@ -9,7 +10,7 @@ const ROLE_TO_SLUG: Record<string, string> = {
   leading_hand: "leading-hand",
 };
 
-export default async function DashboardLayout({
+export default async function AppLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -28,7 +29,7 @@ export default async function DashboardLayout({
 
   const role = profile?.role ?? "leading_hand";
   const dashboardHref = `/dashboard/${ROLE_TO_SLUG[role] ?? "leading-hand"}`;
-  const showJobs = role === "owner" || role === "office";
+  const isAdmin = role === "owner" || role === "office";
 
   return (
     <div className="min-h-screen bg-white">
@@ -36,18 +37,15 @@ export default async function DashboardLayout({
         <Link href={dashboardHref} className="font-bold">
           Blackfox Hub
         </Link>
-        <div className="flex items-center gap-5 text-sm">
-          <Link href={dashboardHref} className="hover:underline">
-            Dashboard
-          </Link>
-          {showJobs && (
-            <Link href="/jobs" className="hover:underline">
-              Jobs
-            </Link>
-          )}
-        </div>
+        <TabNav
+          dashboardHref={dashboardHref}
+          showJobs={isAdmin}
+          showEmployees={isAdmin}
+        />
         <div className="flex items-center gap-3 text-sm">
-          <span className="hidden text-neutral-600 sm:inline">{user.email}</span>
+          <span className="hidden text-neutral-600 sm:inline">
+            {user.email}
+          </span>
           <form action={signOut}>
             <button
               type="submit"

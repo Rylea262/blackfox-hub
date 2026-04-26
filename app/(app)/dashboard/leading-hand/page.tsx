@@ -1,4 +1,4 @@
-import { signOut } from "../actions";
+import { signOut } from "../../actions";
 
 export default function LeadingHandDashboard() {
   return (
