@@ -72,24 +72,24 @@ export default async function JobsListPage({
       )}
 
       {jobs && jobs.length > 0 && (
-        <table className="w-full table-fixed border-collapse text-sm">
+        <table className="w-full border-collapse text-sm">
           <thead>
             <tr className="border-b text-left">
-              <th className="w-1/6 py-2 pr-3">Name</th>
-              <th className="w-1/6 py-2 pr-3">Client</th>
-              <th className="w-1/6 py-2 pr-3">Status</th>
-              <th className="w-1/6 py-2 pr-8 text-right">Value</th>
-              <th className="w-1/6 py-2 pr-8">Created</th>
-              <th className="w-1/6 py-2"></th>
+              <th className="py-2">Name</th>
+              <th className="py-2">Client</th>
+              <th className="py-2">Status</th>
+              <th className="py-2 pl-8 pr-8 text-right">Value</th>
+              <th className="py-2 pr-8">Created</th>
+              <th className="py-2"></th>
             </tr>
           </thead>
           <tbody>
             {jobs.map((j) => (
               <tr key={j.id} className="border-b">
-                <td className="py-2 pr-3 truncate">{j.name}</td>
-                <td className="py-2 pr-3 truncate">{j.client ?? "—"}</td>
-                <td className="py-2 pr-3">{j.status}</td>
-                <td className="py-2 pr-8 text-right tabular-nums">
+                <td className="py-2">{j.name}</td>
+                <td className="py-2">{j.client ?? "—"}</td>
+                <td className="py-2">{j.status}</td>
+                <td className="py-2 pl-8 pr-8 text-right tabular-nums">
                   {formatCurrency(j.project_value)}
                 </td>
                 <td className="py-2 pr-8">
