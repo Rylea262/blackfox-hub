@@ -13,6 +13,7 @@ export default function TabNav({
   showInsurances,
   showServicing,
   showTools,
+  showAssets,
 }: {
   dashboardHref: string;
   showNotes: boolean;
@@ -21,6 +22,7 @@ export default function TabNav({
   showInsurances: boolean;
   showServicing: boolean;
   showTools: boolean;
+  showAssets: boolean;
 }) {
   const pathname = usePathname();
 
@@ -46,6 +48,8 @@ export default function TabNav({
     });
   if (showTools)
     tabs.push({ href: "/tools", label: "Tools", match: "/tools" });
+  if (showAssets)
+    tabs.push({ href: "/assets", label: "Assets", match: "/assets" });
 
   return (
     <div className="flex items-center gap-6 text-sm">

@@ -38,6 +38,7 @@ export async function updateSession(request: NextRequest) {
     "/insurances",
     "/servicing",
     "/tools",
+    "/assets",
   ];
   if (
     !user &&
