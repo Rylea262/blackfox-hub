@@ -212,8 +212,8 @@ export default async function ServicingPage() {
                     className={`text-xs ${statusText(dueStatus(asset.rego_due))}`}
                   >
                     {asset.rego_due
-                      ? `Rego: ${formatDate(asset.rego_due)}`
-                      : "Rego: —"}
+                      ? `Rego due: ${formatDate(asset.rego_due)}`
+                      : "Rego due: —"}
                   </span>
                 )}
                 <span className="ml-auto flex items-center gap-3 text-xs">
