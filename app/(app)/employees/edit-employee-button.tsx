@@ -13,6 +13,7 @@ export type EmployeeForEdit = {
   emergency_contact_name: string | null;
   emergency_contact_phone: string | null;
   start_date: string | null;
+  date_of_birth: string | null;
   notes: string | null;
   address: string | null;
   licence_number: string | null;
@@ -139,16 +140,28 @@ export default function EditEmployeeButton({
                   />
                 </label>
               </div>
-              <label className="flex flex-col gap-1 text-sm">
-                Start date
-                <input
-                  type="date"
-                  name="start_date"
-                  defaultValue={employee.start_date ?? ""}
-                  className="rounded border p-2"
-                  disabled={isPending}
-                />
-              </label>
+              <div className="flex gap-3">
+                <label className="flex flex-1 flex-col gap-1 text-sm">
+                  Start date
+                  <input
+                    type="date"
+                    name="start_date"
+                    defaultValue={employee.start_date ?? ""}
+                    className="rounded border p-2"
+                    disabled={isPending}
+                  />
+                </label>
+                <label className="flex flex-1 flex-col gap-1 text-sm">
+                  Date of birth
+                  <input
+                    type="date"
+                    name="date_of_birth"
+                    defaultValue={employee.date_of_birth ?? ""}
+                    className="rounded border p-2"
+                    disabled={isPending}
+                  />
+                </label>
+              </div>
               <label className="flex flex-col gap-1 text-sm">
                 Address
                 <input

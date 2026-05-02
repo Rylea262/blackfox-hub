@@ -14,6 +14,7 @@ type Employee = {
   emergency_contact_name: string | null;
   emergency_contact_phone: string | null;
   start_date: string | null;
+  date_of_birth: string | null;
   notes: string | null;
   address: string | null;
   licence_number: string | null;
@@ -58,7 +59,7 @@ export default async function EmployeesPage() {
     supabase
       .from("users")
       .select(
-        "id, name, email, position, phone, emergency_contact_name, emergency_contact_phone, start_date, notes, address, licence_number, white_card_number, employment_type, abn_number, tfn_number, pay_type, pay_amount, created_at",
+        "id, name, email, position, phone, emergency_contact_name, emergency_contact_phone, start_date, date_of_birth, notes, address, licence_number, white_card_number, employment_type, abn_number, tfn_number, pay_type, pay_amount, created_at",
       )
       .order("name", { ascending: true, nullsFirst: false }),
     supabase
@@ -138,6 +139,7 @@ export default async function EmployeesPage() {
                       emergency_contact_name: u.emergency_contact_name,
                       emergency_contact_phone: u.emergency_contact_phone,
                       start_date: u.start_date,
+                      date_of_birth: u.date_of_birth,
                       notes: u.notes,
                       address: u.address,
                       licence_number: u.licence_number,
@@ -182,6 +184,10 @@ export default async function EmployeesPage() {
                 <div className="flex gap-2">
                   <dt className="w-28 shrink-0 text-neutral-500">Start date</dt>
                   <dd>{formatDate(u.start_date)}</dd>
+                </div>
+                <div className="flex gap-2">
+                  <dt className="w-28 shrink-0 text-neutral-500">DOB</dt>
+                  <dd>{formatDate(u.date_of_birth)}</dd>
                 </div>
                 <div className="flex gap-2">
                   <dt className="w-28 shrink-0 text-neutral-500">Address</dt>

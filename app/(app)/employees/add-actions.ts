@@ -25,6 +25,8 @@ export async function addEmployee(
     String(formData.get("emergency_contact_phone") ?? "").trim() || null;
   const startDateRaw = String(formData.get("start_date") ?? "").trim();
   const start_date = startDateRaw || null;
+  const dobRaw = String(formData.get("date_of_birth") ?? "").trim();
+  const date_of_birth = dobRaw || null;
   const notes = String(formData.get("notes") ?? "").trim() || null;
   const address = String(formData.get("address") ?? "").trim() || null;
   const licence_number =
@@ -86,6 +88,7 @@ export async function addEmployee(
   if (emergency_contact_name) insert.emergency_contact_name = emergency_contact_name;
   if (emergency_contact_phone) insert.emergency_contact_phone = emergency_contact_phone;
   if (start_date) insert.start_date = start_date;
+  if (date_of_birth) insert.date_of_birth = date_of_birth;
   if (notes) insert.notes = notes;
   if (address) insert.address = address;
   if (licence_number) insert.licence_number = licence_number;
