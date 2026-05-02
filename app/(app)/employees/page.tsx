@@ -74,6 +74,14 @@ function isFilled(value: string | number | null | undefined): boolean {
   return Number.isFinite(value as number);
 }
 
+// The director is exempt from the employment-contract field — they
+// don't have one with themselves.
+const NO_CONTRACT_EMAIL = "info@blackfoxindustries.com.au";
+
+function requiresContract(email: string): boolean {
+  return email.toLowerCase() !== NO_CONTRACT_EMAIL;
+}
+
 function expiryStatus(iso: string | null): RecordStatus {
   if (!iso) return "ok";
   const today = isoToday();
@@ -103,7 +111,7 @@ function recordStatus(u: Employee): RecordStatus {
     (u.employment_type === "abn"
       ? isFilled(u.abn_number)
       : isFilled(u.tfn_number)) &&
-    isFilled(u.contract_url);
+    (!requiresContract(u.email) || isFilled(u.contract_url));
 
   const expiries = [expiryStatus(u.licence_expiry)];
   if (expiries.includes("expired")) return "expired";
@@ -201,10 +209,12 @@ export default async function EmployeesPage() {
                   {nonEmpty(u.position)}
                 </span>
                 <span className="ml-auto flex items-center gap-2">
-                  <EmployeeContractButton
-                    userId={u.id}
-                    contractUrl={u.contract_url}
-                  />
+                  {requiresContract(u.email) && (
+                    <EmployeeContractButton
+                      userId={u.id}
+                      contractUrl={u.contract_url}
+                    />
+                  )}
                   <EditEmployeeButton
                     employee={{
                       id: u.id,
