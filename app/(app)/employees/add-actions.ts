@@ -2,7 +2,7 @@
 
 import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
 import { POSITIONS } from "@/lib/employees/constants";
 
@@ -57,8 +57,8 @@ export async function addEmployee(
   if (start_date) insert.start_date = start_date;
   if (notes) insert.notes = notes;
 
-  const admin = createAdminClient();
-  const { error } = await admin.from("users").insert(insert);
+  const supabase = createClient();
+  const { error } = await supabase.from("users").insert(insert);
 
   if (error) {
     if (error.code === "23505") {
