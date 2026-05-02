@@ -108,38 +108,36 @@ export default async function EmployeesPage() {
               key={u.id}
               className="rounded border border-neutral-200 bg-white"
             >
-              <summary className="flex cursor-pointer select-none flex-wrap items-start justify-between gap-3 px-4 py-3">
-                <div>
-                  <h2 className="text-base font-semibold">
-                    {u.name?.trim() || u.email}
-                    {isSelf && (
-                      <span className="ml-2 text-xs font-normal text-neutral-500">
-                        (you)
-                      </span>
-                    )}
-                  </h2>
-                  <p className="mt-0.5 text-sm text-neutral-500">
-                    {nonEmpty(u.position)}
-                  </p>
-                </div>
-                <EditEmployeeButton
-                  employee={{
-                    id: u.id,
-                    name: u.name,
-                    email: u.email,
-                    position: u.position,
-                    phone: u.phone,
-                    emergency_contact_name: u.emergency_contact_name,
-                    emergency_contact_phone: u.emergency_contact_phone,
-                    start_date: u.start_date,
-                    notes: u.notes,
-                    address: u.address,
-                    licence_number: u.licence_number,
-                    white_card_number: u.white_card_number,
-                    pay_type: u.pay_type,
-                    pay_amount: u.pay_amount,
-                  }}
-                />
+              <summary className="flex cursor-pointer select-none flex-wrap items-center gap-3 px-4 py-3">
+                <span className="font-semibold">
+                  {u.name?.trim() || u.email}
+                </span>
+                {isSelf && (
+                  <span className="text-xs text-neutral-500">(you)</span>
+                )}
+                <span className="text-xs text-neutral-500">
+                  {nonEmpty(u.position)}
+                </span>
+                <span className="ml-auto">
+                  <EditEmployeeButton
+                    employee={{
+                      id: u.id,
+                      name: u.name,
+                      email: u.email,
+                      position: u.position,
+                      phone: u.phone,
+                      emergency_contact_name: u.emergency_contact_name,
+                      emergency_contact_phone: u.emergency_contact_phone,
+                      start_date: u.start_date,
+                      notes: u.notes,
+                      address: u.address,
+                      licence_number: u.licence_number,
+                      white_card_number: u.white_card_number,
+                      pay_type: u.pay_type,
+                      pay_amount: u.pay_amount,
+                    }}
+                  />
+                </span>
               </summary>
               <div className="border-t border-neutral-200 p-4">
               <dl className="grid grid-cols-1 gap-x-6 gap-y-1 text-sm sm:grid-cols-2">
