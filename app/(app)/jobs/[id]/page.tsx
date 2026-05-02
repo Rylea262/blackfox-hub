@@ -7,6 +7,9 @@ import UploadForm from "./upload-form";
 import DocumentList from "./document-list";
 import DeleteJobButton from "./delete-job-button";
 import NotesSection, { type NoteRow } from "./notes-section";
+import VariationsSection, {
+  type VariationRow,
+} from "./variations-section";
 
 export default async function JobDetailPage({
   params,
@@ -35,6 +38,12 @@ export default async function JobDetailPage({
     .select("id, body, created_at, users(name, email)")
     .eq("job_id", params.id)
     .order("created_at", { ascending: false });
+
+  const { data: variations } = await supabase
+    .from("job_variations")
+    .select("id, type, variation_date, value, created_at")
+    .eq("job_id", params.id)
+    .order("variation_date", { ascending: false });
 
   return (
     <main className="mx-auto max-w-3xl p-6">
@@ -81,6 +90,21 @@ export default async function JobDetailPage({
           <NotesSection
             jobId={job.id}
             notes={(notes ?? []) as unknown as NoteRow[]}
+          />
+        </div>
+      </details>
+
+      <details className="mt-8">
+        <summary className="cursor-pointer select-none text-lg font-semibold">
+          Variations{" "}
+          <span className="text-sm font-normal text-neutral-500">
+            ({variations?.length ?? 0})
+          </span>
+        </summary>
+        <div className="mt-2">
+          <VariationsSection
+            jobId={job.id}
+            variations={(variations ?? []) as VariationRow[]}
           />
         </div>
       </details>
