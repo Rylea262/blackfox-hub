@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { formatDate } from "@/lib/format/date";
 import { attachCert, deleteCert, getCertDownloadUrl } from "./cert-actions";
 
 export type EmployeeCert = {
@@ -127,7 +128,7 @@ export default function EmployeeCerts({
               <span className="min-w-0 flex-1 truncate">
                 {c.file_name}
                 <span className="ml-2 text-xs text-neutral-500">
-                  {new Date(c.created_at).toLocaleDateString()}
+                  {formatDate(c.created_at)}
                 </span>
               </span>
               <div className="flex shrink-0 items-center gap-2">

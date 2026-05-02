@@ -7,6 +7,7 @@ import {
   getDownloadUrl,
   renameDocument,
 } from "./document-actions";
+import { formatDate } from "@/lib/format/date";
 import { DOC_TYPES } from "@/lib/jobs/constants";
 
 type DocumentRow = {
@@ -174,7 +175,7 @@ export default function DocumentList({
                         <span className="min-w-0 flex-1 truncate">
                           {d.file_name ?? "—"}
                           <span className="ml-2 text-xs text-neutral-500">
-                            {new Date(d.created_at).toLocaleDateString()}
+                            {formatDate(d.created_at)}
                           </span>
                         </span>
                       )}

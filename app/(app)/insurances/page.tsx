@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
+import { formatDate } from "@/lib/format/date";
 import { COMPANY_LABELS } from "@/lib/insurances/constants";
 import AddInsuranceButton from "./add-insurance-button";
 import CertCell from "./cert-cell";
@@ -7,11 +8,6 @@ import EditInsuranceButton from "./edit-insurance-button";
 import DeleteInsuranceButton from "./delete-insurance-button";
 
 type ExpiryStatus = "expired" | "soon" | "ok" | "none";
-
-function formatDate(iso: string | null): string {
-  if (!iso) return "—";
-  return new Date(iso).toLocaleDateString();
-}
 
 function expiryStatus(iso: string | null): ExpiryStatus {
   if (!iso) return "none";

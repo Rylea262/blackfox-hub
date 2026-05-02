@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { formatCurrency } from "@/lib/format/currency";
+import { formatDate } from "@/lib/format/date";
 import { addVariation, deleteVariation } from "./variation-actions";
 
 export type VariationRow = {
@@ -12,10 +13,6 @@ export type VariationRow = {
   value: number | string;
   created_at: string;
 };
-
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString();
-}
 
 function numericValue(v: number | string): number {
   const n = typeof v === "string" ? Number(v) : v;

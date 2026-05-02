@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
 import { formatCurrency } from "@/lib/format/currency";
+import { formatDate } from "@/lib/format/date";
 import {
   TOOL_CATEGORY_LABELS,
   TOOL_CATEGORY_ORDER,
@@ -55,10 +56,6 @@ function compareCategories(a: string, b: string): number {
   return categoryLabel(a).localeCompare(categoryLabel(b));
 }
 
-function formatDate(iso: string | null): string {
-  if (!iso) return "—";
-  return new Date(iso).toLocaleDateString();
-}
 
 function dueStatus(iso: string | null): DueStatus {
   if (!iso) return "none";

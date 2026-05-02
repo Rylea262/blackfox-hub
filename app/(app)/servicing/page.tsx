@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
+import { formatDate } from "@/lib/format/date";
 import { ASSET_TYPE_LABELS } from "@/lib/servicing/constants";
 import AddAssetButton from "./add-asset-button";
 import AddServicingButton from "./add-servicing-button";
@@ -42,10 +43,6 @@ type Service = {
   created_at: string;
 };
 
-function formatDate(iso: string | null): string {
-  if (!iso) return "—";
-  return new Date(iso).toLocaleDateString();
-}
 
 function dueStatus(iso: string | null): DueStatus {
   if (!iso) return "none";

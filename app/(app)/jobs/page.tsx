@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
 import { formatCurrency } from "@/lib/format/currency";
+import { formatDate } from "@/lib/format/date";
 import { JOB_STATUSES } from "@/lib/jobs/constants";
 
 const STATUS_FILTERS = [
@@ -92,9 +93,7 @@ export default async function JobsListPage({
                 <td className="py-2 pl-8 pr-8 text-right tabular-nums">
                   {formatCurrency(j.project_value)}
                 </td>
-                <td className="py-2 pr-8">
-                  {new Date(j.created_at).toLocaleDateString()}
-                </td>
+                <td className="py-2 pr-8">{formatDate(j.created_at)}</td>
                 <td className="py-2 text-right">
                   <Link href={`/jobs/${j.id}`} className="underline">
                     View

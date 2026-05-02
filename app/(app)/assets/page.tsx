@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
 import { formatCurrency } from "@/lib/format/currency";
+import { formatDate } from "@/lib/format/date";
 import {
   COMPANY_ASSET_CATEGORY_LABELS,
   COMPANY_ASSET_CATEGORY_ORDER,
@@ -32,11 +33,6 @@ function compareCategories(a: string, b: string): number {
   if (aIdx !== -1) return -1;
   if (bIdx !== -1) return 1;
   return categoryLabel(a).localeCompare(categoryLabel(b));
-}
-
-function formatDate(iso: string | null): string {
-  if (!iso) return "—";
-  return new Date(iso).toLocaleDateString();
 }
 
 function numericValue(v: number | string | null): number {

@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
 import { formatCurrency } from "@/lib/format/currency";
+import { formatDate } from "@/lib/format/date";
 import AddEmployeeButton from "./add-employee-button";
 import EditEmployeeButton from "./edit-employee-button";
 import EmployeeCerts, { type EmployeeCert } from "./employee-certs";
@@ -43,11 +44,6 @@ function formatPay(
   if (!payType || payAmount == null || payAmount === "") return "—";
   const formatted = formatCurrency(payAmount);
   return payType === "hourly" ? `${formatted}/hr` : `${formatted}/yr`;
-}
-
-function formatDate(iso: string | null): string {
-  if (!iso) return "—";
-  return new Date(iso).toLocaleDateString();
 }
 
 function nonEmpty(value: string | null): string {

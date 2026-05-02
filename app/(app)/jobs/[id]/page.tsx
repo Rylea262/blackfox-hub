@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
 import { formatCurrency } from "@/lib/format/currency";
+import { formatDate } from "@/lib/format/date";
 import UploadForm from "./upload-form";
 import DocumentList from "./document-list";
 import DeleteJobButton from "./delete-job-button";
@@ -69,11 +70,7 @@ export default async function JobDetailPage({
           <dt className="text-neutral-500">Status</dt>
           <dd>{job.status}</dd>
           <dt className="text-neutral-500">Start date</dt>
-          <dd>
-            {job.start_date
-              ? new Date(job.start_date).toLocaleDateString()
-              : "—"}
-          </dd>
+          <dd>{formatDate(job.start_date)}</dd>
           <dt className="text-neutral-500">Value</dt>
           <dd>{formatCurrency(job.project_value)}</dd>
         </dl>
