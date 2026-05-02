@@ -3,6 +3,7 @@ import { requireRole } from "@/lib/auth/require-role";
 import { formatCurrency } from "@/lib/format/currency";
 import AddEmployeeButton from "./add-employee-button";
 import EditEmployeeButton from "./edit-employee-button";
+import EmployeeCerts, { type EmployeeCert } from "./employee-certs";
 
 type Employee = {
   id: string;
@@ -15,6 +16,8 @@ type Employee = {
   start_date: string | null;
   notes: string | null;
   address: string | null;
+  licence_number: string | null;
+  white_card_number: string | null;
   pay_type: string | null;
   pay_amount: number | string | null;
   created_at: string;
@@ -42,14 +45,36 @@ export default async function EmployeesPage() {
   const { user: currentUser } = await requireRole(["owner", "office"]);
   const supabase = createClient();
 
-  const { data: users, error } = await supabase
-    .from("users")
-    .select(
-      "id, name, email, position, phone, emergency_contact_name, emergency_contact_phone, start_date, notes, address, pay_type, pay_amount, created_at",
-    )
-    .order("name", { ascending: true, nullsFirst: false });
+  const [usersRes, certsRes] = await Promise.all([
+    supabase
+      .from("users")
+      .select(
+        "id, name, email, position, phone, emergency_contact_name, emergency_contact_phone, start_date, notes, address, licence_number, white_card_number, pay_type, pay_amount, created_at",
+      )
+      .order("name", { ascending: true, nullsFirst: false }),
+    supabase
+      .from("employee_certificates")
+      .select("id, user_id, file_name, file_url, created_at")
+      .order("created_at", { ascending: false }),
+  ]);
 
+  const { data: users, error } = usersRes;
   const employees = (users ?? []) as Employee[];
+
+  const certsByUser = new Map<string, EmployeeCert[]>();
+  for (const c of (certsRes.data ?? []) as (EmployeeCert & {
+    user_id: string;
+  })[]) {
+    const arr = certsByUser.get(c.user_id);
+    const cert = {
+      id: c.id,
+      file_name: c.file_name,
+      file_url: c.file_url,
+      created_at: c.created_at,
+    };
+    if (arr) arr.push(cert);
+    else certsByUser.set(c.user_id, [cert]);
+  }
 
   return (
     <main className="mx-auto max-w-4xl p-6">
@@ -109,6 +134,8 @@ export default async function EmployeesPage() {
                     start_date: u.start_date,
                     notes: u.notes,
                     address: u.address,
+                    licence_number: u.licence_number,
+                    white_card_number: u.white_card_number,
                     pay_type: u.pay_type,
                     pay_amount: u.pay_amount,
                   }}
@@ -156,6 +183,18 @@ export default async function EmployeesPage() {
                     {formatPay(u.pay_type, u.pay_amount)}
                   </dd>
                 </div>
+                <div className="flex gap-2">
+                  <dt className="w-28 shrink-0 text-neutral-500">Licence</dt>
+                  <dd className="min-w-0 truncate">
+                    {nonEmpty(u.licence_number)}
+                  </dd>
+                </div>
+                <div className="flex gap-2">
+                  <dt className="w-28 shrink-0 text-neutral-500">White Card</dt>
+                  <dd className="min-w-0 truncate">
+                    {nonEmpty(u.white_card_number)}
+                  </dd>
+                </div>
               </dl>
 
               {u.notes && u.notes.trim() !== "" && (
@@ -163,6 +202,11 @@ export default async function EmployeesPage() {
                   {u.notes}
                 </p>
               )}
+
+              <EmployeeCerts
+                userId={u.id}
+                certs={certsByUser.get(u.id) ?? []}
+              />
             </article>
           );
         })}

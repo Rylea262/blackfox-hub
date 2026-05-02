@@ -27,6 +27,10 @@ export async function addEmployee(
   const start_date = startDateRaw || null;
   const notes = String(formData.get("notes") ?? "").trim() || null;
   const address = String(formData.get("address") ?? "").trim() || null;
+  const licence_number =
+    String(formData.get("licence_number") ?? "").trim() || null;
+  const white_card_number =
+    String(formData.get("white_card_number") ?? "").trim() || null;
   const payTypeRaw = String(formData.get("pay_type") ?? "").trim();
   const pay_type = payTypeRaw === "" ? null : payTypeRaw;
   const payAmountRaw = String(formData.get("pay_amount") ?? "").trim();
@@ -65,6 +69,8 @@ export async function addEmployee(
   if (start_date) insert.start_date = start_date;
   if (notes) insert.notes = notes;
   if (address) insert.address = address;
+  if (licence_number) insert.licence_number = licence_number;
+  if (white_card_number) insert.white_card_number = white_card_number;
   if (pay_type !== null) insert.pay_type = pay_type;
   if (pay_amount !== null) insert.pay_amount = pay_amount;
 

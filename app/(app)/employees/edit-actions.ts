@@ -23,6 +23,10 @@ export async function updateEmployee(
   const start_date = startDateRaw || null;
   const notes = String(formData.get("notes") ?? "").trim() || null;
   const address = String(formData.get("address") ?? "").trim() || null;
+  const licence_number =
+    String(formData.get("licence_number") ?? "").trim() || null;
+  const white_card_number =
+    String(formData.get("white_card_number") ?? "").trim() || null;
   const payTypeRaw = String(formData.get("pay_type") ?? "").trim();
   const pay_type = payTypeRaw === "" ? null : payTypeRaw;
   const payAmountRaw = String(formData.get("pay_amount") ?? "").trim();
@@ -50,6 +54,8 @@ export async function updateEmployee(
     start_date,
     notes,
     address,
+    licence_number,
+    white_card_number,
     pay_type,
     pay_amount,
   };

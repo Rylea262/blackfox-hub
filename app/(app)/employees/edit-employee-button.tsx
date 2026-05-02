@@ -15,6 +15,8 @@ export type EmployeeForEdit = {
   start_date: string | null;
   notes: string | null;
   address: string | null;
+  licence_number: string | null;
+  white_card_number: string | null;
   pay_type: string | null;
   pay_amount: number | string | null;
 };
@@ -145,6 +147,28 @@ export default function EditEmployeeButton({
                   disabled={isPending}
                 />
               </label>
+              <div className="flex gap-3">
+                <label className="flex flex-1 flex-col gap-1 text-sm">
+                  Licence number
+                  <input
+                    type="text"
+                    name="licence_number"
+                    defaultValue={employee.licence_number ?? ""}
+                    className="rounded border p-2"
+                    disabled={isPending}
+                  />
+                </label>
+                <label className="flex flex-1 flex-col gap-1 text-sm">
+                  White Card number
+                  <input
+                    type="text"
+                    name="white_card_number"
+                    defaultValue={employee.white_card_number ?? ""}
+                    className="rounded border p-2"
+                    disabled={isPending}
+                  />
+                </label>
+              </div>
               <div className="flex gap-3">
                 <label className="flex w-36 flex-col gap-1 text-sm">
                   Pay type
