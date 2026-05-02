@@ -31,10 +31,6 @@ export async function updateEmployee(
     String(formData.get("white_card_number") ?? "").trim() || null;
   const licenceExpiryRaw = String(formData.get("licence_expiry") ?? "").trim();
   const licence_expiry = licenceExpiryRaw || null;
-  const whiteCardExpiryRaw = String(
-    formData.get("white_card_expiry") ?? "",
-  ).trim();
-  const white_card_expiry = whiteCardExpiryRaw || null;
   const employmentTypeRaw = String(
     formData.get("employment_type") ?? "",
   ).trim();
@@ -85,7 +81,6 @@ export async function updateEmployee(
     licence_number,
     white_card_number,
     licence_expiry,
-    white_card_expiry,
     employment_type,
     abn_number,
     tfn_number,

@@ -165,26 +165,15 @@ export default function AddEmployeeButton() {
                   />
                 </label>
               </div>
-              <div className="flex gap-3">
-                <label className="flex flex-1 flex-col gap-1 text-sm">
-                  White Card number
-                  <input
-                    type="text"
-                    name="white_card_number"
-                    className="rounded border p-2"
-                    disabled={isPending}
-                  />
-                </label>
-                <label className="flex flex-1 flex-col gap-1 text-sm">
-                  White Card expiry
-                  <input
-                    type="date"
-                    name="white_card_expiry"
-                    className="rounded border p-2"
-                    disabled={isPending}
-                  />
-                </label>
-              </div>
+              <label className="flex flex-col gap-1 text-sm">
+                White Card number
+                <input
+                  type="text"
+                  name="white_card_number"
+                  className="rounded border p-2"
+                  disabled={isPending}
+                />
+              </label>
               <label className="flex flex-col gap-1 text-sm">
                 Employment type
                 <select

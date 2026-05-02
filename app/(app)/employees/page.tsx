@@ -21,7 +21,6 @@ type Employee = {
   licence_number: string | null;
   white_card_number: string | null;
   licence_expiry: string | null;
-  white_card_expiry: string | null;
   employment_type: string | null;
   abn_number: string | null;
   tfn_number: string | null;
@@ -98,7 +97,6 @@ function recordStatus(u: Employee): RecordStatus {
     isFilled(u.licence_number) &&
     isFilled(u.licence_expiry) &&
     isFilled(u.white_card_number) &&
-    isFilled(u.white_card_expiry) &&
     isFilled(u.pay_type) &&
     isFilled(u.pay_amount) &&
     isFilled(u.employment_type) &&
@@ -107,10 +105,7 @@ function recordStatus(u: Employee): RecordStatus {
       : isFilled(u.tfn_number)) &&
     isFilled(u.contract_url);
 
-  const expiries = [
-    expiryStatus(u.licence_expiry),
-    expiryStatus(u.white_card_expiry),
-  ];
+  const expiries = [expiryStatus(u.licence_expiry)];
   if (expiries.includes("expired")) return "expired";
   if (expiries.includes("soon")) return "soon";
   if (!requiredFilled) return "soon";
@@ -136,7 +131,7 @@ export default async function EmployeesPage() {
     supabase
       .from("users")
       .select(
-        "id, name, email, position, phone, emergency_contact_name, emergency_contact_phone, start_date, date_of_birth, notes, address, licence_number, white_card_number, licence_expiry, white_card_expiry, employment_type, abn_number, tfn_number, pay_type, pay_amount, contract_url, created_at",
+        "id, name, email, position, phone, emergency_contact_name, emergency_contact_phone, start_date, date_of_birth, notes, address, licence_number, white_card_number, licence_expiry, employment_type, abn_number, tfn_number, pay_type, pay_amount, contract_url, created_at",
       )
       .order("name", { ascending: true, nullsFirst: false }),
     supabase
@@ -226,7 +221,6 @@ export default async function EmployeesPage() {
                       licence_number: u.licence_number,
                       white_card_number: u.white_card_number,
                       licence_expiry: u.licence_expiry,
-                      white_card_expiry: u.white_card_expiry,
                       employment_type: u.employment_type,
                       abn_number: u.abn_number,
                       tfn_number: u.tfn_number,
