@@ -49,12 +49,13 @@ export async function addEmployee(
   // the new user can't log in. If they ever sign up via Supabase Auth
   // with this same email, the handle_new_user trigger will link their
   // auth record to this row by updating its id.
-  // role is intentionally omitted — the public.users.role column has a
-  // default of 'leading_hand', and access level is no longer part of
-  // this register's UI.
+  // role is no longer captured in the register UI but the DB column
+  // is NOT NULL — default new rows to 'leading_hand' so the insert
+  // succeeds. Access level can be changed elsewhere if needed.
   const insert: Record<string, string | number | null> = {
     id: randomUUID(),
     email,
+    role: "leading_hand",
   };
   if (name) insert.name = name;
   if (position !== null) insert.position = position;
