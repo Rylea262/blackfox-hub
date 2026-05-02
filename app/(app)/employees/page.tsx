@@ -4,6 +4,7 @@ import { formatCurrency } from "@/lib/format/currency";
 import AddEmployeeButton from "./add-employee-button";
 import EditEmployeeButton from "./edit-employee-button";
 import EmployeeCerts, { type EmployeeCert } from "./employee-certs";
+import EmployeeContractButton from "./employee-contract-button";
 
 type Employee = {
   id: string;
@@ -24,6 +25,7 @@ type Employee = {
   tfn_number: string | null;
   pay_type: string | null;
   pay_amount: number | string | null;
+  contract_url: string | null;
   created_at: string;
 };
 
@@ -59,7 +61,7 @@ export default async function EmployeesPage() {
     supabase
       .from("users")
       .select(
-        "id, name, email, position, phone, emergency_contact_name, emergency_contact_phone, start_date, date_of_birth, notes, address, licence_number, white_card_number, employment_type, abn_number, tfn_number, pay_type, pay_amount, created_at",
+        "id, name, email, position, phone, emergency_contact_name, emergency_contact_phone, start_date, date_of_birth, notes, address, licence_number, white_card_number, employment_type, abn_number, tfn_number, pay_type, pay_amount, contract_url, created_at",
       )
       .order("name", { ascending: true, nullsFirst: false }),
     supabase
@@ -128,7 +130,11 @@ export default async function EmployeesPage() {
                 <span className="text-xs text-neutral-500">
                   {nonEmpty(u.position)}
                 </span>
-                <span className="ml-auto">
+                <span className="ml-auto flex items-center gap-2">
+                  <EmployeeContractButton
+                    userId={u.id}
+                    contractUrl={u.contract_url}
+                  />
                   <EditEmployeeButton
                     employee={{
                       id: u.id,
