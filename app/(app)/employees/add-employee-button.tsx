@@ -3,13 +3,6 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { addEmployee } from "./add-actions";
-import { POSITIONS } from "@/lib/employees/constants";
-
-const ROLES = [
-  { value: "leading_hand", label: "Onsite" },
-  { value: "office", label: "Office" },
-  { value: "owner", label: "Owner" },
-];
 
 export default function AddEmployeeButton() {
   const router = useRouter();
@@ -83,35 +76,14 @@ export default function AddEmployeeButton() {
                 />
               </label>
               <label className="flex flex-col gap-1 text-sm">
-                Role
-                <select
-                  name="role"
-                  defaultValue="leading_hand"
-                  className="rounded border p-2"
-                  disabled={isPending}
-                >
-                  {ROLES.map((r) => (
-                    <option key={r.value} value={r.value}>
-                      {r.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label className="flex flex-col gap-1 text-sm">
                 Position
-                <select
+                <input
+                  type="text"
                   name="position"
-                  defaultValue=""
+                  placeholder="e.g. Concreter, Director"
                   className="rounded border p-2"
                   disabled={isPending}
-                >
-                  <option value="">—</option>
-                  {POSITIONS.map((p) => (
-                    <option key={p.value} value={p.value}>
-                      {p.label}
-                    </option>
-                  ))}
-                </select>
+                />
               </label>
               <label className="flex flex-col gap-1 text-sm">
                 Phone

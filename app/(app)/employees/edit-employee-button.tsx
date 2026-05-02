@@ -3,19 +3,11 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { updateEmployee } from "./edit-actions";
-import { POSITIONS } from "@/lib/employees/constants";
-
-const ROLES = [
-  { value: "leading_hand", label: "Onsite" },
-  { value: "office", label: "Office" },
-  { value: "owner", label: "Owner" },
-];
 
 export type EmployeeForEdit = {
   id: string;
   name: string | null;
   email: string;
-  role: string;
   position: string | null;
   phone: string | null;
   emergency_contact_name: string | null;
@@ -29,10 +21,8 @@ export type EmployeeForEdit = {
 
 export default function EditEmployeeButton({
   employee,
-  isSelf,
 }: {
   employee: EmployeeForEdit;
-  isSelf: boolean;
 }) {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
@@ -92,42 +82,17 @@ export default function EditEmployeeButton({
                   disabled={isPending}
                 />
               </label>
-              <div className="flex gap-3">
-                <label className="flex flex-1 flex-col gap-1 text-sm">
-                  Role
-                  <select
-                    name="role"
-                    defaultValue={employee.role}
-                    disabled={isPending || isSelf}
-                    title={
-                      isSelf ? "You can't change your own role" : undefined
-                    }
-                    className="rounded border p-2 disabled:opacity-50"
-                  >
-                    {ROLES.map((r) => (
-                      <option key={r.value} value={r.value}>
-                        {r.label}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <label className="flex flex-1 flex-col gap-1 text-sm">
-                  Position
-                  <select
-                    name="position"
-                    defaultValue={employee.position ?? ""}
-                    className="rounded border p-2"
-                    disabled={isPending}
-                  >
-                    <option value="">—</option>
-                    {POSITIONS.map((p) => (
-                      <option key={p.value} value={p.value}>
-                        {p.label}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              </div>
+              <label className="flex flex-col gap-1 text-sm">
+                Position
+                <input
+                  type="text"
+                  name="position"
+                  defaultValue={employee.position ?? ""}
+                  placeholder="e.g. Concreter, Director"
+                  className="rounded border p-2"
+                  disabled={isPending}
+                />
+              </label>
               <label className="flex flex-col gap-1 text-sm">
                 Phone
                 <input

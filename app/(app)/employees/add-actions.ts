@@ -4,10 +4,7 @@ import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
-import { POSITIONS } from "@/lib/employees/constants";
 
-const VALID_ROLES = ["owner", "office", "leading_hand"] as const;
-const VALID_POSITIONS: string[] = POSITIONS.map((p) => p.value);
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export async function addEmployee(
@@ -19,7 +16,6 @@ export async function addEmployee(
     .trim()
     .toLowerCase();
   const name = String(formData.get("name") ?? "").trim();
-  const role = String(formData.get("role") ?? "leading_hand");
   const positionRaw = String(formData.get("position") ?? "").trim();
   const position = positionRaw === "" ? null : positionRaw;
   const phone = String(formData.get("phone") ?? "").trim() || null;
@@ -45,12 +41,6 @@ export async function addEmployee(
 
   if (!email) return { error: "Email is required" };
   if (!EMAIL_RE.test(email)) return { error: "Email looks invalid" };
-  if (!VALID_ROLES.includes(role as (typeof VALID_ROLES)[number])) {
-    return { error: "Invalid role" };
-  }
-  if (position !== null && !VALID_POSITIONS.includes(position)) {
-    return { error: "Invalid position" };
-  }
   if (pay_type !== null && pay_type !== "hourly" && pay_type !== "salary") {
     return { error: "Invalid pay type" };
   }
@@ -59,10 +49,12 @@ export async function addEmployee(
   // the new user can't log in. If they ever sign up via Supabase Auth
   // with this same email, the handle_new_user trigger will link their
   // auth record to this row by updating its id.
+  // role is intentionally omitted — the public.users.role column has a
+  // default of 'leading_hand', and access level is no longer part of
+  // this register's UI.
   const insert: Record<string, string | number | null> = {
     id: randomUUID(),
     email,
-    role,
   };
   if (name) insert.name = name;
   if (position !== null) insert.position = position;

@@ -3,20 +3,15 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
-import { POSITIONS } from "@/lib/employees/constants";
-
-const VALID_ROLES = ["owner", "office", "leading_hand"] as const;
-const VALID_POSITIONS: string[] = POSITIONS.map((p) => p.value);
 
 export async function updateEmployee(
   employeeId: string,
   formData: FormData,
 ): Promise<{ error?: string } | void> {
-  const { user } = await requireRole(["owner", "office"]);
+  await requireRole(["owner", "office"]);
   const supabase = createClient();
 
   const name = String(formData.get("name") ?? "").trim() || null;
-  const role = String(formData.get("role") ?? "leading_hand");
   const positionRaw = String(formData.get("position") ?? "").trim();
   const position = positionRaw === "" ? null : positionRaw;
   const phone = String(formData.get("phone") ?? "").trim() || null;
@@ -40,16 +35,12 @@ export async function updateEmployee(
     pay_amount = parsed;
   }
 
-  if (!VALID_ROLES.includes(role as (typeof VALID_ROLES)[number])) {
-    return { error: "Invalid role" };
-  }
-  if (position !== null && !VALID_POSITIONS.includes(position)) {
-    return { error: "Invalid position" };
-  }
   if (pay_type !== null && pay_type !== "hourly" && pay_type !== "salary") {
     return { error: "Invalid pay type" };
   }
 
+  // role is intentionally omitted — access level is managed elsewhere
+  // (or, in practice, left at the DB default for now).
   const update: Record<string, string | number | null> = {
     name,
     position,
@@ -62,12 +53,6 @@ export async function updateEmployee(
     pay_type,
     pay_amount,
   };
-
-  // You can edit anyone's contact details (including your own), but you
-  // can't change your own role.
-  if (employeeId !== user.id) {
-    update.role = role;
-  }
 
   const { error } = await supabase
     .from("users")

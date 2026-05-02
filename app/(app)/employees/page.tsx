@@ -1,21 +1,13 @@
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
 import { formatCurrency } from "@/lib/format/currency";
-import { POSITION_LABELS } from "@/lib/employees/constants";
 import AddEmployeeButton from "./add-employee-button";
 import EditEmployeeButton from "./edit-employee-button";
-
-const ROLE_LABELS: Record<string, string> = {
-  owner: "Owner",
-  office: "Office",
-  leading_hand: "Onsite",
-};
 
 type Employee = {
   id: string;
   name: string | null;
   email: string;
-  role: string;
   position: string | null;
   phone: string | null;
   emergency_contact_name: string | null;
@@ -53,7 +45,7 @@ export default async function EmployeesPage() {
   const { data: users, error } = await supabase
     .from("users")
     .select(
-      "id, name, email, role, position, phone, emergency_contact_name, emergency_contact_phone, start_date, notes, address, pay_type, pay_amount, created_at",
+      "id, name, email, position, phone, emergency_contact_name, emergency_contact_phone, start_date, notes, address, pay_type, pay_amount, created_at",
     )
     .order("name", { ascending: true, nullsFirst: false });
 
@@ -65,8 +57,7 @@ export default async function EmployeesPage() {
         <div>
           <h1 className="text-2xl font-bold">Employees</h1>
           <p className="mt-1 text-sm text-neutral-500">
-            Company employee register. Edit a record to update contact and
-            role details.
+            Company employee register. Edit a record to update contact details.
           </p>
         </div>
         <AddEmployeeButton />
@@ -87,10 +78,6 @@ export default async function EmployeesPage() {
       <div className="mt-4 flex flex-col gap-3">
         {employees.map((u) => {
           const isSelf = u.id === currentUser.id;
-          const positionLabel = u.position
-            ? POSITION_LABELS[u.position] ?? u.position
-            : "—";
-          const roleLabel = ROLE_LABELS[u.role] ?? u.role;
           return (
             <article
               key={u.id}
@@ -107,32 +94,25 @@ export default async function EmployeesPage() {
                     )}
                   </h2>
                   <p className="mt-0.5 text-sm text-neutral-500">
-                    {positionLabel}
+                    {nonEmpty(u.position)}
                   </p>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="rounded bg-neutral-100 px-2 py-0.5 text-xs text-neutral-700">
-                    {roleLabel}
-                  </span>
-                  <EditEmployeeButton
-                    employee={{
-                      id: u.id,
-                      name: u.name,
-                      email: u.email,
-                      role: u.role,
-                      position: u.position,
-                      phone: u.phone,
-                      emergency_contact_name: u.emergency_contact_name,
-                      emergency_contact_phone: u.emergency_contact_phone,
-                      start_date: u.start_date,
-                      notes: u.notes,
-                      address: u.address,
-                      pay_type: u.pay_type,
-                      pay_amount: u.pay_amount,
-                    }}
-                    isSelf={isSelf}
-                  />
-                </div>
+                <EditEmployeeButton
+                  employee={{
+                    id: u.id,
+                    name: u.name,
+                    email: u.email,
+                    position: u.position,
+                    phone: u.phone,
+                    emergency_contact_name: u.emergency_contact_name,
+                    emergency_contact_phone: u.emergency_contact_phone,
+                    start_date: u.start_date,
+                    notes: u.notes,
+                    address: u.address,
+                    pay_type: u.pay_type,
+                    pay_amount: u.pay_amount,
+                  }}
+                />
               </header>
 
               <dl className="mt-3 grid grid-cols-1 gap-x-6 gap-y-1 text-sm sm:grid-cols-2">
