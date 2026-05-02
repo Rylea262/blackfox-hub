@@ -27,6 +27,17 @@ export async function updateEmployee(
     String(formData.get("licence_number") ?? "").trim() || null;
   const white_card_number =
     String(formData.get("white_card_number") ?? "").trim() || null;
+  const employmentTypeRaw = String(
+    formData.get("employment_type") ?? "",
+  ).trim();
+  const employment_type = employmentTypeRaw === "" ? null : employmentTypeRaw;
+  const abnRaw = String(formData.get("abn_number") ?? "").trim();
+  const tfnRaw = String(formData.get("tfn_number") ?? "").trim();
+  const abn_number = employment_type === "abn" && abnRaw ? abnRaw : null;
+  const tfn_number =
+    (employment_type === "full_time" || employment_type === "casual") && tfnRaw
+      ? tfnRaw
+      : null;
   const payTypeRaw = String(formData.get("pay_type") ?? "").trim();
   const pay_type = payTypeRaw === "" ? null : payTypeRaw;
   const payAmountRaw = String(formData.get("pay_amount") ?? "").trim();
@@ -42,6 +53,14 @@ export async function updateEmployee(
   if (pay_type !== null && pay_type !== "hourly" && pay_type !== "salary") {
     return { error: "Invalid pay type" };
   }
+  if (
+    employment_type !== null &&
+    employment_type !== "full_time" &&
+    employment_type !== "casual" &&
+    employment_type !== "abn"
+  ) {
+    return { error: "Invalid employment type" };
+  }
 
   // role is intentionally omitted — access level is managed elsewhere
   // (or, in practice, left at the DB default for now).
@@ -56,6 +75,9 @@ export async function updateEmployee(
     address,
     licence_number,
     white_card_number,
+    employment_type,
+    abn_number,
+    tfn_number,
     pay_type,
     pay_amount,
   };

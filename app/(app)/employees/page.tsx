@@ -18,9 +18,18 @@ type Employee = {
   address: string | null;
   licence_number: string | null;
   white_card_number: string | null;
+  employment_type: string | null;
+  abn_number: string | null;
+  tfn_number: string | null;
   pay_type: string | null;
   pay_amount: number | string | null;
   created_at: string;
+};
+
+const EMPLOYMENT_TYPE_LABELS: Record<string, string> = {
+  full_time: "Full time",
+  casual: "Casual",
+  abn: "ABN",
 };
 
 function formatPay(
@@ -49,7 +58,7 @@ export default async function EmployeesPage() {
     supabase
       .from("users")
       .select(
-        "id, name, email, position, phone, emergency_contact_name, emergency_contact_phone, start_date, notes, address, licence_number, white_card_number, pay_type, pay_amount, created_at",
+        "id, name, email, position, phone, emergency_contact_name, emergency_contact_phone, start_date, notes, address, licence_number, white_card_number, employment_type, abn_number, tfn_number, pay_type, pay_amount, created_at",
       )
       .order("name", { ascending: true, nullsFirst: false }),
     supabase
@@ -133,6 +142,9 @@ export default async function EmployeesPage() {
                       address: u.address,
                       licence_number: u.licence_number,
                       white_card_number: u.white_card_number,
+                      employment_type: u.employment_type,
+                      abn_number: u.abn_number,
+                      tfn_number: u.tfn_number,
                       pay_type: u.pay_type,
                       pay_amount: u.pay_amount,
                     }}
@@ -193,6 +205,32 @@ export default async function EmployeesPage() {
                     {nonEmpty(u.white_card_number)}
                   </dd>
                 </div>
+                <div className="flex gap-2">
+                  <dt className="w-28 shrink-0 text-neutral-500">Employment</dt>
+                  <dd className="min-w-0">
+                    {u.employment_type
+                      ? EMPLOYMENT_TYPE_LABELS[u.employment_type] ??
+                        u.employment_type
+                      : "—"}
+                  </dd>
+                </div>
+                {u.employment_type === "abn" && (
+                  <div className="flex gap-2">
+                    <dt className="w-28 shrink-0 text-neutral-500">ABN</dt>
+                    <dd className="min-w-0 truncate">
+                      {nonEmpty(u.abn_number)}
+                    </dd>
+                  </div>
+                )}
+                {(u.employment_type === "full_time" ||
+                  u.employment_type === "casual") && (
+                  <div className="flex gap-2">
+                    <dt className="w-28 shrink-0 text-neutral-500">TFN</dt>
+                    <dd className="min-w-0 truncate">
+                      {nonEmpty(u.tfn_number)}
+                    </dd>
+                  </div>
+                )}
               </dl>
 
               {u.notes && u.notes.trim() !== "" && (

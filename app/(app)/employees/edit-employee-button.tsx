@@ -17,6 +17,9 @@ export type EmployeeForEdit = {
   address: string | null;
   licence_number: string | null;
   white_card_number: string | null;
+  employment_type: string | null;
+  abn_number: string | null;
+  tfn_number: string | null;
   pay_type: string | null;
   pay_amount: number | string | null;
 };
@@ -29,12 +32,16 @@ export default function EditEmployeeButton({
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [employmentType, setEmploymentType] = useState(
+    employee.employment_type ?? "",
+  );
   const [isPending, startTransition] = useTransition();
 
   function close() {
     if (isPending) return;
     setIsOpen(false);
     setError(null);
+    setEmploymentType(employee.employment_type ?? "");
   }
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -174,6 +181,48 @@ export default function EditEmployeeButton({
                   />
                 </label>
               </div>
+              <label className="flex flex-col gap-1 text-sm">
+                Employment type
+                <select
+                  name="employment_type"
+                  value={employmentType}
+                  onChange={(e) => setEmploymentType(e.target.value)}
+                  className="rounded border p-2"
+                  disabled={isPending}
+                >
+                  <option value="">—</option>
+                  <option value="full_time">Full time</option>
+                  <option value="casual">Casual</option>
+                  <option value="abn">ABN</option>
+                </select>
+              </label>
+              {employmentType === "abn" && (
+                <label className="flex flex-col gap-1 text-sm">
+                  ABN
+                  <input
+                    type="text"
+                    name="abn_number"
+                    defaultValue={employee.abn_number ?? ""}
+                    placeholder="11-digit ABN"
+                    className="rounded border p-2"
+                    disabled={isPending}
+                  />
+                </label>
+              )}
+              {(employmentType === "full_time" ||
+                employmentType === "casual") && (
+                <label className="flex flex-col gap-1 text-sm">
+                  TFN
+                  <input
+                    type="text"
+                    name="tfn_number"
+                    defaultValue={employee.tfn_number ?? ""}
+                    placeholder="9-digit TFN"
+                    className="rounded border p-2"
+                    disabled={isPending}
+                  />
+                </label>
+              )}
               <div className="flex gap-3">
                 <label className="flex w-36 flex-col gap-1 text-sm">
                   Pay type

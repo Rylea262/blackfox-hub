@@ -31,6 +31,17 @@ export async function addEmployee(
     String(formData.get("licence_number") ?? "").trim() || null;
   const white_card_number =
     String(formData.get("white_card_number") ?? "").trim() || null;
+  const employmentTypeRaw = String(
+    formData.get("employment_type") ?? "",
+  ).trim();
+  const employment_type = employmentTypeRaw === "" ? null : employmentTypeRaw;
+  const abnRaw = String(formData.get("abn_number") ?? "").trim();
+  const tfnRaw = String(formData.get("tfn_number") ?? "").trim();
+  const abn_number = employment_type === "abn" && abnRaw ? abnRaw : null;
+  const tfn_number =
+    (employment_type === "full_time" || employment_type === "casual") && tfnRaw
+      ? tfnRaw
+      : null;
   const payTypeRaw = String(formData.get("pay_type") ?? "").trim();
   const pay_type = payTypeRaw === "" ? null : payTypeRaw;
   const payAmountRaw = String(formData.get("pay_amount") ?? "").trim();
@@ -47,6 +58,14 @@ export async function addEmployee(
   if (!EMAIL_RE.test(email)) return { error: "Email looks invalid" };
   if (pay_type !== null && pay_type !== "hourly" && pay_type !== "salary") {
     return { error: "Invalid pay type" };
+  }
+  if (
+    employment_type !== null &&
+    employment_type !== "full_time" &&
+    employment_type !== "casual" &&
+    employment_type !== "abn"
+  ) {
+    return { error: "Invalid employment type" };
   }
 
   // Data-only employee record. No auth.users row is created here, so
@@ -71,6 +90,9 @@ export async function addEmployee(
   if (address) insert.address = address;
   if (licence_number) insert.licence_number = licence_number;
   if (white_card_number) insert.white_card_number = white_card_number;
+  if (employment_type !== null) insert.employment_type = employment_type;
+  if (abn_number) insert.abn_number = abn_number;
+  if (tfn_number) insert.tfn_number = tfn_number;
   if (pay_type !== null) insert.pay_type = pay_type;
   if (pay_amount !== null) insert.pay_amount = pay_amount;
 
