@@ -168,6 +168,53 @@ export default function AddEmployeeButton() {
                   ))}
                 </select>
               </label>
+              <label className="flex flex-col gap-1 text-sm">
+                Phone
+                <input
+                  type="tel"
+                  name="phone"
+                  className="rounded border p-2"
+                  disabled={isPending}
+                />
+              </label>
+              <div className="flex gap-3">
+                <label className="flex flex-1 flex-col gap-1 text-sm">
+                  Emergency contact name
+                  <input
+                    type="text"
+                    name="emergency_contact_name"
+                    className="rounded border p-2"
+                    disabled={isPending}
+                  />
+                </label>
+                <label className="flex flex-1 flex-col gap-1 text-sm">
+                  Emergency contact phone
+                  <input
+                    type="tel"
+                    name="emergency_contact_phone"
+                    className="rounded border p-2"
+                    disabled={isPending}
+                  />
+                </label>
+              </div>
+              <label className="flex flex-col gap-1 text-sm">
+                Start date
+                <input
+                  type="date"
+                  name="start_date"
+                  className="rounded border p-2"
+                  disabled={isPending}
+                />
+              </label>
+              <label className="flex flex-col gap-1 text-sm">
+                Notes
+                <textarea
+                  name="notes"
+                  rows={2}
+                  className="resize-y rounded border p-2"
+                  disabled={isPending}
+                />
+              </label>
               <label className="flex items-start gap-2 text-sm">
                 <input
                   type="checkbox"

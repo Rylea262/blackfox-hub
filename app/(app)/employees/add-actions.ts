@@ -22,6 +22,14 @@ export async function addEmployee(
   const role = String(formData.get("role") ?? "leading_hand");
   const positionRaw = String(formData.get("position") ?? "").trim();
   const position = positionRaw === "" ? null : positionRaw;
+  const phone = String(formData.get("phone") ?? "").trim() || null;
+  const emergency_contact_name =
+    String(formData.get("emergency_contact_name") ?? "").trim() || null;
+  const emergency_contact_phone =
+    String(formData.get("emergency_contact_phone") ?? "").trim() || null;
+  const startDateRaw = String(formData.get("start_date") ?? "").trim();
+  const start_date = startDateRaw || null;
+  const notes = String(formData.get("notes") ?? "").trim() || null;
   const sendInvite = formData.get("send_invite") === "on";
 
   if (!email) return { error: "Email is required" };
@@ -44,6 +52,11 @@ export async function addEmployee(
   };
   if (name) insert.name = name;
   if (position !== null) insert.position = position;
+  if (phone) insert.phone = phone;
+  if (emergency_contact_name) insert.emergency_contact_name = emergency_contact_name;
+  if (emergency_contact_phone) insert.emergency_contact_phone = emergency_contact_phone;
+  if (start_date) insert.start_date = start_date;
+  if (notes) insert.notes = notes;
 
   const admin = createAdminClient();
   const { error } = await admin.from("users").insert(insert);
