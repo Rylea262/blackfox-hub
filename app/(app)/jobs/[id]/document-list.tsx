@@ -2,7 +2,11 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { getDownloadUrl, renameDocument } from "./document-actions";
+import {
+  deleteDocument,
+  getDownloadUrl,
+  renameDocument,
+} from "./document-actions";
 import { DOC_TYPES } from "@/lib/jobs/constants";
 
 type DocumentRow = {
@@ -104,6 +108,22 @@ export default function DocumentList({
     });
   }
 
+  function handleDelete(doc: DocumentRow) {
+    const ok = window.confirm(
+      `Delete "${doc.file_name ?? "this document"}"? This cannot be undone.`,
+    );
+    if (!ok) return;
+    setError(null);
+    startTransition(async () => {
+      const result = await deleteDocument(doc.id, jobId);
+      if (result?.error) {
+        setError(result.error);
+        return;
+      }
+      router.refresh();
+    });
+  }
+
   return (
     <>
       {error && (
@@ -194,6 +214,14 @@ export default function DocumentList({
                               className="rounded border px-2 py-0.5 text-xs disabled:opacity-50"
                             >
                               {busyId === d.id ? "..." : "Download"}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDelete(d)}
+                              disabled={isPending}
+                              className="rounded border border-red-300 px-2 py-0.5 text-xs text-red-700 hover:bg-red-50 disabled:opacity-50"
+                            >
+                              Delete
                             </button>
                           </>
                         )}

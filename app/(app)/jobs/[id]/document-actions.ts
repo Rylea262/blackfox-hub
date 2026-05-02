@@ -36,3 +36,37 @@ export async function renameDocument(
 
   revalidatePath(`/jobs/${jobId}`);
 }
+
+export async function deleteDocument(
+  documentId: string,
+  jobId: string,
+): Promise<{ error?: string } | void> {
+  await requireRole(["owner", "office"]);
+  const supabase = createClient();
+
+  // Capture the storage path before deleting so we can clean it up after.
+  const { data: existing } = await supabase
+    .from("documents")
+    .select("file_url")
+    .eq("id", documentId)
+    .maybeSingle();
+
+  const { error } = await supabase
+    .from("documents")
+    .delete()
+    .eq("id", documentId);
+  if (error) return { error: error.message };
+
+  if (existing?.file_url) {
+    const { error: removeErr } = await supabase.storage
+      .from("documents")
+      .remove([existing.file_url]);
+    if (removeErr) {
+      console.error(
+        `Storage cleanup failed for document ${documentId}: ${removeErr.message}`,
+      );
+    }
+  }
+
+  revalidatePath(`/jobs/${jobId}`);
+}
