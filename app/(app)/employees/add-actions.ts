@@ -30,6 +30,18 @@ export async function addEmployee(
   const startDateRaw = String(formData.get("start_date") ?? "").trim();
   const start_date = startDateRaw || null;
   const notes = String(formData.get("notes") ?? "").trim() || null;
+  const address = String(formData.get("address") ?? "").trim() || null;
+  const payTypeRaw = String(formData.get("pay_type") ?? "").trim();
+  const pay_type = payTypeRaw === "" ? null : payTypeRaw;
+  const payAmountRaw = String(formData.get("pay_amount") ?? "").trim();
+  let pay_amount: number | null = null;
+  if (payAmountRaw) {
+    const parsed = Number(payAmountRaw);
+    if (!Number.isFinite(parsed) || parsed < 0) {
+      return { error: "Pay amount must be a non-negative number" };
+    }
+    pay_amount = parsed;
+  }
 
   if (!email) return { error: "Email is required" };
   if (!EMAIL_RE.test(email)) return { error: "Email looks invalid" };
@@ -39,12 +51,15 @@ export async function addEmployee(
   if (position !== null && !VALID_POSITIONS.includes(position)) {
     return { error: "Invalid position" };
   }
+  if (pay_type !== null && pay_type !== "hourly" && pay_type !== "salary") {
+    return { error: "Invalid pay type" };
+  }
 
   // Data-only employee record. No auth.users row is created here, so
   // the new user can't log in. If they ever sign up via Supabase Auth
   // with this same email, the handle_new_user trigger will link their
   // auth record to this row by updating its id.
-  const insert: Record<string, string | null> = {
+  const insert: Record<string, string | number | null> = {
     id: randomUUID(),
     email,
     role,
@@ -56,6 +71,9 @@ export async function addEmployee(
   if (emergency_contact_phone) insert.emergency_contact_phone = emergency_contact_phone;
   if (start_date) insert.start_date = start_date;
   if (notes) insert.notes = notes;
+  if (address) insert.address = address;
+  if (pay_type !== null) insert.pay_type = pay_type;
+  if (pay_amount !== null) insert.pay_amount = pay_amount;
 
   const supabase = createClient();
   const { error } = await supabase.from("users").insert(insert);

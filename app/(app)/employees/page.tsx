@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
+import { formatCurrency } from "@/lib/format/currency";
 import { POSITION_LABELS } from "@/lib/employees/constants";
 import AddEmployeeButton from "./add-employee-button";
 import EditEmployeeButton from "./edit-employee-button";
@@ -21,8 +22,20 @@ type Employee = {
   emergency_contact_phone: string | null;
   start_date: string | null;
   notes: string | null;
+  address: string | null;
+  pay_type: string | null;
+  pay_amount: number | string | null;
   created_at: string;
 };
+
+function formatPay(
+  payType: string | null,
+  payAmount: number | string | null,
+): string {
+  if (!payType || payAmount == null || payAmount === "") return "—";
+  const formatted = formatCurrency(payAmount);
+  return payType === "hourly" ? `${formatted}/hr` : `${formatted}/yr`;
+}
 
 function formatDate(iso: string | null): string {
   if (!iso) return "—";
@@ -40,7 +53,7 @@ export default async function EmployeesPage() {
   const { data: users, error } = await supabase
     .from("users")
     .select(
-      "id, name, email, role, position, phone, emergency_contact_name, emergency_contact_phone, start_date, notes, created_at",
+      "id, name, email, role, position, phone, emergency_contact_name, emergency_contact_phone, start_date, notes, address, pay_type, pay_amount, created_at",
     )
     .order("name", { ascending: true, nullsFirst: false });
 
@@ -113,6 +126,9 @@ export default async function EmployeesPage() {
                       emergency_contact_phone: u.emergency_contact_phone,
                       start_date: u.start_date,
                       notes: u.notes,
+                      address: u.address,
+                      pay_type: u.pay_type,
+                      pay_amount: u.pay_amount,
                     }}
                     isSelf={isSelf}
                   />
@@ -149,6 +165,16 @@ export default async function EmployeesPage() {
                 <div className="flex gap-2">
                   <dt className="w-28 shrink-0 text-neutral-500">Start date</dt>
                   <dd>{formatDate(u.start_date)}</dd>
+                </div>
+                <div className="flex gap-2">
+                  <dt className="w-28 shrink-0 text-neutral-500">Address</dt>
+                  <dd className="min-w-0 truncate">{nonEmpty(u.address)}</dd>
+                </div>
+                <div className="flex gap-2">
+                  <dt className="w-28 shrink-0 text-neutral-500">Pay</dt>
+                  <dd className="tabular-nums">
+                    {formatPay(u.pay_type, u.pay_amount)}
+                  </dd>
                 </div>
               </dl>
 

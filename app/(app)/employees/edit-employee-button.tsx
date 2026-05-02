@@ -22,6 +22,9 @@ export type EmployeeForEdit = {
   emergency_contact_phone: string | null;
   start_date: string | null;
   notes: string | null;
+  address: string | null;
+  pay_type: string | null;
+  pay_amount: number | string | null;
 };
 
 export default function EditEmployeeButton({
@@ -167,6 +170,44 @@ export default function EditEmployeeButton({
                   disabled={isPending}
                 />
               </label>
+              <label className="flex flex-col gap-1 text-sm">
+                Address
+                <input
+                  type="text"
+                  name="address"
+                  defaultValue={employee.address ?? ""}
+                  className="rounded border p-2"
+                  disabled={isPending}
+                />
+              </label>
+              <div className="flex gap-3">
+                <label className="flex w-36 flex-col gap-1 text-sm">
+                  Pay type
+                  <select
+                    name="pay_type"
+                    defaultValue={employee.pay_type ?? ""}
+                    className="rounded border p-2"
+                    disabled={isPending}
+                  >
+                    <option value="">—</option>
+                    <option value="hourly">Hourly rate</option>
+                    <option value="salary">Salary</option>
+                  </select>
+                </label>
+                <label className="flex flex-1 flex-col gap-1 text-sm">
+                  Amount (AUD)
+                  <input
+                    type="number"
+                    name="pay_amount"
+                    min="0"
+                    step="0.01"
+                    inputMode="decimal"
+                    defaultValue={employee.pay_amount ?? ""}
+                    className="rounded border p-2"
+                    disabled={isPending}
+                  />
+                </label>
+              </div>
               <label className="flex flex-col gap-1 text-sm">
                 Notes
                 <textarea

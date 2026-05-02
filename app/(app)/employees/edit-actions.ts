@@ -27,6 +27,18 @@ export async function updateEmployee(
   const startDateRaw = String(formData.get("start_date") ?? "").trim();
   const start_date = startDateRaw || null;
   const notes = String(formData.get("notes") ?? "").trim() || null;
+  const address = String(formData.get("address") ?? "").trim() || null;
+  const payTypeRaw = String(formData.get("pay_type") ?? "").trim();
+  const pay_type = payTypeRaw === "" ? null : payTypeRaw;
+  const payAmountRaw = String(formData.get("pay_amount") ?? "").trim();
+  let pay_amount: number | null = null;
+  if (payAmountRaw) {
+    const parsed = Number(payAmountRaw);
+    if (!Number.isFinite(parsed) || parsed < 0) {
+      return { error: "Pay amount must be a non-negative number" };
+    }
+    pay_amount = parsed;
+  }
 
   if (!VALID_ROLES.includes(role as (typeof VALID_ROLES)[number])) {
     return { error: "Invalid role" };
@@ -34,8 +46,11 @@ export async function updateEmployee(
   if (position !== null && !VALID_POSITIONS.includes(position)) {
     return { error: "Invalid position" };
   }
+  if (pay_type !== null && pay_type !== "hourly" && pay_type !== "salary") {
+    return { error: "Invalid pay type" };
+  }
 
-  const update: Record<string, string | null> = {
+  const update: Record<string, string | number | null> = {
     name,
     position,
     phone,
@@ -43,6 +58,9 @@ export async function updateEmployee(
     emergency_contact_phone,
     start_date,
     notes,
+    address,
+    pay_type,
+    pay_amount,
   };
 
   // You can edit anyone's contact details (including your own), but you

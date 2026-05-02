@@ -1,4 +1,5 @@
 export const POSITIONS = [
+  { value: "director", label: "Director" },
   { value: "concreter", label: "Concreter" },
   { value: "labourer", label: "Labourer" },
   { value: "operator", label: "Operator" },
