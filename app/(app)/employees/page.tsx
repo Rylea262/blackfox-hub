@@ -104,11 +104,11 @@ export default async function EmployeesPage() {
         {employees.map((u) => {
           const isSelf = u.id === currentUser.id;
           return (
-            <article
+            <details
               key={u.id}
-              className="rounded border border-neutral-200 bg-white p-4"
+              className="rounded border border-neutral-200 bg-white"
             >
-              <header className="flex flex-wrap items-start justify-between gap-3">
+              <summary className="flex cursor-pointer select-none flex-wrap items-start justify-between gap-3 px-4 py-3">
                 <div>
                   <h2 className="text-base font-semibold">
                     {u.name?.trim() || u.email}
@@ -140,9 +140,9 @@ export default async function EmployeesPage() {
                     pay_amount: u.pay_amount,
                   }}
                 />
-              </header>
-
-              <dl className="mt-3 grid grid-cols-1 gap-x-6 gap-y-1 text-sm sm:grid-cols-2">
+              </summary>
+              <div className="border-t border-neutral-200 p-4">
+              <dl className="grid grid-cols-1 gap-x-6 gap-y-1 text-sm sm:grid-cols-2">
                 <div className="flex gap-2">
                   <dt className="w-28 shrink-0 text-neutral-500">Email</dt>
                   <dd className="min-w-0 truncate">{u.email}</dd>
@@ -207,7 +207,8 @@ export default async function EmployeesPage() {
                 userId={u.id}
                 certs={certsByUser.get(u.id) ?? []}
               />
-            </article>
+              </div>
+            </details>
           );
         })}
       </div>

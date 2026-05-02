@@ -56,7 +56,12 @@ export default function EditEmployeeButton({
     <>
       <button
         type="button"
-        onClick={() => setIsOpen(true)}
+        onClick={(e) => {
+          // Stop the click from toggling a parent <details>/<summary>.
+          e.preventDefault();
+          e.stopPropagation();
+          setIsOpen(true);
+        }}
         className="rounded border border-neutral-300 bg-white px-2 py-0.5 text-xs hover:bg-neutral-50"
       >
         Edit
