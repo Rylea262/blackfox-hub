@@ -119,8 +119,10 @@ export default function AddEmployeeButton() {
                 <label className="flex flex-1 flex-col gap-1 text-sm">
                   Start date
                   <input
-                    type="date"
+                    type="text"
                     name="start_date"
+                    inputMode="numeric"
+                    placeholder="DD/MM/YYYY"
                     className="rounded border p-2"
                     disabled={isPending}
                   />
@@ -128,8 +130,10 @@ export default function AddEmployeeButton() {
                 <label className="flex flex-1 flex-col gap-1 text-sm">
                   Date of birth
                   <input
-                    type="date"
+                    type="text"
                     name="date_of_birth"
+                    inputMode="numeric"
+                    placeholder="DD/MM/YYYY"
                     className="rounded border p-2"
                     disabled={isPending}
                   />
@@ -157,8 +161,10 @@ export default function AddEmployeeButton() {
                 <label className="flex flex-1 flex-col gap-1 text-sm">
                   Licence expiry
                   <input
-                    type="date"
+                    type="text"
                     name="licence_expiry"
+                    inputMode="numeric"
+                    placeholder="DD/MM/YYYY"
                     className="rounded border p-2"
                     disabled={isPending}
                   />

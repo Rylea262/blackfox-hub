@@ -3,6 +3,18 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
+import { parseDateInput } from "@/lib/format/date";
+
+function parseDateField(
+  value: string,
+  label: string,
+): { value: string | null } | { error: string } {
+  const result = parseDateInput(value);
+  if (result === "invalid") {
+    return { error: `${label} must be DD/MM/YYYY` };
+  }
+  return { value: result };
+}
 
 export async function updateEmployee(
   employeeId: string,
@@ -19,18 +31,31 @@ export async function updateEmployee(
     String(formData.get("emergency_contact_name") ?? "").trim() || null;
   const emergency_contact_phone =
     String(formData.get("emergency_contact_phone") ?? "").trim() || null;
-  const startDateRaw = String(formData.get("start_date") ?? "").trim();
-  const start_date = startDateRaw || null;
-  const dobRaw = String(formData.get("date_of_birth") ?? "").trim();
-  const date_of_birth = dobRaw || null;
+  const startDateParsed = parseDateField(
+    String(formData.get("start_date") ?? ""),
+    "Start date",
+  );
+  if ("error" in startDateParsed) return { error: startDateParsed.error };
+  const start_date = startDateParsed.value;
+
+  const dobParsed = parseDateField(
+    String(formData.get("date_of_birth") ?? ""),
+    "Date of birth",
+  );
+  if ("error" in dobParsed) return { error: dobParsed.error };
+  const date_of_birth = dobParsed.value;
   const notes = String(formData.get("notes") ?? "").trim() || null;
   const address = String(formData.get("address") ?? "").trim() || null;
   const licence_number =
     String(formData.get("licence_number") ?? "").trim() || null;
   const white_card_number =
     String(formData.get("white_card_number") ?? "").trim() || null;
-  const licenceExpiryRaw = String(formData.get("licence_expiry") ?? "").trim();
-  const licence_expiry = licenceExpiryRaw || null;
+  const licenceExpiryParsed = parseDateField(
+    String(formData.get("licence_expiry") ?? ""),
+    "Licence expiry",
+  );
+  if ("error" in licenceExpiryParsed) return { error: licenceExpiryParsed.error };
+  const licence_expiry = licenceExpiryParsed.value;
   const employmentTypeRaw = String(
     formData.get("employment_type") ?? "",
   ).trim();

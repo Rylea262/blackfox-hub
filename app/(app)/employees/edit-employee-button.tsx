@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { formatDateInput } from "@/lib/format/date";
 import { updateEmployee } from "./edit-actions";
 
 export type EmployeeForEdit = {
@@ -145,9 +146,11 @@ export default function EditEmployeeButton({
                 <label className="flex flex-1 flex-col gap-1 text-sm">
                   Start date
                   <input
-                    type="date"
+                    type="text"
                     name="start_date"
-                    defaultValue={employee.start_date ?? ""}
+                    defaultValue={formatDateInput(employee.start_date)}
+                    inputMode="numeric"
+                    placeholder="DD/MM/YYYY"
                     className="rounded border p-2"
                     disabled={isPending}
                   />
@@ -155,9 +158,11 @@ export default function EditEmployeeButton({
                 <label className="flex flex-1 flex-col gap-1 text-sm">
                   Date of birth
                   <input
-                    type="date"
+                    type="text"
                     name="date_of_birth"
-                    defaultValue={employee.date_of_birth ?? ""}
+                    defaultValue={formatDateInput(employee.date_of_birth)}
+                    inputMode="numeric"
+                    placeholder="DD/MM/YYYY"
                     className="rounded border p-2"
                     disabled={isPending}
                   />
@@ -187,9 +192,11 @@ export default function EditEmployeeButton({
                 <label className="flex flex-1 flex-col gap-1 text-sm">
                   Licence expiry
                   <input
-                    type="date"
+                    type="text"
                     name="licence_expiry"
-                    defaultValue={employee.licence_expiry ?? ""}
+                    defaultValue={formatDateInput(employee.licence_expiry)}
+                    inputMode="numeric"
+                    placeholder="DD/MM/YYYY"
                     className="rounded border p-2"
                     disabled={isPending}
                   />
