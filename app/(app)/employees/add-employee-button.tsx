@@ -58,11 +58,10 @@ export default function AddEmployeeButton() {
             </p>
             <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-3">
               <label className="flex flex-col gap-1 text-sm">
-                Email *
+                Email
                 <input
                   type="email"
                   name="email"
-                  required
                   autoFocus
                   className="rounded border p-2"
                   disabled={isPending}

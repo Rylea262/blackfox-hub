@@ -58,8 +58,9 @@ export async function addEmployee(
     pay_amount = parsed;
   }
 
-  if (!email) return { error: "Email is required" };
-  if (!EMAIL_RE.test(email)) return { error: "Email looks invalid" };
+  if (email && !EMAIL_RE.test(email)) {
+    return { error: "Email looks invalid" };
+  }
   if (pay_type !== null && pay_type !== "hourly" && pay_type !== "salary") {
     return { error: "Invalid pay type" };
   }
@@ -81,9 +82,9 @@ export async function addEmployee(
   // succeeds. Access level can be changed elsewhere if needed.
   const insert: Record<string, string | number | null> = {
     id: randomUUID(),
-    email,
     role: "leading_hand",
   };
+  if (email) insert.email = email;
   if (name) insert.name = name;
   if (position !== null) insert.position = position;
   if (phone) insert.phone = phone;
