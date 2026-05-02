@@ -12,7 +12,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export async function addEmployee(
   formData: FormData,
-): Promise<{ error?: string; inviteLink?: string } | void> {
+): Promise<{ error?: string } | void> {
   await requireRole(["owner", "office"]);
 
   const email = String(formData.get("email") ?? "")
@@ -30,7 +30,6 @@ export async function addEmployee(
   const startDateRaw = String(formData.get("start_date") ?? "").trim();
   const start_date = startDateRaw || null;
   const notes = String(formData.get("notes") ?? "").trim() || null;
-  const sendInvite = formData.get("send_invite") === "on";
 
   if (!email) return { error: "Email is required" };
   if (!EMAIL_RE.test(email)) return { error: "Email looks invalid" };
@@ -41,10 +40,10 @@ export async function addEmployee(
     return { error: "Invalid position" };
   }
 
-  // Insert the public.users row first (data-only). If an invite is also
-  // requested, the auth.users insert below fires the handle_new_user
-  // trigger which upserts by email and links this row's id to the new
-  // auth record — role/name/position are preserved.
+  // Data-only employee record. No auth.users row is created here, so
+  // the new user can't log in. If they ever sign up via Supabase Auth
+  // with this same email, the handle_new_user trigger will link their
+  // auth record to this row by updating its id.
   const insert: Record<string, string | null> = {
     id: randomUUID(),
     email,
@@ -66,21 +65,6 @@ export async function addEmployee(
       return { error: "An employee with this email already exists" };
     }
     return { error: error.message };
-  }
-
-  if (sendInvite) {
-    // generateLink creates the auth.users row and returns a link the
-    // admin can copy and share manually. This avoids dependency on SMTP
-    // configuration for the invite email to actually deliver.
-    const { data: linkData, error: inviteError } =
-      await admin.auth.admin.generateLink({ type: "invite", email });
-    if (inviteError) {
-      return {
-        error: `Employee added, but invite failed: ${inviteError.message}`,
-      };
-    }
-    revalidatePath("/employees");
-    return { inviteLink: linkData.properties?.action_link };
   }
 
   revalidatePath("/employees");
