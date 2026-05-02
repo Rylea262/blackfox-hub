@@ -18,6 +18,8 @@ export type EmployeeForEdit = {
   address: string | null;
   licence_number: string | null;
   white_card_number: string | null;
+  licence_expiry: string | null;
+  white_card_expiry: string | null;
   employment_type: string | null;
   abn_number: string | null;
   tfn_number: string | null;
@@ -184,11 +186,33 @@ export default function EditEmployeeButton({
                   />
                 </label>
                 <label className="flex flex-1 flex-col gap-1 text-sm">
+                  Licence expiry
+                  <input
+                    type="date"
+                    name="licence_expiry"
+                    defaultValue={employee.licence_expiry ?? ""}
+                    className="rounded border p-2"
+                    disabled={isPending}
+                  />
+                </label>
+              </div>
+              <div className="flex gap-3">
+                <label className="flex flex-1 flex-col gap-1 text-sm">
                   White Card number
                   <input
                     type="text"
                     name="white_card_number"
                     defaultValue={employee.white_card_number ?? ""}
+                    className="rounded border p-2"
+                    disabled={isPending}
+                  />
+                </label>
+                <label className="flex flex-1 flex-col gap-1 text-sm">
+                  White Card expiry
+                  <input
+                    type="date"
+                    name="white_card_expiry"
+                    defaultValue={employee.white_card_expiry ?? ""}
                     className="rounded border p-2"
                     disabled={isPending}
                   />

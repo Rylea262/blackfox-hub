@@ -20,6 +20,8 @@ type Employee = {
   address: string | null;
   licence_number: string | null;
   white_card_number: string | null;
+  licence_expiry: string | null;
+  white_card_expiry: string | null;
   employment_type: string | null;
   abn_number: string | null;
   tfn_number: string | null;
@@ -53,6 +55,79 @@ function nonEmpty(value: string | null): string {
   return value && value.trim() !== "" ? value : "—";
 }
 
+type RecordStatus = "ok" | "soon" | "expired";
+
+const SOON_DAYS = 30;
+
+function isoToday(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function isoSoon(): string {
+  return new Date(Date.now() + SOON_DAYS * 86400000)
+    .toISOString()
+    .slice(0, 10);
+}
+
+function isFilled(value: string | number | null | undefined): boolean {
+  if (value == null) return false;
+  if (typeof value === "string") return value.trim() !== "";
+  return Number.isFinite(value as number);
+}
+
+function expiryStatus(iso: string | null): RecordStatus {
+  if (!iso) return "ok";
+  const today = isoToday();
+  if (iso < today) return "expired";
+  if (iso <= isoSoon()) return "soon";
+  return "ok";
+}
+
+function recordStatus(u: Employee): RecordStatus {
+  // Required for "green": basic identity, contact, employment, and a
+  // contract on file.
+  const requiredFilled =
+    isFilled(u.name) &&
+    isFilled(u.position) &&
+    isFilled(u.phone) &&
+    isFilled(u.address) &&
+    isFilled(u.date_of_birth) &&
+    isFilled(u.start_date) &&
+    isFilled(u.emergency_contact_name) &&
+    isFilled(u.emergency_contact_phone) &&
+    isFilled(u.licence_number) &&
+    isFilled(u.licence_expiry) &&
+    isFilled(u.white_card_number) &&
+    isFilled(u.white_card_expiry) &&
+    isFilled(u.pay_type) &&
+    isFilled(u.pay_amount) &&
+    isFilled(u.employment_type) &&
+    (u.employment_type === "abn"
+      ? isFilled(u.abn_number)
+      : isFilled(u.tfn_number)) &&
+    isFilled(u.contract_url);
+
+  const expiries = [
+    expiryStatus(u.licence_expiry),
+    expiryStatus(u.white_card_expiry),
+  ];
+  if (expiries.includes("expired")) return "expired";
+  if (expiries.includes("soon")) return "soon";
+  if (!requiredFilled) return "soon";
+  return "ok";
+}
+
+function statusClass(status: RecordStatus): string {
+  switch (status) {
+    case "expired":
+      return "border-red-300 bg-red-50";
+    case "soon":
+      return "border-orange-300 bg-orange-50";
+    default:
+      return "border-green-300 bg-green-50";
+  }
+}
+
 export default async function EmployeesPage() {
   const { user: currentUser } = await requireRole(["owner", "office"]);
   const supabase = createClient();
@@ -61,7 +136,7 @@ export default async function EmployeesPage() {
     supabase
       .from("users")
       .select(
-        "id, name, email, position, phone, emergency_contact_name, emergency_contact_phone, start_date, date_of_birth, notes, address, licence_number, white_card_number, employment_type, abn_number, tfn_number, pay_type, pay_amount, contract_url, created_at",
+        "id, name, email, position, phone, emergency_contact_name, emergency_contact_phone, start_date, date_of_birth, notes, address, licence_number, white_card_number, licence_expiry, white_card_expiry, employment_type, abn_number, tfn_number, pay_type, pay_amount, contract_url, created_at",
       )
       .order("name", { ascending: true, nullsFirst: false }),
     supabase
@@ -118,7 +193,7 @@ export default async function EmployeesPage() {
           return (
             <details
               key={u.id}
-              className="rounded border border-neutral-200 bg-white"
+              className={`rounded border ${statusClass(recordStatus(u))}`}
             >
               <summary className="flex cursor-pointer select-none flex-wrap items-center gap-3 px-4 py-3">
                 <span className="font-semibold">
@@ -150,6 +225,8 @@ export default async function EmployeesPage() {
                       address: u.address,
                       licence_number: u.licence_number,
                       white_card_number: u.white_card_number,
+                      licence_expiry: u.licence_expiry,
+                      white_card_expiry: u.white_card_expiry,
                       employment_type: u.employment_type,
                       abn_number: u.abn_number,
                       tfn_number: u.tfn_number,

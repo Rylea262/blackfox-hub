@@ -33,6 +33,12 @@ export async function addEmployee(
     String(formData.get("licence_number") ?? "").trim() || null;
   const white_card_number =
     String(formData.get("white_card_number") ?? "").trim() || null;
+  const licenceExpiryRaw = String(formData.get("licence_expiry") ?? "").trim();
+  const licence_expiry = licenceExpiryRaw || null;
+  const whiteCardExpiryRaw = String(
+    formData.get("white_card_expiry") ?? "",
+  ).trim();
+  const white_card_expiry = whiteCardExpiryRaw || null;
   const employmentTypeRaw = String(
     formData.get("employment_type") ?? "",
   ).trim();
@@ -93,6 +99,8 @@ export async function addEmployee(
   if (address) insert.address = address;
   if (licence_number) insert.licence_number = licence_number;
   if (white_card_number) insert.white_card_number = white_card_number;
+  if (licence_expiry) insert.licence_expiry = licence_expiry;
+  if (white_card_expiry) insert.white_card_expiry = white_card_expiry;
   if (employment_type !== null) insert.employment_type = employment_type;
   if (abn_number) insert.abn_number = abn_number;
   if (tfn_number) insert.tfn_number = tfn_number;
