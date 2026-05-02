@@ -11,6 +11,7 @@ export type AssetForEdit = {
   type: string;
   current_hours: number | null;
   next_service_hours: number | null;
+  rego_due: string | null;
 };
 
 export default function EditAssetButton({ asset }: { asset: AssetForEdit }) {
@@ -127,6 +128,18 @@ export default function EditAssetButton({ asset }: { asset: AssetForEdit }) {
                     />
                   </label>
                 </div>
+              )}
+              {type === "vehicle" && (
+                <label className="flex flex-col gap-1 text-sm">
+                  Rego due
+                  <input
+                    type="date"
+                    name="rego_due"
+                    defaultValue={asset.rego_due ?? ""}
+                    className="rounded border p-2"
+                    disabled={isPending}
+                  />
+                </label>
               )}
               {error && (
                 <p className="rounded border border-red-300 bg-red-50 p-2 text-sm text-red-700">

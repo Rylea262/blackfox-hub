@@ -14,6 +14,7 @@ type Asset = {
   type: string;
   current_hours: number | null;
   next_service_hours: number | null;
+  rego_due: string | null;
   created_at: string;
 };
 
@@ -90,7 +91,9 @@ export default async function ServicingPage() {
   const [assetsRes, servicesRes] = await Promise.all([
     supabase
       .from("assets")
-      .select("id, name, type, current_hours, next_service_hours, created_at"),
+      .select(
+        "id, name, type, current_hours, next_service_hours, rego_due, created_at",
+      ),
     supabase
       .from("servicing")
       .select(
@@ -204,6 +207,15 @@ export default async function ServicingPage() {
                       {asset.current_hours} / {asset.next_service_hours} hrs
                     </span>
                   )}
+                {asset.type === "vehicle" && (
+                  <span
+                    className={`text-xs ${statusText(dueStatus(asset.rego_due))}`}
+                  >
+                    {asset.rego_due
+                      ? `Rego: ${formatDate(asset.rego_due)}`
+                      : "Rego: —"}
+                  </span>
+                )}
                 <span className="ml-auto flex items-center gap-3 text-xs">
                   <span className={statusText(status)}>
                     {next
@@ -221,6 +233,7 @@ export default async function ServicingPage() {
                       type: asset.type,
                       current_hours: asset.current_hours,
                       next_service_hours: asset.next_service_hours,
+                      rego_due: asset.rego_due,
                     }}
                   />
                   <DeleteAssetButton

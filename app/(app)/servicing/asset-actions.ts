@@ -51,11 +51,18 @@ export async function addAsset(
     next_service_hours = nxt.value;
   }
 
+  let rego_due: string | null = null;
+  if (type === "vehicle") {
+    const raw = String(formData.get("rego_due") ?? "").trim();
+    rego_due = raw || null;
+  }
+
   const { error } = await supabase.from("assets").insert({
     name,
     type,
     current_hours,
     next_service_hours,
+    rego_due,
     created_by: user.id,
   });
 
@@ -102,9 +109,15 @@ export async function updateAsset(
     next_service_hours = nxt.value;
   }
 
+  let rego_due: string | null = null;
+  if (type === "vehicle") {
+    const raw = String(formData.get("rego_due") ?? "").trim();
+    rego_due = raw || null;
+  }
+
   const { error } = await supabase
     .from("assets")
-    .update({ name, type, current_hours, next_service_hours })
+    .update({ name, type, current_hours, next_service_hours, rego_due })
     .eq("id", assetId);
 
   if (error) {

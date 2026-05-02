@@ -118,6 +118,17 @@ export default function AddAssetButton() {
                   </label>
                 </div>
               )}
+              {type === "vehicle" && (
+                <label className="flex flex-col gap-1 text-sm">
+                  Rego due
+                  <input
+                    type="date"
+                    name="rego_due"
+                    className="rounded border p-2"
+                    disabled={isPending}
+                  />
+                </label>
+              )}
               {error && (
                 <p className="rounded border border-red-300 bg-red-50 p-2 text-sm text-red-700">
                   {error}
