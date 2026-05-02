@@ -7,7 +7,7 @@ import EditEmployeeButton from "./edit-employee-button";
 const ROLE_LABELS: Record<string, string> = {
   owner: "Owner",
   office: "Office",
-  leading_hand: "Leading hand",
+  leading_hand: "Onsite",
 };
 
 type Employee = {

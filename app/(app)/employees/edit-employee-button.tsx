@@ -6,7 +6,7 @@ import { updateEmployee } from "./edit-actions";
 import { POSITIONS } from "@/lib/employees/constants";
 
 const ROLES = [
-  { value: "leading_hand", label: "Leading hand" },
+  { value: "leading_hand", label: "Onsite" },
   { value: "office", label: "Office" },
   { value: "owner", label: "Owner" },
 ];
