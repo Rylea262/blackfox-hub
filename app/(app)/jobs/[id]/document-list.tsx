@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { getDownloadUrl } from "./document-actions";
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { getDownloadUrl, renameDocument } from "./document-actions";
 import { DOC_TYPES } from "@/lib/jobs/constants";
 
 type DocumentRow = {
@@ -35,11 +36,17 @@ function compareGroups(a: string, b: string): number {
 
 export default function DocumentList({
   documents,
+  jobId,
 }: {
   documents: DocumentRow[];
+  jobId: string;
 }) {
+  const router = useRouter();
   const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingName, setEditingName] = useState("");
+  const [isPending, startTransition] = useTransition();
 
   if (documents.length === 0) {
     return <p className="mt-2 text-sm text-neutral-500">No documents yet.</p>;
@@ -67,6 +74,36 @@ export default function DocumentList({
     }
   }
 
+  function startRename(doc: DocumentRow) {
+    setEditingId(doc.id);
+    setEditingName(doc.file_name ?? "");
+    setError(null);
+  }
+
+  function cancelRename() {
+    setEditingId(null);
+    setEditingName("");
+  }
+
+  function saveRename(documentId: string) {
+    const trimmed = editingName.trim();
+    if (!trimmed) {
+      setError("Name cannot be empty");
+      return;
+    }
+    setError(null);
+    startTransition(async () => {
+      const result = await renameDocument(documentId, jobId, trimmed);
+      if (result?.error) {
+        setError(result.error);
+        return;
+      }
+      setEditingId(null);
+      setEditingName("");
+      router.refresh();
+    });
+  }
+
   return (
     <>
       {error && (
@@ -89,27 +126,81 @@ export default function DocumentList({
                 </span>
               </summary>
               <ul className="divide-y divide-neutral-200 border-t border-neutral-200 bg-white">
-                {docs.map((d) => (
-                  <li
-                    key={d.id}
-                    className="flex items-center justify-between gap-3 px-3 py-2 text-sm"
-                  >
-                    <span className="min-w-0 truncate">
-                      {d.file_name ?? "—"}
-                      <span className="ml-2 text-xs text-neutral-500">
-                        {new Date(d.created_at).toLocaleDateString()}
-                      </span>
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => handleDownload(d)}
-                      disabled={busyId === d.id}
-                      className="shrink-0 rounded border px-2 py-0.5 text-xs disabled:opacity-50"
+                {docs.map((d) => {
+                  const isEditing = editingId === d.id;
+                  return (
+                    <li
+                      key={d.id}
+                      className="flex items-center justify-between gap-3 px-3 py-2 text-sm"
                     >
-                      {busyId === d.id ? "..." : "Download"}
-                    </button>
-                  </li>
-                ))}
+                      {isEditing ? (
+                        <input
+                          type="text"
+                          value={editingName}
+                          onChange={(e) => setEditingName(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              saveRename(d.id);
+                            } else if (e.key === "Escape") {
+                              cancelRename();
+                            }
+                          }}
+                          autoFocus
+                          disabled={isPending}
+                          className="min-w-0 flex-1 rounded border border-neutral-300 px-2 py-1 text-sm"
+                        />
+                      ) : (
+                        <span className="min-w-0 flex-1 truncate">
+                          {d.file_name ?? "—"}
+                          <span className="ml-2 text-xs text-neutral-500">
+                            {new Date(d.created_at).toLocaleDateString()}
+                          </span>
+                        </span>
+                      )}
+                      <div className="flex shrink-0 items-center gap-2">
+                        {isEditing ? (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => saveRename(d.id)}
+                              disabled={isPending}
+                              className="rounded bg-black px-2 py-0.5 text-xs text-white disabled:opacity-50"
+                            >
+                              {isPending ? "…" : "Save"}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={cancelRename}
+                              disabled={isPending}
+                              className="rounded border border-neutral-300 px-2 py-0.5 text-xs hover:bg-neutral-50"
+                            >
+                              Cancel
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => startRename(d)}
+                              className="rounded border border-neutral-300 px-2 py-0.5 text-xs hover:bg-neutral-50"
+                            >
+                              Rename
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDownload(d)}
+                              disabled={busyId === d.id}
+                              className="rounded border px-2 py-0.5 text-xs disabled:opacity-50"
+                            >
+                              {busyId === d.id ? "..." : "Download"}
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </li>
+                  );
+                })}
               </ul>
             </details>
           );

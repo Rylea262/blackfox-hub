@@ -93,7 +93,7 @@ export default async function JobDetailPage({
           </span>
         </summary>
         <div className="mt-2">
-          <DocumentList documents={documents ?? []} />
+          <DocumentList documents={documents ?? []} jobId={job.id} />
         </div>
       </details>
 
