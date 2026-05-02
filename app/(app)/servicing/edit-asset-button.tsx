@@ -12,6 +12,7 @@ export type AssetForEdit = {
   current_hours: number | null;
   next_service_hours: number | null;
   rego_due: string | null;
+  rego: string | null;
 };
 
 export default function EditAssetButton({ asset }: { asset: AssetForEdit }) {
@@ -130,16 +131,28 @@ export default function EditAssetButton({ asset }: { asset: AssetForEdit }) {
                 </div>
               )}
               {type === "vehicle" && (
-                <label className="flex flex-col gap-1 text-sm">
-                  Rego due
-                  <input
-                    type="date"
-                    name="rego_due"
-                    defaultValue={asset.rego_due ?? ""}
-                    className="rounded border p-2"
-                    disabled={isPending}
-                  />
-                </label>
+                <div className="flex gap-3">
+                  <label className="flex flex-1 flex-col gap-1 text-sm">
+                    Rego
+                    <input
+                      type="text"
+                      name="rego"
+                      defaultValue={asset.rego ?? ""}
+                      className="rounded border p-2"
+                      disabled={isPending}
+                    />
+                  </label>
+                  <label className="flex flex-1 flex-col gap-1 text-sm">
+                    Rego due
+                    <input
+                      type="date"
+                      name="rego_due"
+                      defaultValue={asset.rego_due ?? ""}
+                      className="rounded border p-2"
+                      disabled={isPending}
+                    />
+                  </label>
+                </div>
               )}
               {error && (
                 <p className="rounded border border-red-300 bg-red-50 p-2 text-sm text-red-700">

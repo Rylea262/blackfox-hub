@@ -52,9 +52,12 @@ export async function addAsset(
   }
 
   let rego_due: string | null = null;
+  let rego: string | null = null;
   if (type === "vehicle") {
-    const raw = String(formData.get("rego_due") ?? "").trim();
-    rego_due = raw || null;
+    const dueRaw = String(formData.get("rego_due") ?? "").trim();
+    rego_due = dueRaw || null;
+    const regoRaw = String(formData.get("rego") ?? "").trim();
+    rego = regoRaw || null;
   }
 
   const { error } = await supabase.from("assets").insert({
@@ -63,6 +66,7 @@ export async function addAsset(
     current_hours,
     next_service_hours,
     rego_due,
+    rego,
     created_by: user.id,
   });
 
@@ -110,14 +114,17 @@ export async function updateAsset(
   }
 
   let rego_due: string | null = null;
+  let rego: string | null = null;
   if (type === "vehicle") {
-    const raw = String(formData.get("rego_due") ?? "").trim();
-    rego_due = raw || null;
+    const dueRaw = String(formData.get("rego_due") ?? "").trim();
+    rego_due = dueRaw || null;
+    const regoRaw = String(formData.get("rego") ?? "").trim();
+    rego = regoRaw || null;
   }
 
   const { error } = await supabase
     .from("assets")
-    .update({ name, type, current_hours, next_service_hours, rego_due })
+    .update({ name, type, current_hours, next_service_hours, rego_due, rego })
     .eq("id", assetId);
 
   if (error) {

@@ -15,6 +15,7 @@ type Asset = {
   current_hours: number | null;
   next_service_hours: number | null;
   rego_due: string | null;
+  rego: string | null;
   created_at: string;
 };
 
@@ -92,7 +93,7 @@ export default async function ServicingPage() {
     supabase
       .from("assets")
       .select(
-        "id, name, type, current_hours, next_service_hours, rego_due, created_at",
+        "id, name, type, current_hours, next_service_hours, rego_due, rego, created_at",
       ),
     supabase
       .from("servicing")
@@ -208,13 +209,18 @@ export default async function ServicingPage() {
                     </span>
                   )}
                 {asset.type === "vehicle" && (
-                  <span
-                    className={`text-xs ${statusText(dueStatus(asset.rego_due))}`}
-                  >
-                    {asset.rego_due
-                      ? `Rego due: ${formatDate(asset.rego_due)}`
-                      : "Rego due: —"}
-                  </span>
+                  <>
+                    <span className="text-xs text-neutral-700">
+                      Rego: {asset.rego ?? "—"}
+                    </span>
+                    <span
+                      className={`text-xs ${statusText(dueStatus(asset.rego_due))}`}
+                    >
+                      {asset.rego_due
+                        ? `Rego due: ${formatDate(asset.rego_due)}`
+                        : "Rego due: —"}
+                    </span>
+                  </>
                 )}
                 <span className="ml-auto flex items-center gap-3 text-xs">
                   <span className={statusText(status)}>
@@ -234,6 +240,7 @@ export default async function ServicingPage() {
                       current_hours: asset.current_hours,
                       next_service_hours: asset.next_service_hours,
                       rego_due: asset.rego_due,
+                      rego: asset.rego,
                     }}
                   />
                   <DeleteAssetButton
