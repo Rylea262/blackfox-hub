@@ -82,7 +82,7 @@ export default function EditEmployeeButton({
           onClick={close}
         >
           <div
-            className="w-full max-w-md rounded bg-white p-6 shadow-lg"
+            className="max-h-[calc(100dvh-2rem)] w-full max-w-md overflow-y-auto rounded bg-white p-6 shadow-lg"
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="text-lg font-semibold">Edit employee</h2>
