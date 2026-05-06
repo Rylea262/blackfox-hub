@@ -7,6 +7,8 @@ import { requireRole } from "@/lib/auth/require-role";
 import { parseDateInput } from "@/lib/format/date";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const VALID_SIZES = ["S", "M", "L", "XL", "2XL", "3XL", "4XL"] as const;
+type Size = (typeof VALID_SIZES)[number];
 
 function parseDateField(
   value: string,
@@ -60,6 +62,23 @@ export async function addEmployee(
   );
   if ("error" in licenceExpiryParsed) return { error: licenceExpiryParsed.error };
   const licence_expiry = licenceExpiryParsed.value;
+  const qleave_number =
+    String(formData.get("qleave_number") ?? "").trim() || null;
+  const shirtRaw = String(formData.get("shirt_size") ?? "").trim();
+  const shirt_size = shirtRaw === "" ? null : (shirtRaw as Size);
+  const shortsRaw = String(formData.get("shorts_size") ?? "").trim();
+  const shorts_size = shortsRaw === "" ? null : (shortsRaw as Size);
+  const jacketRaw = String(formData.get("jacket_size") ?? "").trim();
+  const jacket_size = jacketRaw === "" ? null : (jacketRaw as Size);
+  if (shirt_size !== null && !VALID_SIZES.includes(shirt_size)) {
+    return { error: "Invalid shirt size" };
+  }
+  if (shorts_size !== null && !VALID_SIZES.includes(shorts_size)) {
+    return { error: "Invalid shorts size" };
+  }
+  if (jacket_size !== null && !VALID_SIZES.includes(jacket_size)) {
+    return { error: "Invalid jacket size" };
+  }
   const employmentTypeRaw = String(
     formData.get("employment_type") ?? "",
   ).trim();
@@ -127,6 +146,10 @@ export async function addEmployee(
   if (tfn_number) insert.tfn_number = tfn_number;
   if (pay_type !== null) insert.pay_type = pay_type;
   if (pay_amount !== null) insert.pay_amount = pay_amount;
+  if (qleave_number) insert.qleave_number = qleave_number;
+  if (shirt_size) insert.shirt_size = shirt_size;
+  if (shorts_size) insert.shorts_size = shorts_size;
+  if (jacket_size) insert.jacket_size = jacket_size;
 
   const supabase = createClient();
   const { error } = await supabase.from("users").insert(insert);

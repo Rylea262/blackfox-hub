@@ -27,6 +27,10 @@ type Employee = {
   tfn_number: string | null;
   pay_type: string | null;
   pay_amount: number | string | null;
+  qleave_number: string | null;
+  shirt_size: string | null;
+  shorts_size: string | null;
+  jacket_size: string | null;
   contract_url: string | null;
   created_at: string;
 };
@@ -135,7 +139,7 @@ export default async function EmployeesPage() {
     supabase
       .from("users")
       .select(
-        "id, name, email, position, phone, emergency_contact_name, emergency_contact_phone, start_date, date_of_birth, notes, address, licence_number, white_card_number, licence_expiry, employment_type, abn_number, tfn_number, pay_type, pay_amount, contract_url, created_at",
+        "id, name, email, position, phone, emergency_contact_name, emergency_contact_phone, start_date, date_of_birth, notes, address, licence_number, white_card_number, licence_expiry, employment_type, abn_number, tfn_number, pay_type, pay_amount, qleave_number, shirt_size, shorts_size, jacket_size, contract_url, created_at",
       )
       .order("name", { ascending: true, nullsFirst: false }),
     supabase
@@ -232,6 +236,10 @@ export default async function EmployeesPage() {
                       tfn_number: u.tfn_number,
                       pay_type: u.pay_type,
                       pay_amount: u.pay_amount,
+                      qleave_number: u.qleave_number,
+                      shirt_size: u.shirt_size,
+                      shorts_size: u.shorts_size,
+                      jacket_size: u.jacket_size,
                     }}
                   />
                 </span>
@@ -320,6 +328,26 @@ export default async function EmployeesPage() {
                     </dd>
                   </div>
                 )}
+                <div className="flex gap-2">
+                  <dt className="w-28 shrink-0 text-neutral-500">Qleave</dt>
+                  <dd className="min-w-0 truncate">
+                    {nonEmpty(u.qleave_number)}
+                  </dd>
+                </div>
+                <div className="flex gap-2">
+                  <dt className="w-28 shrink-0 text-neutral-500">Sizes</dt>
+                  <dd className="min-w-0">
+                    {u.shirt_size || u.shorts_size || u.jacket_size ? (
+                      <span className="text-neutral-700">
+                        Shirt {u.shirt_size ?? "—"} · Shorts{" "}
+                        {u.shorts_size ?? "—"} · Jacket{" "}
+                        {u.jacket_size ?? "—"}
+                      </span>
+                    ) : (
+                      "—"
+                    )}
+                  </dd>
+                </div>
               </dl>
 
               {u.notes && u.notes.trim() !== "" && (

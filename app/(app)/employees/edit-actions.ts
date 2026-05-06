@@ -5,6 +5,9 @@ import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
 import { parseDateInput } from "@/lib/format/date";
 
+const VALID_SIZES = ["S", "M", "L", "XL", "2XL", "3XL", "4XL"] as const;
+type Size = (typeof VALID_SIZES)[number];
+
 function parseDateField(
   value: string,
   label: string,
@@ -56,6 +59,23 @@ export async function updateEmployee(
   );
   if ("error" in licenceExpiryParsed) return { error: licenceExpiryParsed.error };
   const licence_expiry = licenceExpiryParsed.value;
+  const qleave_number =
+    String(formData.get("qleave_number") ?? "").trim() || null;
+  const shirtRaw = String(formData.get("shirt_size") ?? "").trim();
+  const shirt_size = shirtRaw === "" ? null : (shirtRaw as Size);
+  const shortsRaw = String(formData.get("shorts_size") ?? "").trim();
+  const shorts_size = shortsRaw === "" ? null : (shortsRaw as Size);
+  const jacketRaw = String(formData.get("jacket_size") ?? "").trim();
+  const jacket_size = jacketRaw === "" ? null : (jacketRaw as Size);
+  if (shirt_size !== null && !VALID_SIZES.includes(shirt_size)) {
+    return { error: "Invalid shirt size" };
+  }
+  if (shorts_size !== null && !VALID_SIZES.includes(shorts_size)) {
+    return { error: "Invalid shorts size" };
+  }
+  if (jacket_size !== null && !VALID_SIZES.includes(jacket_size)) {
+    return { error: "Invalid jacket size" };
+  }
   const employmentTypeRaw = String(
     formData.get("employment_type") ?? "",
   ).trim();
@@ -111,6 +131,10 @@ export async function updateEmployee(
     tfn_number,
     pay_type,
     pay_amount,
+    qleave_number,
+    shirt_size,
+    shorts_size,
+    jacket_size,
   };
 
   const { error } = await supabase

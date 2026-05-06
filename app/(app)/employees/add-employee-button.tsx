@@ -248,6 +248,71 @@ export default function AddEmployeeButton() {
                 </label>
               </div>
               <label className="flex flex-col gap-1 text-sm">
+                Qleave number
+                <input
+                  type="text"
+                  name="qleave_number"
+                  className="rounded border p-2"
+                  disabled={isPending}
+                />
+              </label>
+              <div className="flex gap-3">
+                <label className="flex flex-1 flex-col gap-1 text-sm">
+                  Shirt
+                  <select
+                    name="shirt_size"
+                    defaultValue=""
+                    className="rounded border p-2"
+                    disabled={isPending}
+                  >
+                    <option value="">—</option>
+                    <option value="S">S</option>
+                    <option value="M">M</option>
+                    <option value="L">L</option>
+                    <option value="XL">XL</option>
+                    <option value="2XL">2XL</option>
+                    <option value="3XL">3XL</option>
+                    <option value="4XL">4XL</option>
+                  </select>
+                </label>
+                <label className="flex flex-1 flex-col gap-1 text-sm">
+                  Shorts
+                  <select
+                    name="shorts_size"
+                    defaultValue=""
+                    className="rounded border p-2"
+                    disabled={isPending}
+                  >
+                    <option value="">—</option>
+                    <option value="S">S</option>
+                    <option value="M">M</option>
+                    <option value="L">L</option>
+                    <option value="XL">XL</option>
+                    <option value="2XL">2XL</option>
+                    <option value="3XL">3XL</option>
+                    <option value="4XL">4XL</option>
+                  </select>
+                </label>
+                <label className="flex flex-1 flex-col gap-1 text-sm">
+                  Jacket
+                  <select
+                    name="jacket_size"
+                    defaultValue=""
+                    className="rounded border p-2"
+                    disabled={isPending}
+                  >
+                    <option value="">—</option>
+                    <option value="S">S</option>
+                    <option value="M">M</option>
+                    <option value="L">L</option>
+                    <option value="XL">XL</option>
+                    <option value="2XL">2XL</option>
+                    <option value="3XL">3XL</option>
+                    <option value="4XL">4XL</option>
+                  </select>
+                </label>
+              </div>
+              <label className="flex flex-col gap-1 text-sm">
                 Notes
                 <textarea
                   name="notes"
