@@ -84,6 +84,8 @@ export async function upsertPumpCompany(
     String(formData.get("accounts_contact_phone") ?? "").trim() || null;
   const accounts_contact_email =
     String(formData.get("accounts_contact_email") ?? "").trim() || null;
+  const address = String(formData.get("address") ?? "").trim() || null;
+  const abn = String(formData.get("abn") ?? "").trim() || null;
   const payment_terms =
     String(formData.get("payment_terms") ?? "").trim() || null;
   const limitRaw = String(formData.get("credit_limit") ?? "").trim();
@@ -106,6 +108,8 @@ export async function upsertPumpCompany(
       accounts_contact_name,
       accounts_contact_phone,
       accounts_contact_email,
+      address,
+      abn,
       credit_limit,
       payment_terms,
       updated_at: new Date().toISOString(),

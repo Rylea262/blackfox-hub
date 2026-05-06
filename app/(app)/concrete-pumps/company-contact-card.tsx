@@ -13,6 +13,8 @@ export type PumpCompanyContact = {
   accounts_contact_name: string | null;
   accounts_contact_phone: string | null;
   accounts_contact_email: string | null;
+  address: string | null;
+  abn: string | null;
   credit_limit: number | string | null;
   payment_terms: string | null;
 };
@@ -77,25 +79,41 @@ export default function CompanyContactCard({
             </span>
           </div>
           <div className="flex gap-2">
-            <span className="w-20 shrink-0 text-neutral-500">Accounts</span>
+            <span className="w-24 shrink-0 text-neutral-500">Accounts</span>
             <span className="min-w-0 truncate">
               {nonEmpty(contact?.accounts_contact_name ?? null)}
             </span>
           </div>
           <div className="flex gap-2">
-            <span className="w-20 shrink-0 text-neutral-500">A/c phone</span>
+            <span className="w-24 shrink-0 text-neutral-500">
+              Accounts phone
+            </span>
             <span className="min-w-0 truncate">
               {nonEmpty(contact?.accounts_contact_phone ?? null)}
             </span>
           </div>
           <div className="flex gap-2 sm:col-span-2">
-            <span className="w-20 shrink-0 text-neutral-500">A/c email</span>
+            <span className="w-24 shrink-0 text-neutral-500">
+              Accounts email
+            </span>
             <span className="min-w-0 truncate">
               {nonEmpty(contact?.accounts_contact_email ?? null)}
             </span>
           </div>
           <div className="flex gap-2 sm:col-span-2">
-            <span className="w-20 shrink-0 text-neutral-500">Terms</span>
+            <span className="w-24 shrink-0 text-neutral-500">Address</span>
+            <span className="min-w-0 truncate">
+              {nonEmpty(contact?.address ?? null)}
+            </span>
+          </div>
+          <div className="flex gap-2">
+            <span className="w-24 shrink-0 text-neutral-500">ABN</span>
+            <span className="min-w-0 truncate">
+              {nonEmpty(contact?.abn ?? null)}
+            </span>
+          </div>
+          <div className="flex gap-2">
+            <span className="w-24 shrink-0 text-neutral-500">Terms</span>
             <span className="min-w-0 truncate">
               {nonEmpty(contact?.payment_terms ?? null)}
             </span>
@@ -197,6 +215,27 @@ export default function CompanyContactCard({
                   />
                 </label>
               </div>
+              <label className="flex flex-col gap-1 text-sm">
+                Address
+                <input
+                  type="text"
+                  name="address"
+                  defaultValue={contact?.address ?? ""}
+                  className="rounded border p-2"
+                  disabled={isPending}
+                />
+              </label>
+              <label className="flex flex-col gap-1 text-sm">
+                ABN
+                <input
+                  type="text"
+                  name="abn"
+                  defaultValue={contact?.abn ?? ""}
+                  placeholder="11-digit ABN"
+                  className="rounded border p-2"
+                  disabled={isPending}
+                />
+              </label>
               <div className="flex gap-3">
                 <label className="flex flex-1 flex-col gap-1 text-sm">
                   Credit limit (AUD)

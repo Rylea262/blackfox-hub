@@ -47,7 +47,7 @@ export default async function ConcretePumpsPage() {
     supabase
       .from("pump_companies")
       .select(
-        "name, contact_name, contact_phone, contact_email, notes, accounts_contact_name, accounts_contact_phone, accounts_contact_email, credit_limit, payment_terms",
+        "name, contact_name, contact_phone, contact_email, notes, accounts_contact_name, accounts_contact_phone, accounts_contact_email, address, abn, credit_limit, payment_terms",
       ),
     supabase
       .from("pump_company_documents")
