@@ -47,6 +47,7 @@ export default async function AppLayout({
           showTools={isAdmin}
           showAssets={isAdmin}
           showSuppliers={isAdmin}
+          showSubcontractors={isAdmin}
         />
         <div className="flex items-center gap-3 text-sm">
           <span className="hidden text-neutral-600 sm:inline">

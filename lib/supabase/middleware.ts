@@ -40,6 +40,7 @@ export async function updateSession(request: NextRequest) {
     "/tools",
     "/assets",
     "/suppliers",
+    "/subcontractors",
   ];
   if (
     !user &&
