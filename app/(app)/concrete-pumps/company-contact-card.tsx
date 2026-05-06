@@ -85,17 +85,13 @@ export default function CompanyContactCard({
             </span>
           </div>
           <div className="flex gap-2">
-            <span className="w-24 shrink-0 text-neutral-500">
-              Accounts phone
-            </span>
+            <span className="w-24 shrink-0 text-neutral-500">Phone</span>
             <span className="min-w-0 truncate">
               {nonEmpty(contact?.accounts_contact_phone ?? null)}
             </span>
           </div>
           <div className="flex gap-2 sm:col-span-2">
-            <span className="w-24 shrink-0 text-neutral-500">
-              Accounts email
-            </span>
+            <span className="w-24 shrink-0 text-neutral-500">Email</span>
             <span className="min-w-0 truncate">
               {nonEmpty(contact?.accounts_contact_email ?? null)}
             </span>
