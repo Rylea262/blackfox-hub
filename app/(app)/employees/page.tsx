@@ -227,7 +227,6 @@ export default async function EmployeesPage() {
           return (
             <details
               key={companyKey}
-              open
               className="mt-4 rounded border border-neutral-200 bg-white"
             >
               <summary className="flex cursor-pointer select-none items-center justify-between px-4 py-3">
