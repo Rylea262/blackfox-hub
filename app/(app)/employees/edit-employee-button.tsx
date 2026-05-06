@@ -29,6 +29,7 @@ export type EmployeeForEdit = {
   shirt_size: string | null;
   shorts_size: string | null;
   jacket_size: string | null;
+  company: string | null;
 };
 
 export default function EditEmployeeButton({
@@ -102,6 +103,24 @@ export default function EditEmployeeButton({
                   className="rounded border p-2"
                   disabled={isPending}
                 />
+              </label>
+              <label className="flex flex-col gap-1 text-sm">
+                Company
+                <select
+                  name="company"
+                  defaultValue={employee.company ?? ""}
+                  className="rounded border p-2"
+                  disabled={isPending}
+                >
+                  <option value="">—</option>
+                  <option value="black_fox_industries">
+                    Black Fox Industries
+                  </option>
+                  <option value="black_fox_concrete_pumping">
+                    Black Fox Concrete Pumping
+                  </option>
+                  <option value="black_fox_barbers">Black Fox Barbers</option>
+                </select>
               </label>
               <label className="flex flex-col gap-1 text-sm">
                 Position

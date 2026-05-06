@@ -79,6 +79,16 @@ export async function addEmployee(
   if (jacket_size !== null && !VALID_SIZES.includes(jacket_size)) {
     return { error: "Invalid jacket size" };
   }
+  const companyRaw = String(formData.get("company") ?? "").trim();
+  const company = companyRaw === "" ? null : companyRaw;
+  const VALID_COMPANIES = [
+    "black_fox_industries",
+    "black_fox_concrete_pumping",
+    "black_fox_barbers",
+  ];
+  if (company !== null && !VALID_COMPANIES.includes(company)) {
+    return { error: "Invalid company" };
+  }
   const employmentTypeRaw = String(
     formData.get("employment_type") ?? "",
   ).trim();
@@ -150,6 +160,7 @@ export async function addEmployee(
   if (shirt_size) insert.shirt_size = shirt_size;
   if (shorts_size) insert.shorts_size = shorts_size;
   if (jacket_size) insert.jacket_size = jacket_size;
+  if (company) insert.company = company;
 
   const supabase = createClient();
   const { error } = await supabase.from("users").insert(insert);

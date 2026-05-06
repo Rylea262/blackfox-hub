@@ -31,8 +31,21 @@ type Employee = {
   shirt_size: string | null;
   shorts_size: string | null;
   jacket_size: string | null;
+  company: string | null;
   contract_url: string | null;
   created_at: string;
+};
+
+const COMPANY_ORDER = [
+  "black_fox_industries",
+  "black_fox_concrete_pumping",
+  "black_fox_barbers",
+] as const;
+
+const COMPANY_LABELS: Record<string, string> = {
+  black_fox_industries: "Black Fox Industries",
+  black_fox_concrete_pumping: "Black Fox Concrete Pumping",
+  black_fox_barbers: "Black Fox Barbers",
 };
 
 const EMPLOYMENT_TYPE_LABELS: Record<string, string> = {
@@ -139,7 +152,7 @@ export default async function EmployeesPage() {
     supabase
       .from("users")
       .select(
-        "id, name, email, position, phone, emergency_contact_name, emergency_contact_phone, start_date, date_of_birth, notes, address, licence_number, white_card_number, licence_expiry, employment_type, abn_number, tfn_number, pay_type, pay_amount, qleave_number, shirt_size, shorts_size, jacket_size, contract_url, created_at",
+        "id, name, email, position, phone, emergency_contact_name, emergency_contact_phone, start_date, date_of_birth, notes, address, licence_number, white_card_number, licence_expiry, employment_type, abn_number, tfn_number, pay_type, pay_amount, qleave_number, shirt_size, shorts_size, jacket_size, company, contract_url, created_at",
       )
       .order("name", { ascending: true, nullsFirst: false }),
     supabase
@@ -190,9 +203,41 @@ export default async function EmployeesPage() {
         </p>
       )}
 
-      <div className="mt-4 flex flex-col gap-3">
-        {employees.map((u) => {
-          const isSelf = u.id === currentUser.id;
+      {(() => {
+        const groups = new Map<string, Employee[]>();
+        for (const u of employees) {
+          const key = u.company ?? "unassigned";
+          const arr = groups.get(key);
+          if (arr) arr.push(u);
+          else groups.set(key, [u]);
+        }
+        const orderedKeys: string[] = [
+          ...COMPANY_ORDER.filter((k) => groups.has(k)),
+        ];
+        if (groups.has("unassigned")) orderedKeys.push("unassigned");
+        return orderedKeys.map((companyKey) => {
+          const list = groups.get(companyKey)!;
+          const heading =
+            companyKey === "unassigned"
+              ? "Unassigned"
+              : COMPANY_LABELS[companyKey] ?? companyKey;
+          return (
+            <details
+              key={companyKey}
+              open
+              className="mt-4 rounded border border-neutral-200 bg-white"
+            >
+              <summary className="flex cursor-pointer select-none items-center justify-between px-4 py-3">
+                <span className="text-base font-semibold">{heading}</span>
+                <span className="text-xs text-neutral-500">
+                  {list.length}{" "}
+                  {list.length === 1 ? "employee" : "employees"}
+                </span>
+              </summary>
+              <div className="border-t border-neutral-200 bg-neutral-50/40 p-3">
+                <div className="flex flex-col gap-3">
+                  {list.map((u) => {
+                    const isSelf = u.id === currentUser.id;
           return (
             <details
               key={u.id}
@@ -240,6 +285,7 @@ export default async function EmployeesPage() {
                       shirt_size: u.shirt_size,
                       shorts_size: u.shorts_size,
                       jacket_size: u.jacket_size,
+                      company: u.company,
                     }}
                   />
                 </span>
@@ -363,8 +409,13 @@ export default async function EmployeesPage() {
               </div>
             </details>
           );
-        })}
-      </div>
+                  })}
+                </div>
+              </div>
+            </details>
+          );
+        });
+      })()}
     </main>
   );
 }
