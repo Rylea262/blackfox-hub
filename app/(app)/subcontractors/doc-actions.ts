@@ -36,6 +36,22 @@ export async function attachSubDoc(
   revalidatePath("/subcontractors");
 }
 
+export async function renameSubDoc(
+  docId: string,
+  newName: string,
+): Promise<{ error?: string } | void> {
+  await requireRole(["owner", "office"]);
+  const trimmed = newName.trim();
+  if (!trimmed) return { error: "Name cannot be empty" };
+  const supabase = createClient();
+  const { error } = await supabase
+    .from("subcontractor_documents")
+    .update({ file_name: trimmed })
+    .eq("id", docId);
+  if (error) return { error: error.message };
+  revalidatePath("/subcontractors");
+}
+
 export async function deleteSubDoc(
   docId: string,
 ): Promise<{ error?: string } | void> {

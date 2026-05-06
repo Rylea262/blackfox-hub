@@ -36,6 +36,22 @@ export async function attachCert(
   revalidatePath("/employees");
 }
 
+export async function renameCert(
+  certId: string,
+  newName: string,
+): Promise<{ error?: string } | void> {
+  await requireRole(["owner", "office"]);
+  const trimmed = newName.trim();
+  if (!trimmed) return { error: "Name cannot be empty" };
+  const supabase = createClient();
+  const { error } = await supabase
+    .from("employee_certificates")
+    .update({ file_name: trimmed })
+    .eq("id", certId);
+  if (error) return { error: error.message };
+  revalidatePath("/employees");
+}
+
 export async function deleteCert(
   certId: string,
 ): Promise<{ error?: string } | void> {

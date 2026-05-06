@@ -36,6 +36,22 @@ export async function attachPumpDoc(
   revalidatePath("/concrete-pumps");
 }
 
+export async function renamePumpDoc(
+  docId: string,
+  newName: string,
+): Promise<{ error?: string } | void> {
+  await requireRole(["owner", "office"]);
+  const trimmed = newName.trim();
+  if (!trimmed) return { error: "Name cannot be empty" };
+  const supabase = createClient();
+  const { error } = await supabase
+    .from("concrete_pump_documents")
+    .update({ file_name: trimmed })
+    .eq("id", docId);
+  if (error) return { error: error.message };
+  revalidatePath("/concrete-pumps");
+}
+
 export async function deletePumpDoc(
   docId: string,
 ): Promise<{ error?: string } | void> {
@@ -100,6 +116,22 @@ export async function attachCompanyDoc(
 
   if (error) return { error: error.message };
 
+  revalidatePath("/concrete-pumps");
+}
+
+export async function renameCompanyDoc(
+  docId: string,
+  newName: string,
+): Promise<{ error?: string } | void> {
+  await requireRole(["owner", "office"]);
+  const trimmed = newName.trim();
+  if (!trimmed) return { error: "Name cannot be empty" };
+  const supabase = createClient();
+  const { error } = await supabase
+    .from("pump_company_documents")
+    .update({ file_name: trimmed })
+    .eq("id", docId);
+  if (error) return { error: error.message };
   revalidatePath("/concrete-pumps");
 }
 
