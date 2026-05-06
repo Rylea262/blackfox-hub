@@ -96,6 +96,20 @@ export async function updateTool(
   revalidatePath("/tools");
 }
 
+export async function setToolLost(
+  toolId: string,
+  isLost: boolean,
+): Promise<{ error?: string } | void> {
+  await requireRole(["owner", "office"]);
+  const supabase = createClient();
+  const { error } = await supabase
+    .from("tools")
+    .update({ is_lost: isLost })
+    .eq("id", toolId);
+  if (error) return { error: error.message };
+  revalidatePath("/tools");
+}
+
 export async function deleteTool(
   toolId: string,
 ): Promise<{ error?: string } | void> {

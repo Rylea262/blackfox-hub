@@ -10,6 +10,7 @@ import {
 import AddToolButton from "./add-tool-button";
 import EditToolButton from "./edit-tool-button";
 import DeleteToolButton from "./delete-tool-button";
+import LostToolButton from "./lost-tool-button";
 import ReceiptCell from "./receipt-cell";
 
 type Tool = {
@@ -25,8 +26,15 @@ type Tool = {
   brand: string | null;
   current_hours: number | null;
   next_service_hours: number | null;
+  is_lost: boolean;
   created_at: string;
 };
+
+function numericValue(v: number | string | null): number {
+  if (v == null) return 0;
+  const n = typeof v === "string" ? Number(v) : v;
+  return Number.isFinite(n) ? n : 0;
+}
 
 const HOURS_WARNING_THRESHOLD = 50;
 
@@ -89,20 +97,19 @@ export default async function ToolsPage() {
   const { data: tools, error } = await supabase
     .from("tools")
     .select(
-      "id, name, category, serial_number, location, notes, next_service_due, value, receipt_url, brand, current_hours, next_service_hours, created_at",
+      "id, name, category, serial_number, location, notes, next_service_due, value, receipt_url, brand, current_hours, next_service_hours, is_lost, created_at",
     )
     .order("name", { ascending: true });
 
   const all = (tools ?? []) as Tool[];
+  const active = all.filter((t) => !t.is_lost);
+  const lost = all.filter((t) => t.is_lost);
 
-  const totalValue = all.reduce((sum, t) => {
-    const v = typeof t.value === "string" ? Number(t.value) : t.value;
-    if (v == null || !Number.isFinite(v)) return sum;
-    return sum + (v as number);
-  }, 0);
+  const totalValue = active.reduce((sum, t) => sum + numericValue(t.value), 0);
+  const lostValue = lost.reduce((sum, t) => sum + numericValue(t.value), 0);
 
   const grouped = new Map<string, Tool[]>();
-  for (const t of all) {
+  for (const t of active) {
     const arr = grouped.get(t.category);
     if (arr) arr.push(t);
     else grouped.set(t.category, [t]);
@@ -247,6 +254,11 @@ export default async function ToolsPage() {
                                   next_service_hours: t.next_service_hours,
                                 }}
                               />
+                              <LostToolButton
+                                toolId={t.id}
+                                toolName={t.name}
+                                isLost={t.is_lost}
+                              />
                               <DeleteToolButton
                                 toolId={t.id}
                                 toolName={t.name}
@@ -263,6 +275,62 @@ export default async function ToolsPage() {
           );
         })}
       </div>
+
+      {lost.length > 0 && (
+        <details className="mt-6 rounded border border-red-200 bg-red-50">
+          <summary className="flex cursor-pointer select-none items-center justify-between px-4 py-3">
+            <span className="font-semibold text-red-800">Lost and Stolen</span>
+            <span className="flex items-baseline gap-3 text-xs text-red-700">
+              <span className="tabular-nums">
+                −{formatCurrency(lostValue)}
+              </span>
+              <span>
+                {lost.length} {lost.length === 1 ? "tool" : "tools"}
+              </span>
+            </span>
+          </summary>
+          <div className="border-t border-red-200 bg-white p-4 overflow-x-auto">
+            <table className="w-full border-collapse text-sm">
+              <thead>
+                <tr className="border-b text-left text-xs text-neutral-500">
+                  <th className="py-1.5">Name</th>
+                  <th className="py-1.5">Category</th>
+                  <th className="py-1.5 text-right">Value</th>
+                  <th className="py-1.5">Notes</th>
+                  <th className="py-1.5">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {lost.map((t) => (
+                  <tr key={t.id} className="border-b align-top">
+                    <td className="py-2">{t.name}</td>
+                    <td className="py-2">{categoryLabel(t.category)}</td>
+                    <td className="py-2 text-right tabular-nums">
+                      {formatCurrency(t.value)}
+                    </td>
+                    <td className="py-2 whitespace-pre-wrap">
+                      {t.notes ?? "—"}
+                    </td>
+                    <td className="py-2">
+                      <div className="flex flex-col items-start gap-1">
+                        <LostToolButton
+                          toolId={t.id}
+                          toolName={t.name}
+                          isLost={t.is_lost}
+                        />
+                        <DeleteToolButton
+                          toolId={t.id}
+                          toolName={t.name}
+                        />
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </details>
+      )}
     </main>
   );
 }
