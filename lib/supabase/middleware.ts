@@ -42,6 +42,7 @@ export async function updateSession(request: NextRequest) {
     "/suppliers",
     "/subcontractors",
     "/concrete-pumps",
+    "/documents",
   ];
   if (
     !user &&
