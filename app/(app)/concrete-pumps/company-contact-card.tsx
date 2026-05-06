@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { formatCurrency } from "@/lib/format/currency";
 import { upsertPumpCompany } from "./actions";
 
 export type PumpCompanyContact = {
@@ -10,6 +11,9 @@ export type PumpCompanyContact = {
   contact_phone: string | null;
   contact_email: string | null;
   notes: string | null;
+  account_number: string | null;
+  credit_limit: number | string | null;
+  payment_terms: string | null;
 };
 
 function nonEmpty(value: string | null): string {
@@ -69,6 +73,26 @@ export default function CompanyContactCard({
             <span className="w-20 shrink-0 text-neutral-500">Email</span>
             <span className="min-w-0 truncate">
               {nonEmpty(contact?.contact_email ?? null)}
+            </span>
+          </div>
+          <div className="flex gap-2">
+            <span className="w-20 shrink-0 text-neutral-500">Account</span>
+            <span className="min-w-0 truncate">
+              {nonEmpty(contact?.account_number ?? null)}
+            </span>
+          </div>
+          <div className="flex gap-2">
+            <span className="w-20 shrink-0 text-neutral-500">Limit</span>
+            <span className="tabular-nums">
+              {contact?.credit_limit != null && contact.credit_limit !== ""
+                ? formatCurrency(contact.credit_limit)
+                : "—"}
+            </span>
+          </div>
+          <div className="flex gap-2 sm:col-span-2">
+            <span className="w-20 shrink-0 text-neutral-500">Terms</span>
+            <span className="min-w-0 truncate">
+              {nonEmpty(contact?.payment_terms ?? null)}
             </span>
           </div>
           {contact?.notes && contact.notes.trim() !== "" && (
@@ -136,6 +160,42 @@ export default function CompanyContactCard({
                   />
                 </label>
               </div>
+              <div className="flex gap-3">
+                <label className="flex flex-1 flex-col gap-1 text-sm">
+                  Account number
+                  <input
+                    type="text"
+                    name="account_number"
+                    defaultValue={contact?.account_number ?? ""}
+                    className="rounded border p-2"
+                    disabled={isPending}
+                  />
+                </label>
+                <label className="flex flex-1 flex-col gap-1 text-sm">
+                  Credit limit (AUD)
+                  <input
+                    type="number"
+                    name="credit_limit"
+                    min="0"
+                    step="0.01"
+                    inputMode="decimal"
+                    defaultValue={contact?.credit_limit ?? ""}
+                    className="rounded border p-2"
+                    disabled={isPending}
+                  />
+                </label>
+              </div>
+              <label className="flex flex-col gap-1 text-sm">
+                Payment terms
+                <input
+                  type="text"
+                  name="payment_terms"
+                  defaultValue={contact?.payment_terms ?? ""}
+                  placeholder="e.g. 30 days EOM"
+                  className="rounded border p-2"
+                  disabled={isPending}
+                />
+              </label>
               <label className="flex flex-col gap-1 text-sm">
                 Notes
                 <textarea

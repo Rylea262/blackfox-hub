@@ -42,7 +42,9 @@ export default async function ConcretePumpsPage() {
       .order("created_at", { ascending: false }),
     supabase
       .from("pump_companies")
-      .select("name, contact_name, contact_phone, contact_email, notes"),
+      .select(
+        "name, contact_name, contact_phone, contact_email, notes, account_number, credit_limit, payment_terms",
+      ),
   ]);
 
   const companyContacts = new Map<string, PumpCompanyContact>();

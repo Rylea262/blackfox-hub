@@ -78,6 +78,19 @@ export async function upsertPumpCompany(
   const contact_email =
     String(formData.get("contact_email") ?? "").trim() || null;
   const notes = String(formData.get("notes") ?? "").trim() || null;
+  const account_number =
+    String(formData.get("account_number") ?? "").trim() || null;
+  const payment_terms =
+    String(formData.get("payment_terms") ?? "").trim() || null;
+  const limitRaw = String(formData.get("credit_limit") ?? "").trim();
+  let credit_limit: number | null = null;
+  if (limitRaw) {
+    const parsed = Number(limitRaw);
+    if (!Number.isFinite(parsed) || parsed < 0) {
+      return { error: "Credit limit must be a non-negative number" };
+    }
+    credit_limit = parsed;
+  }
 
   const { error } = await supabase.from("pump_companies").upsert(
     {
@@ -86,6 +99,9 @@ export async function upsertPumpCompany(
       contact_phone,
       contact_email,
       notes,
+      account_number,
+      credit_limit,
+      payment_terms,
       updated_at: new Date().toISOString(),
     },
     { onConflict: "name" },
