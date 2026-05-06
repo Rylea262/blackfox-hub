@@ -24,6 +24,12 @@ function readSupplier(formData: FormData) {
     String(formData.get("contact_email") ?? "").trim() || null;
   const contact_phone =
     String(formData.get("contact_phone") ?? "").trim() || null;
+  const company_rep_name =
+    String(formData.get("company_rep_name") ?? "").trim() || null;
+  const company_rep_phone =
+    String(formData.get("company_rep_phone") ?? "").trim() || null;
+  const company_rep_email =
+    String(formData.get("company_rep_email") ?? "").trim() || null;
   const website = String(formData.get("website") ?? "").trim() || null;
   const address = String(formData.get("address") ?? "").trim() || null;
   const account_number =
@@ -36,6 +42,9 @@ function readSupplier(formData: FormData) {
     contact_name,
     contact_email,
     contact_phone,
+    company_rep_name,
+    company_rep_phone,
+    company_rep_email,
     website,
     address,
     account_number,

@@ -93,6 +93,35 @@ export default function AddSupplierButton() {
                 </label>
               </div>
               <label className="flex flex-col gap-1 text-sm">
+                Company rep name
+                <input
+                  type="text"
+                  name="company_rep_name"
+                  className="rounded border p-2"
+                  disabled={isPending}
+                />
+              </label>
+              <div className="flex gap-3">
+                <label className="flex flex-1 flex-col gap-1 text-sm">
+                  Company rep phone
+                  <input
+                    type="tel"
+                    name="company_rep_phone"
+                    className="rounded border p-2"
+                    disabled={isPending}
+                  />
+                </label>
+                <label className="flex flex-1 flex-col gap-1 text-sm">
+                  Company rep email
+                  <input
+                    type="email"
+                    name="company_rep_email"
+                    className="rounded border p-2"
+                    disabled={isPending}
+                  />
+                </label>
+              </div>
+              <label className="flex flex-col gap-1 text-sm">
                 Website
                 <input
                   type="text"

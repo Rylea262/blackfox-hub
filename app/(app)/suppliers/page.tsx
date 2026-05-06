@@ -12,6 +12,9 @@ type Supplier = {
   contact_name: string | null;
   contact_email: string | null;
   contact_phone: string | null;
+  company_rep_name: string | null;
+  company_rep_phone: string | null;
+  company_rep_email: string | null;
   website: string | null;
   address: string | null;
   account_number: string | null;
@@ -33,7 +36,7 @@ export default async function SuppliersPage() {
     supabase
       .from("suppliers")
       .select(
-        "id, name, contact_name, contact_email, contact_phone, website, address, account_number, credit_limit, payment_terms, notes, created_at",
+        "id, name, contact_name, contact_email, contact_phone, company_rep_name, company_rep_phone, company_rep_email, website, address, account_number, credit_limit, payment_terms, notes, created_at",
       )
       .order("name", { ascending: true }),
     supabase
@@ -111,6 +114,9 @@ export default async function SuppliersPage() {
                       contact_name: s.contact_name,
                       contact_email: s.contact_email,
                       contact_phone: s.contact_phone,
+                      company_rep_name: s.company_rep_name,
+                      company_rep_phone: s.company_rep_phone,
+                      company_rep_email: s.company_rep_email,
                       website: s.website,
                       address: s.address,
                       account_number: s.account_number,
@@ -150,6 +156,30 @@ export default async function SuppliersPage() {
                     <dt className="w-32 shrink-0 text-neutral-500">Website</dt>
                     <dd className="min-w-0 truncate">
                       {nonEmpty(s.website)}
+                    </dd>
+                  </div>
+                  <div className="flex gap-2">
+                    <dt className="w-32 shrink-0 text-neutral-500">
+                      Company rep
+                    </dt>
+                    <dd className="min-w-0 truncate">
+                      {nonEmpty(s.company_rep_name)}
+                    </dd>
+                  </div>
+                  <div className="flex gap-2">
+                    <dt className="w-32 shrink-0 text-neutral-500">
+                      Rep phone
+                    </dt>
+                    <dd className="min-w-0 truncate">
+                      {nonEmpty(s.company_rep_phone)}
+                    </dd>
+                  </div>
+                  <div className="flex gap-2 sm:col-span-2">
+                    <dt className="w-32 shrink-0 text-neutral-500">
+                      Rep email
+                    </dt>
+                    <dd className="min-w-0 truncate">
+                      {nonEmpty(s.company_rep_email)}
                     </dd>
                   </div>
                   <div className="flex gap-2 sm:col-span-2">

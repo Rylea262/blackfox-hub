@@ -10,6 +10,9 @@ export type SupplierForEdit = {
   contact_name: string | null;
   contact_email: string | null;
   contact_phone: string | null;
+  company_rep_name: string | null;
+  company_rep_phone: string | null;
+  company_rep_email: string | null;
   website: string | null;
   address: string | null;
   account_number: string | null;
@@ -113,6 +116,38 @@ export default function EditSupplierButton({
                     type="tel"
                     name="contact_phone"
                     defaultValue={supplier.contact_phone ?? ""}
+                    className="rounded border p-2"
+                    disabled={isPending}
+                  />
+                </label>
+              </div>
+              <label className="flex flex-col gap-1 text-sm">
+                Company rep name
+                <input
+                  type="text"
+                  name="company_rep_name"
+                  defaultValue={supplier.company_rep_name ?? ""}
+                  className="rounded border p-2"
+                  disabled={isPending}
+                />
+              </label>
+              <div className="flex gap-3">
+                <label className="flex flex-1 flex-col gap-1 text-sm">
+                  Company rep phone
+                  <input
+                    type="tel"
+                    name="company_rep_phone"
+                    defaultValue={supplier.company_rep_phone ?? ""}
+                    className="rounded border p-2"
+                    disabled={isPending}
+                  />
+                </label>
+                <label className="flex flex-1 flex-col gap-1 text-sm">
+                  Company rep email
+                  <input
+                    type="email"
+                    name="company_rep_email"
+                    defaultValue={supplier.company_rep_email ?? ""}
                     className="rounded border p-2"
                     disabled={isPending}
                   />
