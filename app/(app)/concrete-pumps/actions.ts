@@ -61,6 +61,41 @@ export async function updatePump(
   revalidatePath("/concrete-pumps");
 }
 
+export async function upsertPumpCompany(
+  name: string,
+  formData: FormData,
+): Promise<{ error?: string } | void> {
+  await requireRole(["owner", "office"]);
+  const supabase = createClient();
+
+  const trimmed = name.trim();
+  if (!trimmed) return { error: "Company name is required" };
+
+  const contact_name =
+    String(formData.get("contact_name") ?? "").trim() || null;
+  const contact_phone =
+    String(formData.get("contact_phone") ?? "").trim() || null;
+  const contact_email =
+    String(formData.get("contact_email") ?? "").trim() || null;
+  const notes = String(formData.get("notes") ?? "").trim() || null;
+
+  const { error } = await supabase.from("pump_companies").upsert(
+    {
+      name: trimmed,
+      contact_name,
+      contact_phone,
+      contact_email,
+      notes,
+      updated_at: new Date().toISOString(),
+    },
+    { onConflict: "name" },
+  );
+
+  if (error) return { error: error.message };
+
+  revalidatePath("/concrete-pumps");
+}
+
 export async function deletePump(
   pumpId: string,
 ): Promise<{ error?: string } | void> {

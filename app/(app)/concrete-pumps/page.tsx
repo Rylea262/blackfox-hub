@@ -4,6 +4,9 @@ import AddPumpButton from "./add-pump-button";
 import EditPumpButton from "./edit-pump-button";
 import DeletePumpButton from "./delete-pump-button";
 import PumpDocs, { type PumpDoc } from "./pump-docs";
+import CompanyContactCard, {
+  type PumpCompanyContact,
+} from "./company-contact-card";
 
 type Pump = {
   id: string;
@@ -25,7 +28,7 @@ export default async function ConcretePumpsPage() {
   await requireRole(["owner", "office"]);
   const supabase = createClient();
 
-  const [pumpRes, docRes] = await Promise.all([
+  const [pumpRes, docRes, companyRes] = await Promise.all([
     supabase
       .from("concrete_pumps")
       .select(
@@ -37,7 +40,15 @@ export default async function ConcretePumpsPage() {
       .from("concrete_pump_documents")
       .select("id, pump_id, file_name, file_url, created_at")
       .order("created_at", { ascending: false }),
+    supabase
+      .from("pump_companies")
+      .select("name, contact_name, contact_phone, contact_email, notes"),
   ]);
+
+  const companyContacts = new Map<string, PumpCompanyContact>();
+  for (const c of (companyRes.data ?? []) as PumpCompanyContact[]) {
+    companyContacts.set(c.name, c);
+  }
 
   const pumps = (pumpRes.data ?? []) as Pump[];
 
@@ -106,6 +117,10 @@ export default async function ConcretePumpsPage() {
                 </span>
               </summary>
               <div className="border-t border-neutral-200 bg-neutral-50/40 p-3">
+                <CompanyContactCard
+                  company={company}
+                  contact={companyContacts.get(company) ?? null}
+                />
                 <div className="flex flex-col gap-2">
                   {items.map((p) => {
                     const docs = docsByPump.get(p.id) ?? [];
