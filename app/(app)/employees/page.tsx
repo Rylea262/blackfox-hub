@@ -10,7 +10,7 @@ import EmployeeContractButton from "./employee-contract-button";
 type Employee = {
   id: string;
   name: string | null;
-  email: string;
+  email: string | null;
   position: string | null;
   phone: string | null;
   emergency_contact_name: string | null;
@@ -91,7 +91,10 @@ function isFilled(value: string | number | null | undefined): boolean {
 // don't have one with themselves.
 const NO_CONTRACT_EMAIL = "info@blackfoxindustries.com.au";
 
-function requiresContract(email: string): boolean {
+function requiresContract(email: string | null): boolean {
+  // Default to "yes, requires a contract" when there's no email at all —
+  // only the director's known email is exempt.
+  if (!email) return true;
   return email.toLowerCase() !== NO_CONTRACT_EMAIL;
 }
 
@@ -245,7 +248,7 @@ export default async function EmployeesPage() {
             >
               <summary className="flex cursor-pointer select-none flex-wrap items-center gap-3 px-4 py-3">
                 <span className="font-semibold">
-                  {u.name?.trim() || u.email}
+                  {u.name?.trim() || u.email || "(no name)"}
                 </span>
                 {isSelf && (
                   <span className="text-xs text-neutral-500">(you)</span>
@@ -294,7 +297,7 @@ export default async function EmployeesPage() {
               <dl className="grid grid-cols-1 gap-x-6 gap-y-1 text-sm sm:grid-cols-2">
                 <div className="flex gap-2">
                   <dt className="w-28 shrink-0 text-neutral-500">Email</dt>
-                  <dd className="min-w-0 truncate">{u.email}</dd>
+                  <dd className="min-w-0 truncate">{nonEmpty(u.email)}</dd>
                 </div>
                 <div className="flex gap-2">
                   <dt className="w-28 shrink-0 text-neutral-500">Phone</dt>

@@ -8,7 +8,7 @@ import { updateEmployee } from "./edit-actions";
 export type EmployeeForEdit = {
   id: string;
   name: string | null;
-  email: string;
+  email: string | null;
   position: string | null;
   phone: string | null;
   emergency_contact_name: string | null;
@@ -92,7 +92,9 @@ export default function EditEmployeeButton({
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="text-lg font-semibold">Edit employee</h2>
-            <p className="mt-1 text-xs text-neutral-500">{employee.email}</p>
+            <p className="mt-1 text-xs text-neutral-500">
+              {employee.email ?? "no email"}
+            </p>
             <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-3">
               <label className="flex flex-col gap-1 text-sm">
                 Name
