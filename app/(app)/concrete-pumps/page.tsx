@@ -7,6 +7,9 @@ import PumpDocs, { type PumpDoc } from "./pump-docs";
 import CompanyContactCard, {
   type PumpCompanyContact,
 } from "./company-contact-card";
+import PumpCompanyDocs, {
+  type PumpCompanyDoc,
+} from "./pump-company-docs";
 
 type Pump = {
   id: string;
@@ -28,7 +31,7 @@ export default async function ConcretePumpsPage() {
   await requireRole(["owner", "office"]);
   const supabase = createClient();
 
-  const [pumpRes, docRes, companyRes] = await Promise.all([
+  const [pumpRes, docRes, companyRes, companyDocRes] = await Promise.all([
     supabase
       .from("concrete_pumps")
       .select(
@@ -45,11 +48,30 @@ export default async function ConcretePumpsPage() {
       .select(
         "name, contact_name, contact_phone, contact_email, notes, account_number, credit_limit, payment_terms",
       ),
+    supabase
+      .from("pump_company_documents")
+      .select("id, company_name, file_name, file_url, created_at")
+      .order("created_at", { ascending: false }),
   ]);
 
   const companyContacts = new Map<string, PumpCompanyContact>();
   for (const c of (companyRes.data ?? []) as PumpCompanyContact[]) {
     companyContacts.set(c.name, c);
+  }
+
+  const companyDocs = new Map<string, PumpCompanyDoc[]>();
+  for (const d of (companyDocRes.data ?? []) as (PumpCompanyDoc & {
+    company_name: string;
+  })[]) {
+    const arr = companyDocs.get(d.company_name);
+    const doc = {
+      id: d.id,
+      file_name: d.file_name,
+      file_url: d.file_url,
+      created_at: d.created_at,
+    };
+    if (arr) arr.push(doc);
+    else companyDocs.set(d.company_name, [doc]);
   }
 
   const pumps = (pumpRes.data ?? []) as Pump[];
@@ -122,6 +144,10 @@ export default async function ConcretePumpsPage() {
                 <CompanyContactCard
                   company={company}
                   contact={companyContacts.get(company) ?? null}
+                />
+                <PumpCompanyDocs
+                  companyName={company}
+                  docs={companyDocs.get(company) ?? []}
                 />
                 <div className="flex flex-col gap-2">
                   {items.map((p) => {
