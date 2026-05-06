@@ -16,6 +16,7 @@ export default function TabNav({
   showAssets,
   showSuppliers,
   showSubcontractors,
+  showConcretePumps,
 }: {
   dashboardHref: string;
   showNotes: boolean;
@@ -27,6 +28,7 @@ export default function TabNav({
   showAssets: boolean;
   showSuppliers: boolean;
   showSubcontractors: boolean;
+  showConcretePumps: boolean;
 }) {
   const pathname = usePathname();
 
@@ -61,6 +63,12 @@ export default function TabNav({
       href: "/subcontractors",
       label: "Subcontractors",
       match: "/subcontractors",
+    });
+  if (showConcretePumps)
+    tabs.push({
+      href: "/concrete-pumps",
+      label: "Concrete Pumps",
+      match: "/concrete-pumps",
     });
 
   return (
