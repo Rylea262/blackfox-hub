@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
+import { formatCurrency } from "@/lib/format/currency";
 import AddPumpButton from "./add-pump-button";
 import EditPumpButton from "./edit-pump-button";
 import DeletePumpButton from "./delete-pump-button";
@@ -46,7 +47,7 @@ export default async function ConcretePumpsPage() {
     supabase
       .from("pump_companies")
       .select(
-        "name, contact_name, contact_phone, contact_email, notes, account_number, credit_limit, payment_terms",
+        "name, contact_name, contact_phone, contact_email, notes, accounts_contact_name, accounts_contact_phone, accounts_contact_email, credit_limit, payment_terms",
       ),
     supabase
       .from("pump_company_documents")
@@ -134,9 +135,18 @@ export default async function ConcretePumpsPage() {
               key={company}
               className="rounded border border-neutral-200 bg-white"
             >
-              <summary className="flex cursor-pointer select-none items-center justify-between px-4 py-3">
+              <summary className="flex cursor-pointer select-none flex-wrap items-center gap-3 px-4 py-3">
                 <span className="font-semibold">{company}</span>
-                <span className="text-xs text-neutral-500">
+                {companyContacts.get(company)?.credit_limit != null &&
+                  companyContacts.get(company)?.credit_limit !== "" && (
+                    <span className="text-xs tabular-nums text-neutral-500">
+                      Limit{" "}
+                      {formatCurrency(
+                        companyContacts.get(company)!.credit_limit,
+                      )}
+                    </span>
+                  )}
+                <span className="ml-auto text-xs text-neutral-500">
                   {items.length} {items.length === 1 ? "pump" : "pumps"}
                 </span>
               </summary>

@@ -2,7 +2,6 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { formatCurrency } from "@/lib/format/currency";
 import { upsertPumpCompany } from "./actions";
 
 export type PumpCompanyContact = {
@@ -11,7 +10,9 @@ export type PumpCompanyContact = {
   contact_phone: string | null;
   contact_email: string | null;
   notes: string | null;
-  account_number: string | null;
+  accounts_contact_name: string | null;
+  accounts_contact_phone: string | null;
+  accounts_contact_email: string | null;
   credit_limit: number | string | null;
   payment_terms: string | null;
 };
@@ -76,17 +77,21 @@ export default function CompanyContactCard({
             </span>
           </div>
           <div className="flex gap-2">
-            <span className="w-20 shrink-0 text-neutral-500">Account</span>
+            <span className="w-20 shrink-0 text-neutral-500">Accounts</span>
             <span className="min-w-0 truncate">
-              {nonEmpty(contact?.account_number ?? null)}
+              {nonEmpty(contact?.accounts_contact_name ?? null)}
             </span>
           </div>
           <div className="flex gap-2">
-            <span className="w-20 shrink-0 text-neutral-500">Limit</span>
-            <span className="tabular-nums">
-              {contact?.credit_limit != null && contact.credit_limit !== ""
-                ? formatCurrency(contact.credit_limit)
-                : "—"}
+            <span className="w-20 shrink-0 text-neutral-500">A/c phone</span>
+            <span className="min-w-0 truncate">
+              {nonEmpty(contact?.accounts_contact_phone ?? null)}
+            </span>
+          </div>
+          <div className="flex gap-2 sm:col-span-2">
+            <span className="w-20 shrink-0 text-neutral-500">A/c email</span>
+            <span className="min-w-0 truncate">
+              {nonEmpty(contact?.accounts_contact_email ?? null)}
             </span>
           </div>
           <div className="flex gap-2 sm:col-span-2">
@@ -160,17 +165,39 @@ export default function CompanyContactCard({
                   />
                 </label>
               </div>
+              <label className="flex flex-col gap-1 text-sm">
+                Accounts contact name
+                <input
+                  type="text"
+                  name="accounts_contact_name"
+                  defaultValue={contact?.accounts_contact_name ?? ""}
+                  className="rounded border p-2"
+                  disabled={isPending}
+                />
+              </label>
               <div className="flex gap-3">
                 <label className="flex flex-1 flex-col gap-1 text-sm">
-                  Account number
+                  Accounts contact phone
                   <input
-                    type="text"
-                    name="account_number"
-                    defaultValue={contact?.account_number ?? ""}
+                    type="tel"
+                    name="accounts_contact_phone"
+                    defaultValue={contact?.accounts_contact_phone ?? ""}
                     className="rounded border p-2"
                     disabled={isPending}
                   />
                 </label>
+                <label className="flex flex-1 flex-col gap-1 text-sm">
+                  Accounts contact email
+                  <input
+                    type="email"
+                    name="accounts_contact_email"
+                    defaultValue={contact?.accounts_contact_email ?? ""}
+                    className="rounded border p-2"
+                    disabled={isPending}
+                  />
+                </label>
+              </div>
+              <div className="flex gap-3">
                 <label className="flex flex-1 flex-col gap-1 text-sm">
                   Credit limit (AUD)
                   <input
@@ -184,18 +211,21 @@ export default function CompanyContactCard({
                     disabled={isPending}
                   />
                 </label>
+                <label className="flex flex-1 flex-col gap-1 text-sm">
+                  Payment terms
+                  <select
+                    name="payment_terms"
+                    defaultValue={contact?.payment_terms ?? ""}
+                    className="rounded border p-2"
+                    disabled={isPending}
+                  >
+                    <option value="">—</option>
+                    <option value="7 days">7 days</option>
+                    <option value="14 days">14 days</option>
+                    <option value="30 days EOM">30 days EOM</option>
+                  </select>
+                </label>
               </div>
-              <label className="flex flex-col gap-1 text-sm">
-                Payment terms
-                <input
-                  type="text"
-                  name="payment_terms"
-                  defaultValue={contact?.payment_terms ?? ""}
-                  placeholder="e.g. 30 days EOM"
-                  className="rounded border p-2"
-                  disabled={isPending}
-                />
-              </label>
               <label className="flex flex-col gap-1 text-sm">
                 Notes
                 <textarea
