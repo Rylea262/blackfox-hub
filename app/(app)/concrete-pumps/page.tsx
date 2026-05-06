@@ -118,7 +118,7 @@ export default async function ConcretePumpsPage() {
                           <span className="font-medium">{p.name}</span>
                           {p.capacity && (
                             <span className="text-xs text-neutral-500">
-                              {p.capacity}
+                              ID {p.capacity}
                             </span>
                           )}
                           {p.registration && (
@@ -175,7 +175,7 @@ export default async function ConcretePumpsPage() {
                             </div>
                             <div className="flex gap-2">
                               <dt className="w-32 shrink-0 text-neutral-500">
-                                Capacity
+                                ID
                               </dt>
                               <dd className="min-w-0 truncate">
                                 {nonEmpty(p.capacity)}

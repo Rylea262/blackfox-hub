@@ -121,11 +121,11 @@ export default function AddPumpButton({
                   />
                 </label>
                 <label className="flex flex-1 flex-col gap-1 text-sm">
-                  Capacity
+                  ID
                   <input
                     type="text"
                     name="capacity"
-                    placeholder="e.g. 32m boom"
+                    placeholder="e.g. P1, BF-32A"
                     className="rounded border p-2"
                     disabled={isPending}
                   />

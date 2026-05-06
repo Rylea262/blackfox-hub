@@ -135,7 +135,7 @@ export default function EditPumpButton({
                   />
                 </label>
                 <label className="flex flex-1 flex-col gap-1 text-sm">
-                  Capacity
+                  ID
                   <input
                     type="text"
                     name="capacity"
