@@ -17,8 +17,17 @@ type Asset = {
   next_service_hours: number | null;
   rego_due: string | null;
   rego: string | null;
+  vin: string | null;
+  next_service_due: string | null;
   created_at: string;
 };
+
+function worstStatus(...statuses: DueStatus[]): DueStatus {
+  if (statuses.includes("overdue")) return "overdue";
+  if (statuses.includes("soon")) return "soon";
+  if (statuses.includes("ok")) return "ok";
+  return "none";
+}
 
 const HOURS_WARNING_THRESHOLD = 50;
 
@@ -90,7 +99,7 @@ export default async function ServicingPage() {
     supabase
       .from("assets")
       .select(
-        "id, name, type, current_hours, next_service_hours, rego_due, rego, created_at",
+        "id, name, type, current_hours, next_service_hours, rego_due, rego, vin, next_service_due, created_at",
       ),
     supabase
       .from("servicing")
@@ -181,10 +190,21 @@ export default async function ServicingPage() {
           const assetServices = servicesByAsset.get(asset.id) ?? [];
           const next = soonestNext(asset.id);
           const status = dueStatus(next);
+          // Banner colour: combine the soonest service date with the
+          // vehicle-specific rego_due and next_service_due statuses so
+          // any expired/soon item drives the row red/orange.
+          const bannerStatus =
+            asset.type === "vehicle"
+              ? worstStatus(
+                  status,
+                  dueStatus(asset.rego_due),
+                  dueStatus(asset.next_service_due),
+                )
+              : status;
           return (
             <details
               key={asset.id}
-              className={`rounded border ${statusBg(status)}`}
+              className={`rounded border ${statusBg(bannerStatus)}`}
             >
               <summary className="flex cursor-pointer select-none flex-wrap items-center gap-3 px-4 py-3">
                 <span className="font-semibold">{asset.name}</span>
@@ -210,13 +230,21 @@ export default async function ServicingPage() {
                     <span className="text-xs text-neutral-700">
                       Rego: {asset.rego ?? "—"}
                     </span>
-                    <span
-                      className={`text-xs ${statusText(dueStatus(asset.rego_due))}`}
-                    >
+                    <span className="text-xs text-neutral-700">
                       {asset.rego_due
                         ? `Rego due: ${formatDate(asset.rego_due)}`
                         : "Rego due: —"}
                     </span>
+                    {asset.vin && (
+                      <span className="text-xs text-neutral-700">
+                        VIN: {asset.vin}
+                      </span>
+                    )}
+                    {asset.next_service_due && (
+                      <span className="text-xs text-neutral-700">
+                        Next service: {formatDate(asset.next_service_due)}
+                      </span>
+                    )}
                   </>
                 )}
                 <span className="ml-auto flex items-center gap-3 text-xs">
@@ -238,6 +266,8 @@ export default async function ServicingPage() {
                       next_service_hours: asset.next_service_hours,
                       rego_due: asset.rego_due,
                       rego: asset.rego,
+                      vin: asset.vin,
+                      next_service_due: asset.next_service_due,
                     }}
                   />
                   <DeleteAssetButton

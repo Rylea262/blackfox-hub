@@ -53,11 +53,17 @@ export async function addAsset(
 
   let rego_due: string | null = null;
   let rego: string | null = null;
+  let vin: string | null = null;
+  let next_service_due: string | null = null;
   if (type === "vehicle") {
     const dueRaw = String(formData.get("rego_due") ?? "").trim();
     rego_due = dueRaw || null;
     const regoRaw = String(formData.get("rego") ?? "").trim();
     rego = regoRaw || null;
+    const vinRaw = String(formData.get("vin") ?? "").trim();
+    vin = vinRaw || null;
+    const nsdRaw = String(formData.get("next_service_due") ?? "").trim();
+    next_service_due = nsdRaw || null;
   }
 
   const { error } = await supabase.from("assets").insert({
@@ -67,6 +73,8 @@ export async function addAsset(
     next_service_hours,
     rego_due,
     rego,
+    vin,
+    next_service_due,
     created_by: user.id,
   });
 
@@ -115,16 +123,31 @@ export async function updateAsset(
 
   let rego_due: string | null = null;
   let rego: string | null = null;
+  let vin: string | null = null;
+  let next_service_due: string | null = null;
   if (type === "vehicle") {
     const dueRaw = String(formData.get("rego_due") ?? "").trim();
     rego_due = dueRaw || null;
     const regoRaw = String(formData.get("rego") ?? "").trim();
     rego = regoRaw || null;
+    const vinRaw = String(formData.get("vin") ?? "").trim();
+    vin = vinRaw || null;
+    const nsdRaw = String(formData.get("next_service_due") ?? "").trim();
+    next_service_due = nsdRaw || null;
   }
 
   const { error } = await supabase
     .from("assets")
-    .update({ name, type, current_hours, next_service_hours, rego_due, rego })
+    .update({
+      name,
+      type,
+      current_hours,
+      next_service_hours,
+      rego_due,
+      rego,
+      vin,
+      next_service_due,
+    })
     .eq("id", assetId);
 
   if (error) {

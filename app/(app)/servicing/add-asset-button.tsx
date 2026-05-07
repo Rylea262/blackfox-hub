@@ -119,27 +119,47 @@ export default function AddAssetButton() {
                 </div>
               )}
               {type === "vehicle" && (
-                <div className="flex gap-3">
-                  <label className="flex flex-1 flex-col gap-1 text-sm">
-                    Rego
+                <>
+                  <div className="flex gap-3">
+                    <label className="flex flex-1 flex-col gap-1 text-sm">
+                      Rego
+                      <input
+                        type="text"
+                        name="rego"
+                        placeholder="e.g. 1ABC123"
+                        className="rounded border p-2"
+                        disabled={isPending}
+                      />
+                    </label>
+                    <label className="flex flex-1 flex-col gap-1 text-sm">
+                      Rego due
+                      <input
+                        type="date"
+                        name="rego_due"
+                        className="rounded border p-2"
+                        disabled={isPending}
+                      />
+                    </label>
+                  </div>
+                  <label className="flex flex-col gap-1 text-sm">
+                    VIN
                     <input
                       type="text"
-                      name="rego"
-                      placeholder="e.g. 1ABC123"
+                      name="vin"
                       className="rounded border p-2"
                       disabled={isPending}
                     />
                   </label>
-                  <label className="flex flex-1 flex-col gap-1 text-sm">
-                    Rego due
+                  <label className="flex flex-col gap-1 text-sm">
+                    Next service due
                     <input
                       type="date"
-                      name="rego_due"
+                      name="next_service_due"
                       className="rounded border p-2"
                       disabled={isPending}
                     />
                   </label>
-                </div>
+                </>
               )}
               {error && (
                 <p className="rounded border border-red-300 bg-red-50 p-2 text-sm text-red-700">
