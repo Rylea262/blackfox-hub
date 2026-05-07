@@ -118,7 +118,7 @@ export default function AddAssetButton() {
                   </label>
                 </div>
               )}
-              {type === "vehicle" && (
+              {(type === "vehicle" || type === "trailer") && (
                 <>
                   <div className="flex gap-3">
                     <label className="flex flex-1 flex-col gap-1 text-sm">

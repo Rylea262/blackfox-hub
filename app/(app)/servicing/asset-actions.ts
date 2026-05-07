@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
-import { ASSET_TYPES } from "@/lib/servicing/constants";
+import { ASSET_TYPES, isVehicleLike } from "@/lib/servicing/constants";
 
 const VALID_TYPES: string[] = ASSET_TYPES.map((a) => a.value);
 
@@ -30,7 +30,7 @@ export async function addAsset(
 
   const type = String(formData.get("type") ?? "").trim();
   if (!VALID_TYPES.includes(type)) {
-    return { error: "Type must be vehicle or plant" };
+    return { error: "Type must be vehicle, plant, or trailer" };
   }
 
   let current_hours: number | null = null;
@@ -55,7 +55,7 @@ export async function addAsset(
   let rego: string | null = null;
   let vin: string | null = null;
   let next_service_due: string | null = null;
-  if (type === "vehicle") {
+  if (isVehicleLike(type)) {
     const dueRaw = String(formData.get("rego_due") ?? "").trim();
     rego_due = dueRaw || null;
     const regoRaw = String(formData.get("rego") ?? "").trim();
@@ -100,7 +100,7 @@ export async function updateAsset(
 
   const type = String(formData.get("type") ?? "").trim();
   if (!VALID_TYPES.includes(type)) {
-    return { error: "Type must be vehicle or plant" };
+    return { error: "Type must be vehicle, plant, or trailer" };
   }
 
   let current_hours: number | null = null;
@@ -125,7 +125,7 @@ export async function updateAsset(
   let rego: string | null = null;
   let vin: string | null = null;
   let next_service_due: string | null = null;
-  if (type === "vehicle") {
+  if (isVehicleLike(type)) {
     const dueRaw = String(formData.get("rego_due") ?? "").trim();
     rego_due = dueRaw || null;
     const regoRaw = String(formData.get("rego") ?? "").trim();

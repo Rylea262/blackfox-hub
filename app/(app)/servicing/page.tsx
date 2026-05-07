@@ -194,7 +194,7 @@ export default async function ServicingPage() {
           // vehicle-specific rego_due and next_service_due statuses so
           // any expired/soon item drives the row red/orange.
           const bannerStatus =
-            asset.type === "vehicle"
+            asset.type === "vehicle" || asset.type === "trailer"
               ? worstStatus(
                   status,
                   dueStatus(asset.rego_due),
@@ -225,7 +225,8 @@ export default async function ServicingPage() {
                       {asset.current_hours} / {asset.next_service_hours} hrs
                     </span>
                   )}
-                {asset.type === "vehicle" && (
+                {(asset.type === "vehicle" ||
+                  asset.type === "trailer") && (
                   <>
                     <span className="text-xs text-neutral-700">
                       Rego: {asset.rego ?? "—"}
