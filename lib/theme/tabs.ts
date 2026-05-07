@@ -59,16 +59,6 @@ export const TAB_THEME: TabColour[] = [
     pillActive: "bg-lime-600 text-white",
     pageBg: "bg-lime-50",
   },
-  {
-    pillIdle: "bg-orange-100 text-orange-900 hover:bg-orange-200",
-    pillActive: "bg-orange-600 text-white",
-    pageBg: "bg-orange-50",
-  },
-  {
-    pillIdle: "bg-pink-100 text-pink-900 hover:bg-pink-200",
-    pillActive: "bg-pink-600 text-white",
-    pageBg: "bg-pink-50",
-  },
 ];
 
 // Match longest paths first so /concrete-pumps doesn't accidentally hit
@@ -93,5 +83,7 @@ export const PATH_TO_COLOUR_INDEX: { match: string; index: number }[] = [
 export function pageBgForPath(pathname: string): string {
   const hit = PATH_TO_COLOUR_INDEX.find((p) => pathname.startsWith(p.match));
   if (!hit) return "bg-sky-50";
-  return TAB_THEME[hit.index]?.pageBg ?? "bg-sky-50";
+  // Wrap with modulo so the bg keeps matching the pill when there
+  // are more tabs than palette entries.
+  return TAB_THEME[hit.index % TAB_THEME.length]?.pageBg ?? "bg-sky-50";
 }
