@@ -35,7 +35,7 @@ export default async function AppLayout({
     <div className="min-h-screen bg-white">
       <nav className="flex items-center justify-between border-b border-neutral-200 px-6 py-3">
         <Link href={dashboardHref} className="font-bold">
-          Blackfox Hub
+          BLACK FOX HUB
         </Link>
         <TabNav
           dashboardHref={dashboardHref}

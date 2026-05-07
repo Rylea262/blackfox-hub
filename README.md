@@ -1,4 +1,4 @@
-# Blackfox Hub
+# BLACK FOX HUB
 
 ## Stack
 
