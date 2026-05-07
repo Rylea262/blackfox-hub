@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { signOut } from "./actions";
 import TabNav from "./tab-nav";
+import ThemedShell from "./themed-shell";
 
 const ROLE_TO_SLUG: Record<string, string> = {
   owner: "owner",
@@ -32,8 +33,8 @@ export default async function AppLayout({
   const isAdmin = role === "owner" || role === "office";
 
   return (
-    <div className="min-h-screen bg-sky-50">
-      <nav className="flex flex-wrap items-center justify-between gap-3 border-b border-sky-200 bg-white/70 px-6 py-3 backdrop-blur">
+    <ThemedShell>
+      <nav className="flex flex-wrap items-center justify-between gap-3 border-b border-neutral-200 bg-white/70 px-6 py-3 backdrop-blur">
         <Link href={dashboardHref} className="font-bold">
           BLACK FOX HUB
         </Link>
@@ -66,6 +67,6 @@ export default async function AppLayout({
         </div>
       </nav>
       <div>{children}</div>
-    </div>
+    </ThemedShell>
   );
 }
