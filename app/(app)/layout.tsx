@@ -32,8 +32,8 @@ export default async function AppLayout({
   const isAdmin = role === "owner" || role === "office";
 
   return (
-    <div className="min-h-screen bg-white">
-      <nav className="flex items-center justify-between border-b border-neutral-200 px-6 py-3">
+    <div className="min-h-screen bg-sky-50">
+      <nav className="flex flex-wrap items-center justify-between gap-3 border-b border-sky-200 bg-white/70 px-6 py-3 backdrop-blur">
         <Link href={dashboardHref} className="font-bold">
           BLACK FOX HUB
         </Link>
