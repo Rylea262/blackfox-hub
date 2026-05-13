@@ -19,16 +19,17 @@ function nonEmpty(value: string | null): string {
   return value && value.trim() !== "" ? value : "—";
 }
 
-function mailtoBcc(emails: string[]): string {
+function buildMailto(emails: string[], mode: "bcc" | "cc"): string {
   if (emails.length === 0) return "";
-  // Plain mailto with bcc — leave to the user's mail client.
-  return `mailto:?bcc=${encodeURIComponent(emails.join(","))}`;
+  return `mailto:?${mode}=${encodeURIComponent(emails.join(","))}`;
 }
 
 export default function ContactsSection({
   contacts,
+  sendMode = "bcc",
 }: {
   contacts: Contact[];
+  sendMode?: "bcc" | "cc";
 }) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
@@ -73,7 +74,7 @@ export default function ContactsSection({
     <div className="flex flex-col gap-3">
       <div className="flex flex-wrap items-center gap-2">
         <a
-          href={mailtoBcc(selectedEmails)}
+          href={buildMailto(selectedEmails, sendMode)}
           aria-disabled={selectedEmails.length === 0}
           className={`rounded bg-black px-3 py-1.5 text-sm text-white ${
             selectedEmails.length === 0
@@ -84,7 +85,7 @@ export default function ContactsSection({
           Email selected ({selectedEmails.length})
         </a>
         <a
-          href={mailtoBcc(emails)}
+          href={buildMailto(emails, sendMode)}
           aria-disabled={emails.length === 0}
           className={`rounded border border-neutral-300 bg-white px-3 py-1.5 text-sm hover:bg-neutral-50 ${
             emails.length === 0 ? "pointer-events-none opacity-50" : ""
@@ -92,8 +93,8 @@ export default function ContactsSection({
         >
           Email all ({emails.length})
         </a>
-        <span className="ml-auto text-xs text-neutral-500">
-          BCC opens in your mail app
+        <span className="ml-auto text-xs uppercase tracking-wide text-neutral-500">
+          {sendMode}
         </span>
       </div>
 

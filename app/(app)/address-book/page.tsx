@@ -1,12 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
 import AddContactButton from "./add-contact-button";
-import ContactsSection, { type Contact } from "./contacts-section";
-
-const BF_GROUPS = [
-  { value: "black_fox_industries", label: "Black Fox Industries" },
-  { value: "black_fox_concrete_pumping", label: "Black Fox Concrete Pumping" },
-] as const;
+import AddressBookView from "./address-book-view";
+import type { Contact } from "./contacts-section";
 
 export default async function AddressBookPage() {
   await requireRole(["owner", "office"]);
@@ -21,11 +17,9 @@ export default async function AddressBookPage() {
 
   const contacts = (data ?? []) as Contact[];
 
-  const byCompany = new Map<string, Contact[]>();
+  const contactsByCompany: Record<string, Contact[]> = {};
   for (const c of contacts) {
-    const arr = byCompany.get(c.bf_company);
-    if (arr) arr.push(c);
-    else byCompany.set(c.bf_company, [c]);
+    (contactsByCompany[c.bf_company] ??= []).push(c);
   }
 
   return (
@@ -35,7 +29,7 @@ export default async function AddressBookPage() {
           <h1 className="text-2xl font-bold">Address book</h1>
           <p className="mt-1 text-sm text-neutral-500">
             Client and partner contacts grouped by Black Fox company.
-            Use the checkboxes to BCC a group.
+            Use the checkboxes to BCC or CC a group.
           </p>
         </div>
         <AddContactButton />
@@ -47,26 +41,7 @@ export default async function AddressBookPage() {
         </p>
       )}
 
-      {BF_GROUPS.map((group) => (
-        <details
-          key={group.value}
-          open
-          className="mt-4 rounded border border-neutral-200 bg-white"
-        >
-          <summary className="flex cursor-pointer select-none items-center justify-between px-4 py-3">
-            <span className="text-base font-semibold">{group.label}</span>
-            <span className="text-xs text-neutral-500">
-              {(byCompany.get(group.value) ?? []).length}{" "}
-              {(byCompany.get(group.value) ?? []).length === 1
-                ? "contact"
-                : "contacts"}
-            </span>
-          </summary>
-          <div className="border-t border-neutral-200 p-4">
-            <ContactsSection contacts={byCompany.get(group.value) ?? []} />
-          </div>
-        </details>
-      ))}
+      <AddressBookView contactsByCompany={contactsByCompany} />
     </main>
   );
 }
