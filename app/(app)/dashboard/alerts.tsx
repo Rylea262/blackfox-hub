@@ -187,7 +187,7 @@ export default async function Alerts() {
           title: a.name,
           detail: detailFor(svcStatus, "Service", a.next_service_due),
           date: a.next_service_due,
-          href: "/assets",
+          href: "/servicing",
         });
       }
     }
