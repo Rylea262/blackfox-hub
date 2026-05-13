@@ -1,4 +1,5 @@
 import Alerts from "./alerts";
+import DashboardGridClient from "./dashboard-grid-client";
 import {
   RecentChangesQuadrant,
   RecentDocumentsQuadrant,
@@ -11,19 +12,15 @@ export default function DashboardGrid() {
     <div className="mx-auto max-w-6xl px-6 py-6">
       <p className="text-sm text-neutral-500">Welcome back.</p>
 
-      <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-        <RecentJobsQuadrant />
-        <RecentDocumentsQuadrant />
-      </div>
-
-      <div className="mt-4">
-        <Alerts />
-      </div>
-
-      <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-        <RecentNotesQuadrant />
-        <RecentChangesQuadrant />
-      </div>
+      <DashboardGridClient
+        slots={{
+          jobs: <RecentJobsQuadrant />,
+          documents: <RecentDocumentsQuadrant />,
+          notes: <RecentNotesQuadrant />,
+          changes: <RecentChangesQuadrant />,
+        }}
+        centre={<Alerts />}
+      />
     </div>
   );
 }
