@@ -24,6 +24,7 @@ export default function DocumentsList({ docs }: { docs: CompanyDoc[] }) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [busyDownloadId, setBusyDownloadId] = useState<string | null>(null);
+  const [busyViewId, setBusyViewId] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState("");
@@ -68,12 +69,25 @@ export default function DocumentsList({ docs }: { docs: CompanyDoc[] }) {
     });
   }
 
-  async function handleDownload(doc: CompanyDoc) {
-    setBusyDownloadId(doc.id);
+  async function handleView(doc: CompanyDoc) {
+    setBusyViewId(doc.id);
     setError(null);
     try {
       const url = await getCompanyDocUrl(doc.file_url);
       window.open(url, "_blank");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not open file");
+    } finally {
+      setBusyViewId(null);
+    }
+  }
+
+  async function handleDownload(doc: CompanyDoc) {
+    setBusyDownloadId(doc.id);
+    setError(null);
+    try {
+      const url = await getCompanyDocUrl(doc.file_url, doc.file_name);
+      window.location.href = url;
     } catch (e) {
       setError(e instanceof Error ? e.message : "Download failed");
     } finally {
@@ -259,6 +273,14 @@ export default function DocumentsList({ docs }: { docs: CompanyDoc[] }) {
                           className="rounded border border-neutral-300 px-2 py-0.5 text-xs hover:bg-neutral-50"
                         >
                           Rename
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleView(d)}
+                          disabled={busyViewId === d.id}
+                          className="rounded border px-2 py-0.5 text-xs disabled:opacity-50"
+                        >
+                          {busyViewId === d.id ? "…" : "View"}
                         </button>
                         <button
                           type="button"

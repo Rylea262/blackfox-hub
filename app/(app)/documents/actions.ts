@@ -4,12 +4,16 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
 
-export async function getCompanyDocUrl(path: string): Promise<string> {
+export async function getCompanyDocUrl(
+  path: string,
+  download?: string,
+): Promise<string> {
   await requireRole(["owner", "office"]);
   const supabase = createClient();
+  const options = download ? { download } : undefined;
   const { data, error } = await supabase.storage
     .from("company-documents")
-    .createSignedUrl(path, 3600);
+    .createSignedUrl(path, 3600, options);
   if (error || !data) {
     throw new Error(error?.message ?? "Could not generate signed URL");
   }
