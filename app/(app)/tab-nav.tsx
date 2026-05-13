@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { TAB_THEME } from "@/lib/theme/tabs";
 
 type Tab = { href: string; label: string; match: string };
 
@@ -86,15 +85,14 @@ export default function TabNav({
 
   return (
     <div className="flex flex-wrap items-center justify-center gap-2 text-sm">
-      {tabs.map((t, i) => {
+      {tabs.map((t) => {
         const isActive = pathname.startsWith(t.match);
-        const colour = TAB_THEME[i % TAB_THEME.length];
         return (
           <Link
             key={t.label}
             href={t.href}
-            className={`rounded-full px-3 py-1 font-medium transition ${
-              isActive ? colour.pillActive : colour.pillIdle
+            className={`px-3 py-1 text-black transition hover:underline ${
+              isActive ? "font-bold underline underline-offset-4" : "font-medium"
             }`}
           >
             {t.label}
