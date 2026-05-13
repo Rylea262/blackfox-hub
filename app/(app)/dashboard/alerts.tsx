@@ -174,7 +174,7 @@ export default async function Alerts() {
         title: a.name,
         detail: detailFor(regoStatus, "Rego", a.rego_due),
         date: a.rego_due,
-        href: "/assets",
+        href: "/servicing",
       });
     }
     if (!seenServicingAssets.has(a.id)) {
