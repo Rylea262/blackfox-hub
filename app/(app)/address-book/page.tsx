@@ -1,21 +1,29 @@
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
 import AddContactButton from "./add-contact-button";
-import AddressBookView from "./address-book-view";
+import AddressBookView, { type Sender } from "./address-book-view";
 import type { Contact } from "./contacts-section";
 
 export default async function AddressBookPage() {
   await requireRole(["owner", "office"]);
   const supabase = createClient();
 
-  const { data, error } = await supabase
-    .from("address_book_contacts")
-    .select(
-      "id, bf_company, name, company, position, email, phone, notes",
-    )
-    .order("name", { ascending: true });
+  const [contactsRes, sendersRes] = await Promise.all([
+    supabase
+      .from("address_book_contacts")
+      .select(
+        "id, bf_company, name, company, position, email, phone, notes",
+      )
+      .order("name", { ascending: true }),
+    supabase
+      .from("address_book_senders")
+      .select("id, email")
+      .order("email", { ascending: true }),
+  ]);
 
-  const contacts = (data ?? []) as Contact[];
+  const contacts = (contactsRes.data ?? []) as Contact[];
+  const senders = (sendersRes.data ?? []) as Sender[];
+  const error = contactsRes.error ?? sendersRes.error;
 
   const contactsByCompany: Record<string, Contact[]> = {};
   for (const c of contacts) {
@@ -41,7 +49,10 @@ export default async function AddressBookPage() {
         </p>
       )}
 
-      <AddressBookView contactsByCompany={contactsByCompany} />
+      <AddressBookView
+        contactsByCompany={contactsByCompany}
+        senders={senders}
+      />
     </main>
   );
 }
