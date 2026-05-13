@@ -11,6 +11,7 @@ import NotesSection, { type NoteRow } from "./notes-section";
 import VariationsSection, {
   type VariationRow,
 } from "./variations-section";
+import DefectsSection, { type DefectRow } from "./defects-section";
 
 export default async function JobDetailPage({
   params,
@@ -45,6 +46,12 @@ export default async function JobDetailPage({
     .select("id, type, variation_date, value, created_at")
     .eq("job_id", params.id)
     .order("variation_date", { ascending: false });
+
+  const { data: defects } = await supabase
+    .from("job_defects")
+    .select("id, description, defect_date, cost, created_at")
+    .eq("job_id", params.id)
+    .order("defect_date", { ascending: false });
 
   return (
     <main className="mx-auto max-w-3xl p-6">
@@ -102,6 +109,21 @@ export default async function JobDetailPage({
           <VariationsSection
             jobId={job.id}
             variations={(variations ?? []) as VariationRow[]}
+          />
+        </div>
+      </details>
+
+      <details className="mt-8">
+        <summary className="cursor-pointer select-none text-lg font-semibold">
+          Defects{" "}
+          <span className="text-sm font-normal text-neutral-500">
+            ({defects?.length ?? 0})
+          </span>
+        </summary>
+        <div className="mt-2">
+          <DefectsSection
+            jobId={job.id}
+            defects={(defects ?? []) as DefectRow[]}
           />
         </div>
       </details>
