@@ -85,7 +85,7 @@ export default function TabNav({
     });
 
   return (
-    <div className="flex flex-wrap items-center gap-2 text-sm">
+    <div className="flex flex-wrap items-center justify-center gap-2 text-sm">
       {tabs.map((t, i) => {
         const isActive = pathname.startsWith(t.match);
         const colour = TAB_THEME[i % TAB_THEME.length];

@@ -34,37 +34,41 @@ export default async function AppLayout({
 
   return (
     <ThemedShell>
-      <nav className="flex flex-wrap items-center justify-between gap-3 border-b border-neutral-200 bg-white/70 px-6 py-3 backdrop-blur">
-        <Link href={dashboardHref} className="font-bold">
-          BLACK FOX HUB
-        </Link>
-        <TabNav
-          dashboardHref={dashboardHref}
-          showNotes={isAdmin}
-          showJobs={isAdmin}
-          showEmployees={isAdmin}
-          showInsurances={isAdmin}
-          showServicing={isAdmin}
-          showTools={isAdmin}
-          showAssets={isAdmin}
-          showSuppliers={isAdmin}
-          showSubcontractors={isAdmin}
-          showConcretePumps={isAdmin}
-          showDocuments={isAdmin}
-          showAddressBook={isAdmin}
-        />
-        <div className="flex items-center gap-3 text-sm">
-          <span className="hidden text-neutral-600 sm:inline">
-            {user.email}
-          </span>
-          <form action={signOut}>
-            <button
-              type="submit"
-              className="rounded border border-neutral-300 px-2 py-1 hover:bg-neutral-50"
-            >
-              Sign out
-            </button>
-          </form>
+      <nav className="border-b border-neutral-200 bg-white/70 backdrop-blur">
+        <div className="flex flex-wrap items-center justify-between gap-3 px-6 py-3">
+          <Link href={dashboardHref} className="font-bold">
+            BLACK FOX HUB
+          </Link>
+          <div className="flex items-center gap-3 text-sm">
+            <span className="hidden text-neutral-600 sm:inline">
+              {user.email}
+            </span>
+            <form action={signOut}>
+              <button
+                type="submit"
+                className="rounded border border-neutral-300 px-2 py-1 hover:bg-neutral-50"
+              >
+                Sign out
+              </button>
+            </form>
+          </div>
+        </div>
+        <div className="flex justify-center border-t border-neutral-200 px-6 py-2">
+          <TabNav
+            dashboardHref={dashboardHref}
+            showNotes={isAdmin}
+            showJobs={isAdmin}
+            showEmployees={isAdmin}
+            showInsurances={isAdmin}
+            showServicing={isAdmin}
+            showTools={isAdmin}
+            showAssets={isAdmin}
+            showSuppliers={isAdmin}
+            showSubcontractors={isAdmin}
+            showConcretePumps={isAdmin}
+            showDocuments={isAdmin}
+            showAddressBook={isAdmin}
+          />
         </div>
       </nav>
       <div>{children}</div>
