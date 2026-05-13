@@ -43,6 +43,7 @@ export async function updateSession(request: NextRequest) {
     "/subcontractors",
     "/concrete-pumps",
     "/documents",
+    "/address-book",
   ];
   if (
     !user &&

@@ -78,6 +78,7 @@ export const PATH_TO_COLOUR_INDEX: { match: string; index: number }[] = [
   { match: "/subcontractors", index: 9 },
   { match: "/concrete-pumps", index: 10 },
   { match: "/documents", index: 11 },
+  { match: "/address-book", index: 12 },
 ];
 
 export function pageBgForPath(pathname: string): string {

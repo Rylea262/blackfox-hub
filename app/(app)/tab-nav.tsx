@@ -19,6 +19,7 @@ export default function TabNav({
   showSubcontractors,
   showConcretePumps,
   showDocuments,
+  showAddressBook,
 }: {
   dashboardHref: string;
   showNotes: boolean;
@@ -32,6 +33,7 @@ export default function TabNav({
   showSubcontractors: boolean;
   showConcretePumps: boolean;
   showDocuments: boolean;
+  showAddressBook: boolean;
 }) {
   const pathname = usePathname();
 
@@ -75,6 +77,12 @@ export default function TabNav({
     });
   if (showDocuments)
     tabs.push({ href: "/documents", label: "Documents", match: "/documents" });
+  if (showAddressBook)
+    tabs.push({
+      href: "/address-book",
+      label: "Address Book",
+      match: "/address-book",
+    });
 
   return (
     <div className="flex flex-wrap items-center gap-2 text-sm">
