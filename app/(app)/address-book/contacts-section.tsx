@@ -112,12 +112,16 @@ export default function ContactsSection({
 
   const allChecked = contacts.every((c) => selectedIds.has(c.id));
 
-  const headers: { field: SortField; label: string }[] = [
+  const headers: {
+    field: SortField;
+    label: string;
+    align?: "left" | "center";
+  }[] = [
     { field: "name", label: "Name" },
     { field: "company", label: "Company" },
     { field: "position", label: "Position" },
     { field: "category", label: "Category" },
-    { field: "email", label: "Email" },
+    { field: "email", label: "Email", align: "center" },
     { field: "phone", label: "Phone" },
   ];
 
@@ -167,14 +171,17 @@ export default function ContactsSection({
                   ? "▲"
                   : "▼"
                 : "";
+              const align = h.align ?? "left";
               return (
                 <th key={h.field} className="py-1.5">
                   <button
                     type="button"
                     onClick={() => handleSort(h.field)}
-                    className={`flex items-center gap-1 text-left text-xs uppercase tracking-wide hover:text-neutral-900 ${
-                      isActive ? "text-neutral-900" : "text-neutral-500"
-                    }`}
+                    className={`flex w-full items-center gap-1 text-xs uppercase tracking-wide hover:text-neutral-900 ${
+                      align === "center"
+                        ? "justify-center"
+                        : "justify-start text-left"
+                    } ${isActive ? "text-neutral-900" : "text-neutral-500"}`}
                   >
                     {h.label}
                     {indicator && <span aria-hidden>{indicator}</span>}
