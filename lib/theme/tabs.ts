@@ -10,53 +10,53 @@ export type TabColour = {
 
 export const TAB_THEME: TabColour[] = [
   {
-    pillIdle: "bg-blue-100 text-blue-900 hover:bg-blue-200",
-    pillActive: "bg-blue-600 text-white",
+    pillIdle: "bg-blue-100 text-black hover:bg-blue-200",
+    pillActive: "bg-blue-300 text-black ring-1 ring-blue-600",
     pageBg: "bg-blue-50",
   },
   {
-    pillIdle: "bg-emerald-100 text-emerald-900 hover:bg-emerald-200",
-    pillActive: "bg-emerald-600 text-white",
+    pillIdle: "bg-emerald-100 text-black hover:bg-emerald-200",
+    pillActive: "bg-emerald-300 text-black ring-1 ring-emerald-600",
     pageBg: "bg-emerald-50",
   },
   {
-    pillIdle: "bg-amber-100 text-amber-900 hover:bg-amber-200",
-    pillActive: "bg-amber-600 text-white",
+    pillIdle: "bg-amber-100 text-black hover:bg-amber-200",
+    pillActive: "bg-amber-300 text-black ring-1 ring-amber-600",
     pageBg: "bg-amber-50",
   },
   {
-    pillIdle: "bg-purple-100 text-purple-900 hover:bg-purple-200",
-    pillActive: "bg-purple-600 text-white",
+    pillIdle: "bg-purple-100 text-black hover:bg-purple-200",
+    pillActive: "bg-purple-300 text-black ring-1 ring-purple-600",
     pageBg: "bg-purple-50",
   },
   {
-    pillIdle: "bg-rose-100 text-rose-900 hover:bg-rose-200",
-    pillActive: "bg-rose-600 text-white",
+    pillIdle: "bg-rose-100 text-black hover:bg-rose-200",
+    pillActive: "bg-rose-300 text-black ring-1 ring-rose-600",
     pageBg: "bg-rose-50",
   },
   {
-    pillIdle: "bg-cyan-100 text-cyan-900 hover:bg-cyan-200",
-    pillActive: "bg-cyan-600 text-white",
+    pillIdle: "bg-cyan-100 text-black hover:bg-cyan-200",
+    pillActive: "bg-cyan-300 text-black ring-1 ring-cyan-600",
     pageBg: "bg-cyan-50",
   },
   {
-    pillIdle: "bg-teal-100 text-teal-900 hover:bg-teal-200",
-    pillActive: "bg-teal-600 text-white",
+    pillIdle: "bg-teal-100 text-black hover:bg-teal-200",
+    pillActive: "bg-teal-300 text-black ring-1 ring-teal-600",
     pageBg: "bg-teal-50",
   },
   {
-    pillIdle: "bg-indigo-100 text-indigo-900 hover:bg-indigo-200",
-    pillActive: "bg-indigo-600 text-white",
+    pillIdle: "bg-indigo-100 text-black hover:bg-indigo-200",
+    pillActive: "bg-indigo-300 text-black ring-1 ring-indigo-600",
     pageBg: "bg-indigo-50",
   },
   {
-    pillIdle: "bg-fuchsia-100 text-fuchsia-900 hover:bg-fuchsia-200",
-    pillActive: "bg-fuchsia-600 text-white",
+    pillIdle: "bg-fuchsia-100 text-black hover:bg-fuchsia-200",
+    pillActive: "bg-fuchsia-300 text-black ring-1 ring-fuchsia-600",
     pageBg: "bg-fuchsia-50",
   },
   {
-    pillIdle: "bg-lime-100 text-lime-900 hover:bg-lime-200",
-    pillActive: "bg-lime-600 text-white",
+    pillIdle: "bg-lime-100 text-black hover:bg-lime-200",
+    pillActive: "bg-lime-300 text-black ring-1 ring-lime-600",
     pageBg: "bg-lime-50",
   },
 ];
