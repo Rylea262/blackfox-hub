@@ -30,14 +30,24 @@ function hoursStatus(
   return "ok";
 }
 
+type AlertKind = "INS" | "SVC" | "REGO" | "EMP" | "TOOL" | "SUB";
+
 type Alert = {
   key: string;
-  kind: "Insurance" | "Service";
+  kind: AlertKind;
   status: Status;
   title: string;
   detail: string;
+  date: string | null;
   href: string;
 };
+
+function detailFor(status: Status, label: string, iso: string | null): string {
+  if (status === "expired") {
+    return iso ? `${label} expired ${iso}` : `${label} expired`;
+  }
+  return iso ? `${label} expires ${iso}` : `${label} expires soon`;
+}
 
 export default async function Alerts() {
   const supabase = createClient();
@@ -45,7 +55,15 @@ export default async function Alerts() {
     new Date(Date.now() + SOON_DAYS * 86400000),
   );
 
-  const [insRes, svcRes, plantRes] = await Promise.all([
+  const [
+    insRes,
+    svcRes,
+    plantRes,
+    assetsRes,
+    toolsRes,
+    usersRes,
+    subsRes,
+  ] = await Promise.all([
     supabase
       .from("insurances")
       .select("id, name, expiry_date")
@@ -64,6 +82,29 @@ export default async function Alerts() {
       .eq("type", "plant")
       .not("current_hours", "is", null)
       .not("next_service_hours", "is", null),
+    supabase
+      .from("assets")
+      .select("id, name, rego_due, next_service_due")
+      .or(
+        `and(rego_due.not.is.null,rego_due.lte.${cutoff}),and(next_service_due.not.is.null,next_service_due.lte.${cutoff})`,
+      ),
+    supabase
+      .from("tools")
+      .select("id, name, next_service_due")
+      .not("next_service_due", "is", null)
+      .lte("next_service_due", cutoff),
+    supabase
+      .from("users")
+      .select("id, name, email, licence_expiry, white_card_expiry")
+      .or(
+        `and(licence_expiry.not.is.null,licence_expiry.lte.${cutoff}),and(white_card_expiry.not.is.null,white_card_expiry.lte.${cutoff})`,
+      ),
+    supabase
+      .from("subcontractors")
+      .select("id, name, public_liability_expiry, workcover_expiry")
+      .or(
+        `and(public_liability_expiry.not.is.null,public_liability_expiry.lte.${cutoff}),and(workcover_expiry.not.is.null,workcover_expiry.lte.${cutoff})`,
+      ),
   ]);
 
   const alerts: Alert[] = [];
@@ -73,57 +114,162 @@ export default async function Alerts() {
     if (status === "ok") continue;
     alerts.push({
       key: `ins-${i.id}`,
-      kind: "Insurance",
+      kind: "INS",
       status,
       title: i.name,
-      detail: status === "expired" ? "Expired" : "Expires within 30 days",
+      detail: detailFor(status, "Insurance", i.expiry_date),
+      date: i.expiry_date,
       href: "/insurances",
     });
   }
 
   // Dedupe servicing alerts by asset; only flag the soonest upcoming per asset.
-  const seenAssets = new Set<string>();
+  const seenServicingAssets = new Set<string>();
   for (const s of svcRes.data ?? []) {
     const asset = Array.isArray(s.assets)
       ? (s.assets as { id: string; name: string }[])[0]
       : (s.assets as { id: string; name: string } | null);
-    if (!asset || seenAssets.has(asset.id)) continue;
-    seenAssets.add(asset.id);
+    if (!asset || seenServicingAssets.has(asset.id)) continue;
+    seenServicingAssets.add(asset.id);
     const status = dateStatus(s.next_service_date);
     if (status === "ok") continue;
     alerts.push({
       key: `svc-date-${asset.id}`,
-      kind: "Service",
+      kind: "SVC",
       status,
       title: asset.name,
-      detail:
-        status === "expired" ? "Service overdue" : "Service due within 30 days",
+      detail: detailFor(status, "Service", s.next_service_date),
+      date: s.next_service_date,
       href: "/servicing",
     });
   }
 
   for (const a of plantRes.data ?? []) {
-    if (seenAssets.has(a.id)) continue; // already flagged via date alert
+    if (seenServicingAssets.has(a.id)) continue;
     const status = hoursStatus(a.current_hours, a.next_service_hours);
     if (status === "ok") continue;
     const remaining =
       (a.next_service_hours as number) - (a.current_hours as number);
     alerts.push({
       key: `svc-hrs-${a.id}`,
-      kind: "Service",
+      kind: "SVC",
       status,
       title: a.name,
       detail:
         status === "expired"
           ? `Service overdue (${-remaining} hrs over)`
           : `Service in ${remaining} hrs`,
+      date: null,
       href: "/servicing",
     });
   }
 
-  // Expired ones first, then upcoming.
+  for (const a of assetsRes.data ?? []) {
+    const regoStatus = dateStatus(a.rego_due);
+    if (regoStatus !== "ok") {
+      alerts.push({
+        key: `rego-${a.id}`,
+        kind: "REGO",
+        status: regoStatus,
+        title: a.name,
+        detail: detailFor(regoStatus, "Rego", a.rego_due),
+        date: a.rego_due,
+        href: "/assets",
+      });
+    }
+    if (!seenServicingAssets.has(a.id)) {
+      const svcStatus = dateStatus(a.next_service_due);
+      if (svcStatus !== "ok") {
+        alerts.push({
+          key: `asset-svc-${a.id}`,
+          kind: "SVC",
+          status: svcStatus,
+          title: a.name,
+          detail: detailFor(svcStatus, "Service", a.next_service_due),
+          date: a.next_service_due,
+          href: "/assets",
+        });
+      }
+    }
+  }
+
+  for (const t of toolsRes.data ?? []) {
+    const status = dateStatus(t.next_service_due);
+    if (status === "ok") continue;
+    alerts.push({
+      key: `tool-${t.id}`,
+      kind: "TOOL",
+      status,
+      title: t.name,
+      detail: detailFor(status, "Service", t.next_service_due),
+      date: t.next_service_due,
+      href: "/tools",
+    });
+  }
+
+  for (const u of usersRes.data ?? []) {
+    const label = (u.name as string | null)?.trim() || (u.email as string | null) || "Employee";
+    const licStatus = dateStatus(u.licence_expiry);
+    if (licStatus !== "ok") {
+      alerts.push({
+        key: `lic-${u.id}`,
+        kind: "EMP",
+        status: licStatus,
+        title: label,
+        detail: detailFor(licStatus, "Licence", u.licence_expiry),
+        date: u.licence_expiry,
+        href: "/employees",
+      });
+    }
+    const wcStatus = dateStatus(u.white_card_expiry);
+    if (wcStatus !== "ok") {
+      alerts.push({
+        key: `wc-${u.id}`,
+        kind: "EMP",
+        status: wcStatus,
+        title: label,
+        detail: detailFor(wcStatus, "White Card", u.white_card_expiry),
+        date: u.white_card_expiry,
+        href: "/employees",
+      });
+    }
+  }
+
+  for (const s of subsRes.data ?? []) {
+    const plStatus = dateStatus(s.public_liability_expiry);
+    if (plStatus !== "ok") {
+      alerts.push({
+        key: `sub-pl-${s.id}`,
+        kind: "SUB",
+        status: plStatus,
+        title: s.name,
+        detail: detailFor(plStatus, "Public liability", s.public_liability_expiry),
+        date: s.public_liability_expiry,
+        href: "/subcontractors",
+      });
+    }
+    const wcStatus = dateStatus(s.workcover_expiry);
+    if (wcStatus !== "ok") {
+      alerts.push({
+        key: `sub-wc-${s.id}`,
+        kind: "SUB",
+        status: wcStatus,
+        title: s.name,
+        detail: detailFor(wcStatus, "Workcover", s.workcover_expiry),
+        date: s.workcover_expiry,
+        href: "/subcontractors",
+      });
+    }
+  }
+
+  // Expired first, then soonest upcoming, then title.
   alerts.sort((x, y) => {
     if (x.status !== y.status) return x.status === "expired" ? -1 : 1;
+    if (x.date && y.date && x.date !== y.date) {
+      return x.date < y.date ? -1 : 1;
+    }
+    if (x.date && !y.date) return -1;
+    if (!x.date && y.date) return 1;
     return x.title.localeCompare(y.title);
   });
 
@@ -133,7 +279,7 @@ export default async function Alerts() {
     <section className="mx-auto max-w-3xl px-6 pt-6">
       <h2 className="text-lg font-semibold">Needs attention</h2>
       <p className="mt-1 text-xs text-neutral-500">
-        Insurances and services that are expired or due soon.
+        Anything expired or due within the next {SOON_DAYS} days.
       </p>
       <ul className="mt-2 space-y-1.5">
         {alerts.map((a) => (
@@ -154,7 +300,7 @@ export default async function Alerts() {
                       : "bg-orange-200 text-orange-800"
                   }`}
                 >
-                  {a.kind === "Insurance" ? "INS" : "SVC"}
+                  {a.kind}
                 </span>
                 <span className="truncate font-medium">{a.title}</span>
               </span>
