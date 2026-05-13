@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
+import { CONTACT_CATEGORY_VALUES } from "@/lib/address-book/categories";
 
 const VALID_BF_COMPANIES = [
   "black_fox_industries",
@@ -17,7 +18,18 @@ function readContact(formData: FormData) {
   const email = String(formData.get("email") ?? "").trim() || null;
   const phone = String(formData.get("phone") ?? "").trim() || null;
   const notes = String(formData.get("notes") ?? "").trim() || null;
-  return { bf_company, name, company, position, email, phone, notes };
+  const categoryRaw = String(formData.get("category") ?? "").trim();
+  const category = categoryRaw || null;
+  return {
+    bf_company,
+    name,
+    company,
+    position,
+    email,
+    phone,
+    notes,
+    category,
+  };
 }
 
 export async function addContact(
@@ -34,6 +46,14 @@ export async function addContact(
     )
   ) {
     return { error: "Pick a Black Fox company" };
+  }
+  if (
+    fields.category !== null &&
+    !CONTACT_CATEGORY_VALUES.includes(
+      fields.category as (typeof CONTACT_CATEGORY_VALUES)[number],
+    )
+  ) {
+    return { error: "Pick a valid category" };
   }
 
   const { data, error } = await supabase
@@ -64,6 +84,14 @@ export async function updateContact(
     )
   ) {
     return { error: "Pick a Black Fox company" };
+  }
+  if (
+    fields.category !== null &&
+    !CONTACT_CATEGORY_VALUES.includes(
+      fields.category as (typeof CONTACT_CATEGORY_VALUES)[number],
+    )
+  ) {
+    return { error: "Pick a valid category" };
   }
 
   const { error } = await supabase

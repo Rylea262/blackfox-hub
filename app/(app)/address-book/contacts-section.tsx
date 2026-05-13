@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import EditContactButton, { type ContactForEdit } from "./edit-contact-button";
 import DeleteContactButton from "./delete-contact-button";
+import { categoryLabel } from "@/lib/address-book/categories";
 
 export type Contact = {
   id: string;
@@ -13,10 +14,26 @@ export type Contact = {
   email: string | null;
   phone: string | null;
   notes: string | null;
+  category: string | null;
 };
+
+type SortField =
+  | "name"
+  | "company"
+  | "position"
+  | "category"
+  | "email"
+  | "phone";
+type SortDir = "asc" | "desc";
 
 function nonEmpty(value: string | null): string {
   return value && value.trim() !== "" ? value : "—";
+}
+
+function sortKey(c: Contact, field: SortField): string {
+  if (field === "category") return categoryLabel(c.category).toLowerCase();
+  const raw = c[field];
+  return (raw ?? "").toString().trim().toLowerCase();
 }
 
 function buildMailto(emails: string[], mode: "bcc" | "cc"): string {
@@ -32,6 +49,22 @@ export default function ContactsSection({
   sendMode?: "bcc" | "cc";
 }) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [sortField, setSortField] = useState<SortField>("name");
+  const [sortDir, setSortDir] = useState<SortDir>("asc");
+
+  const sortedContacts = useMemo(() => {
+    const dir = sortDir === "asc" ? 1 : -1;
+    return [...contacts].sort((a, b) => {
+      const ak = sortKey(a, sortField);
+      const bk = sortKey(b, sortField);
+      // empties last regardless of direction
+      if (ak === "" && bk !== "") return 1;
+      if (bk === "" && ak !== "") return -1;
+      if (ak < bk) return -1 * dir;
+      if (ak > bk) return 1 * dir;
+      return a.name.localeCompare(b.name);
+    });
+  }, [contacts, sortField, sortDir]);
 
   const emails = useMemo(() => {
     return contacts
@@ -62,6 +95,15 @@ export default function ContactsSection({
     }
   }
 
+  function handleSort(field: SortField) {
+    if (sortField === field) {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortField(field);
+      setSortDir("asc");
+    }
+  }
+
   if (contacts.length === 0) {
     return (
       <p className="text-sm text-neutral-500">No contacts here yet.</p>
@@ -69,6 +111,15 @@ export default function ContactsSection({
   }
 
   const allChecked = contacts.every((c) => selectedIds.has(c.id));
+
+  const headers: { field: SortField; label: string }[] = [
+    { field: "name", label: "Name" },
+    { field: "company", label: "Company" },
+    { field: "position", label: "Position" },
+    { field: "category", label: "Category" },
+    { field: "email", label: "Email" },
+    { field: "phone", label: "Phone" },
+  ];
 
   return (
     <div className="flex flex-col gap-3">
@@ -109,16 +160,33 @@ export default function ContactsSection({
                 aria-label="Select all"
               />
             </th>
-            <th className="py-1.5">Name</th>
-            <th className="py-1.5">Company</th>
-            <th className="py-1.5">Position</th>
-            <th className="py-1.5">Email</th>
-            <th className="py-1.5">Phone</th>
+            {headers.map((h) => {
+              const isActive = sortField === h.field;
+              const indicator = isActive
+                ? sortDir === "asc"
+                  ? "▲"
+                  : "▼"
+                : "";
+              return (
+                <th key={h.field} className="py-1.5">
+                  <button
+                    type="button"
+                    onClick={() => handleSort(h.field)}
+                    className={`flex items-center gap-1 text-left text-xs uppercase tracking-wide hover:text-neutral-900 ${
+                      isActive ? "text-neutral-900" : "text-neutral-500"
+                    }`}
+                  >
+                    {h.label}
+                    {indicator && <span aria-hidden>{indicator}</span>}
+                  </button>
+                </th>
+              );
+            })}
             <th className="py-1.5"></th>
           </tr>
         </thead>
         <tbody>
-          {contacts.map((c) => (
+          {sortedContacts.map((c) => (
             <tr key={c.id} className="border-b align-top">
               <td className="py-2">
                 <input
@@ -131,6 +199,7 @@ export default function ContactsSection({
               <td className="py-2 pr-3 font-medium">{c.name}</td>
               <td className="py-2 pr-3">{nonEmpty(c.company)}</td>
               <td className="py-2 pr-3">{nonEmpty(c.position)}</td>
+              <td className="py-2 pr-3">{categoryLabel(c.category)}</td>
               <td className="py-2 pr-3">
                 {c.email ? (
                   <a

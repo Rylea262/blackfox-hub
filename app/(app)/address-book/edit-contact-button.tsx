@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { updateContact } from "./actions";
+import { CONTACT_CATEGORIES } from "@/lib/address-book/categories";
 
 export type ContactForEdit = {
   id: string;
@@ -13,6 +14,7 @@ export type ContactForEdit = {
   email: string | null;
   phone: string | null;
   notes: string | null;
+  category: string | null;
 };
 
 export default function EditContactButton({
@@ -85,6 +87,22 @@ export default function EditContactButton({
                   <option value="black_fox_concrete_pumping">
                     Black Fox Concrete Pumping
                   </option>
+                </select>
+              </label>
+              <label className="flex flex-col gap-1 text-sm">
+                Category
+                <select
+                  name="category"
+                  defaultValue={contact.category ?? ""}
+                  className="rounded border p-2"
+                  disabled={isPending}
+                >
+                  <option value="">— None —</option>
+                  {CONTACT_CATEGORIES.map((c) => (
+                    <option key={c.value} value={c.value}>
+                      {c.label}
+                    </option>
+                  ))}
                 </select>
               </label>
               <label className="flex flex-col gap-1 text-sm">

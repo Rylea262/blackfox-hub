@@ -12,7 +12,7 @@ export default async function AddressBookPage() {
     supabase
       .from("address_book_contacts")
       .select(
-        "id, bf_company, name, company, position, email, phone, notes",
+        "id, bf_company, name, company, position, email, phone, notes, category",
       )
       .order("name", { ascending: true }),
     supabase
