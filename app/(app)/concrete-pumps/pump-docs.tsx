@@ -51,25 +51,51 @@ export default function PumpDocs({
         return;
       }
 
-      for (const link of links) {
-        const a = document.createElement("a");
-        a.href = link.url;
-        a.download = link.file_name;
-        a.rel = "noopener";
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        await new Promise((r) => setTimeout(r, 300));
-      }
+      const { default: JSZip } = await import("jszip");
+      const zip = new JSZip();
+      const folder = zip.folder(`Plant Pack - ${pumpName}`) ?? zip;
+
+      const usedNames = new Map<string, number>();
+      await Promise.all(
+        links.map(async (link) => {
+          const res = await fetch(link.url);
+          if (!res.ok) {
+            throw new Error(
+              `Failed to fetch ${link.file_name}: ${res.status} ${res.statusText}`,
+            );
+          }
+          const blob = await res.blob();
+          let name = link.file_name;
+          const count = usedNames.get(name) ?? 0;
+          if (count > 0) {
+            const dot = name.lastIndexOf(".");
+            const base = dot > 0 ? name.slice(0, dot) : name;
+            const ext = dot > 0 ? name.slice(dot) : "";
+            name = `${base} (${count})${ext}`;
+          }
+          usedNames.set(link.file_name, count + 1);
+          folder.file(name, blob);
+        }),
+      );
+
+      const zipBlob = await zip.generateAsync({ type: "blob" });
+      const zipUrl = URL.createObjectURL(zipBlob);
+      const a = document.createElement("a");
+      a.href = zipUrl;
+      a.download = `Plant Pack - ${pumpName}.zip`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(zipUrl), 60_000);
 
       const subject = `Plant Pack — ${pumpName}`;
       const lines = [
         `Plant pack for ${pumpName}.`,
         "",
-        "Files:",
+        "Files included in the attached zip:",
         ...links.map((l) => `- ${l.file_name}`),
         "",
-        "(Files have been downloaded to your computer — please attach them to this email before sending.)",
+        `(Attach "Plant Pack - ${pumpName}.zip" from your Downloads folder before sending.)`,
       ];
       const href = `mailto:?subject=${encodeURIComponent(
         subject,
