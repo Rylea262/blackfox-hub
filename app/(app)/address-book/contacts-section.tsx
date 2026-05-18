@@ -36,9 +36,11 @@ function sortKey(c: Contact, field: SortField): string {
   return (raw ?? "").toString().trim().toLowerCase();
 }
 
-function buildMailto(emails: string[], mode: "bcc" | "cc"): string {
+function buildMailto(emails: string[], mode: "to" | "bcc" | "cc"): string {
   if (emails.length === 0) return "";
-  return `mailto:?${mode}=${encodeURIComponent(emails.join(","))}`;
+  const joined = encodeURIComponent(emails.join(","));
+  if (mode === "to") return `mailto:${joined}`;
+  return `mailto:?${mode}=${joined}`;
 }
 
 export default function ContactsSection({
@@ -49,7 +51,7 @@ export default function ContactsSection({
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [sortField, setSortField] = useState<SortField>("name");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
-  const [sendMode, setSendMode] = useState<"bcc" | "cc">("bcc");
+  const [sendMode, setSendMode] = useState<"to" | "bcc" | "cc">("bcc");
 
   const sortedContacts = useMemo(() => {
     const dir = sortDir === "asc" ? 1 : -1;
@@ -148,6 +150,16 @@ export default function ContactsSection({
           Email all ({emails.length})
         </a>
         <fieldset className="flex items-center gap-3 text-sm">
+          <label className="flex items-center gap-1">
+            <input
+              type="radio"
+              name={`send-mode-${contacts[0]?.bf_company ?? "section"}`}
+              value="to"
+              checked={sendMode === "to"}
+              onChange={() => setSendMode("to")}
+            />
+            To
+          </label>
           <label className="flex items-center gap-1">
             <input
               type="radio"
