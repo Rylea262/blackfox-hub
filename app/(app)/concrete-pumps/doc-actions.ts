@@ -16,7 +16,7 @@ export async function getPumpDocUrl(path: string): Promise<string> {
   return data.signedUrl;
 }
 
-export async function getPlantPackLinks(
+export async function getPlantPackDownloadLinks(
   pumpId: string,
 ): Promise<{ file_name: string; url: string }[]> {
   await requireRole(["owner", "office"]);
@@ -31,16 +31,21 @@ export async function getPlantPackLinks(
   if (docsErr) throw new Error(docsErr.message);
   if (!docs || docs.length === 0) return [];
 
-  const paths = docs.map((d) => d.file_url);
-  const { data: signed, error: signErr } = await supabase.storage
-    .from("concrete-pump-documents")
-    .createSignedUrls(paths, 60 * 60 * 24 * 7);
-  if (signErr) throw new Error(signErr.message);
+  const results = await Promise.all(
+    docs.map(async (d) => {
+      const { data, error } = await supabase.storage
+        .from("concrete-pump-documents")
+        .createSignedUrl(d.file_url, 300, { download: d.file_name });
+      if (error || !data) {
+        throw new Error(
+          error?.message ?? `Could not sign URL for ${d.file_name}`,
+        );
+      }
+      return { file_name: d.file_name, url: data.signedUrl };
+    }),
+  );
 
-  return docs.map((d, i) => ({
-    file_name: d.file_name,
-    url: signed?.[i]?.signedUrl ?? "",
-  }));
+  return results;
 }
 
 export async function attachPumpDoc(

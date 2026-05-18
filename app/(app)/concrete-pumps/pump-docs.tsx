@@ -7,7 +7,7 @@ import { formatDate } from "@/lib/format/date";
 import {
   attachPumpDoc,
   deletePumpDoc,
-  getPlantPackLinks,
+  getPlantPackDownloadLinks,
   getPumpDocUrl,
   renamePumpDoc,
 } from "./doc-actions";
@@ -45,22 +45,31 @@ export default function PumpDocs({
     setIsBuildingPack(true);
     setError(null);
     try {
-      const links = await getPlantPackLinks(pumpId);
+      const links = await getPlantPackDownloadLinks(pumpId);
       if (links.length === 0) {
         setError("No documents to send.");
         return;
       }
+
+      for (const link of links) {
+        const a = document.createElement("a");
+        a.href = link.url;
+        a.download = link.file_name;
+        a.rel = "noopener";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        await new Promise((r) => setTimeout(r, 300));
+      }
+
       const subject = `Plant Pack — ${pumpName}`;
       const lines = [
         `Plant pack for ${pumpName}.`,
         "",
-        "Links below are valid for 7 days:",
+        "Files:",
+        ...links.map((l) => `- ${l.file_name}`),
         "",
-        ...links.flatMap((l, i) => [
-          `${i + 1}. ${l.file_name}`,
-          `   ${l.url}`,
-          "",
-        ]),
+        "(Files have been downloaded to your computer — please attach them to this email before sending.)",
       ];
       const href = `mailto:?subject=${encodeURIComponent(
         subject,
