@@ -81,24 +81,28 @@ export default async function JobsListPage({
               <th className="py-2">Status</th>
               <th className="py-2 pl-8 pr-8 text-right">Value</th>
               <th className="py-2 pr-8">Created</th>
-              <th className="py-2"></th>
             </tr>
           </thead>
           <tbody>
             {jobs.map((j) => (
-              <tr key={j.id} className="border-b">
-                <td className="py-2">{j.name}</td>
+              <tr
+                key={j.id}
+                className="relative cursor-pointer border-b hover:bg-neutral-50"
+              >
+                <td className="py-2">
+                  <Link
+                    href={`/jobs/${j.id}`}
+                    aria-label={`Open ${j.name}`}
+                    className="absolute inset-0"
+                  />
+                  {j.name}
+                </td>
                 <td className="py-2">{j.client ?? "—"}</td>
                 <td className="py-2">{j.status}</td>
                 <td className="py-2 pl-8 pr-8 text-right tabular-nums">
                   {formatCurrency(j.project_value)}
                 </td>
                 <td className="py-2 pr-8">{formatDate(j.created_at)}</td>
-                <td className="py-2 text-right">
-                  <Link href={`/jobs/${j.id}`} className="underline">
-                    View
-                  </Link>
-                </td>
               </tr>
             ))}
           </tbody>
