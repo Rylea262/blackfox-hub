@@ -4,6 +4,7 @@ import { formatCurrency } from "@/lib/format/currency";
 import AddPumpButton from "./add-pump-button";
 import EditPumpButton from "./edit-pump-button";
 import DeletePumpButton from "./delete-pump-button";
+import EmailPlantPackButton from "./email-plant-pack-button";
 import PumpDocs, { type PumpDoc } from "./pump-docs";
 import CompanyContactCard, {
   type PumpCompanyContact,
@@ -180,6 +181,11 @@ export default async function ConcretePumpsPage() {
                             </span>
                           )}
                           <span className="ml-auto flex items-center gap-2">
+                            <EmailPlantPackButton
+                              pumpId={p.id}
+                              pumpName={p.name}
+                              docCount={docs.length}
+                            />
                             <EditPumpButton
                               pump={{
                                 id: p.id,
@@ -242,11 +248,7 @@ export default async function ConcretePumpsPage() {
                             </p>
                           )}
 
-                          <PumpDocs
-                            pumpId={p.id}
-                            pumpName={p.name}
-                            docs={docs}
-                          />
+                          <PumpDocs pumpId={p.id} docs={docs} />
                         </div>
                       </details>
                     );

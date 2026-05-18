@@ -7,7 +7,6 @@ import { formatDate } from "@/lib/format/date";
 import {
   attachPumpDoc,
   deletePumpDoc,
-  getPlantPackDownloadLinks,
   getPumpDocUrl,
   renamePumpDoc,
 } from "./doc-actions";
@@ -21,92 +20,18 @@ export type PumpDoc = {
 
 export default function PumpDocs({
   pumpId,
-  pumpName,
   docs,
 }: {
   pumpId: string;
-  pumpName: string;
   docs: PumpDoc[];
 }) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [busyDownloadId, setBusyDownloadId] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
-  const [isBuildingPack, setIsBuildingPack] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState("");
   const [isPending, startTransition] = useTransition();
-
-  async function handleEmailPlantPack() {
-    if (docs.length === 0) {
-      setError("No documents to send.");
-      return;
-    }
-    setIsBuildingPack(true);
-    setError(null);
-    try {
-      const links = await getPlantPackDownloadLinks(pumpId);
-      if (links.length === 0) {
-        setError("No documents to send.");
-        return;
-      }
-
-      const { default: JSZip } = await import("jszip");
-      const zip = new JSZip();
-      const folder = zip.folder(`Plant Pack - ${pumpName}`) ?? zip;
-
-      const usedNames = new Map<string, number>();
-      await Promise.all(
-        links.map(async (link) => {
-          const res = await fetch(link.url);
-          if (!res.ok) {
-            throw new Error(
-              `Failed to fetch ${link.file_name}: ${res.status} ${res.statusText}`,
-            );
-          }
-          const blob = await res.blob();
-          let name = link.file_name;
-          const count = usedNames.get(name) ?? 0;
-          if (count > 0) {
-            const dot = name.lastIndexOf(".");
-            const base = dot > 0 ? name.slice(0, dot) : name;
-            const ext = dot > 0 ? name.slice(dot) : "";
-            name = `${base} (${count})${ext}`;
-          }
-          usedNames.set(link.file_name, count + 1);
-          folder.file(name, blob);
-        }),
-      );
-
-      const zipBlob = await zip.generateAsync({ type: "blob" });
-      const zipUrl = URL.createObjectURL(zipBlob);
-      const a = document.createElement("a");
-      a.href = zipUrl;
-      a.download = `Plant Pack - ${pumpName}.zip`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      setTimeout(() => URL.revokeObjectURL(zipUrl), 60_000);
-
-      const subject = `Plant Pack — ${pumpName}`;
-      const lines = [
-        `Plant pack for ${pumpName}.`,
-        "",
-        "Files included in the attached zip:",
-        ...links.map((l) => `- ${l.file_name}`),
-        "",
-        `(Attach "Plant Pack - ${pumpName}.zip" from your Downloads folder before sending.)`,
-      ];
-      const href = `mailto:?subject=${encodeURIComponent(
-        subject,
-      )}&body=${encodeURIComponent(lines.join("\n"))}`;
-      window.location.href = href;
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Could not build plant pack");
-    } finally {
-      setIsBuildingPack(false);
-    }
-  }
 
   function startRename(doc: PumpDoc) {
     setEditingId(doc.id);
@@ -201,37 +126,27 @@ export default function PumpDocs({
     });
   }
 
-  const busy = isUploading || isPending || isBuildingPack;
+  const busy = isUploading || isPending;
 
   return (
     <div className="mt-3 border-t border-neutral-200 pt-3">
       <div className="flex items-center justify-between gap-3">
         <h4 className="text-sm font-medium text-neutral-700">Documents</h4>
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={handleEmailPlantPack}
-            disabled={busy || docs.length === 0}
-            className="rounded border border-neutral-300 bg-white px-2 py-0.5 text-xs hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {isBuildingPack ? "Preparing…" : "Email Plant Pack"}
-          </button>
-          <label
-            className={`rounded border border-neutral-300 bg-white px-2 py-0.5 text-xs ${
-              busy
-                ? "pointer-events-none opacity-50"
-                : "cursor-pointer hover:bg-neutral-50"
-            }`}
-          >
-            {isUploading ? "Uploading…" : "+ Upload"}
-            <input
-              type="file"
-              className="hidden"
-              disabled={busy}
-              onChange={handleUpload}
-            />
-          </label>
-        </div>
+        <label
+          className={`rounded border border-neutral-300 bg-white px-2 py-0.5 text-xs ${
+            busy
+              ? "pointer-events-none opacity-50"
+              : "cursor-pointer hover:bg-neutral-50"
+          }`}
+        >
+          {isUploading ? "Uploading…" : "+ Upload"}
+          <input
+            type="file"
+            className="hidden"
+            disabled={busy}
+            onChange={handleUpload}
+          />
+        </label>
       </div>
 
       {error && (
