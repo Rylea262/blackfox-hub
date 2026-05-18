@@ -43,14 +43,13 @@ function buildMailto(emails: string[], mode: "bcc" | "cc"): string {
 
 export default function ContactsSection({
   contacts,
-  sendMode = "bcc",
 }: {
   contacts: Contact[];
-  sendMode?: "bcc" | "cc";
 }) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [sortField, setSortField] = useState<SortField>("name");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
+  const [sendMode, setSendMode] = useState<"bcc" | "cc">("bcc");
 
   const sortedContacts = useMemo(() => {
     const dir = sortDir === "asc" ? 1 : -1;
@@ -127,7 +126,7 @@ export default function ContactsSection({
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-wrap items-center gap-3">
         <a
           href={buildMailto(selectedEmails, sendMode)}
           aria-disabled={selectedEmails.length === 0}
@@ -148,9 +147,28 @@ export default function ContactsSection({
         >
           Email all ({emails.length})
         </a>
-        <span className="ml-auto text-xs uppercase tracking-wide text-neutral-500">
-          {sendMode}
-        </span>
+        <fieldset className="flex items-center gap-3 text-sm">
+          <label className="flex items-center gap-1">
+            <input
+              type="radio"
+              name={`send-mode-${contacts[0]?.bf_company ?? "section"}`}
+              value="bcc"
+              checked={sendMode === "bcc"}
+              onChange={() => setSendMode("bcc")}
+            />
+            BCC
+          </label>
+          <label className="flex items-center gap-1">
+            <input
+              type="radio"
+              name={`send-mode-${contacts[0]?.bf_company ?? "section"}`}
+              value="cc"
+              checked={sendMode === "cc"}
+              onChange={() => setSendMode("cc")}
+            />
+            CC
+          </label>
+        </fieldset>
       </div>
 
       <table className="w-full border-collapse text-sm">
