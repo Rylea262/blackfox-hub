@@ -7,6 +7,7 @@ import { formatDate } from "@/lib/format/date";
 import {
   attachPumpDoc,
   deletePumpDoc,
+  getPlantPackLinks,
   getPumpDocUrl,
   renamePumpDoc,
 } from "./doc-actions";
@@ -20,18 +21,57 @@ export type PumpDoc = {
 
 export default function PumpDocs({
   pumpId,
+  pumpName,
   docs,
 }: {
   pumpId: string;
+  pumpName: string;
   docs: PumpDoc[];
 }) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [busyDownloadId, setBusyDownloadId] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [isBuildingPack, setIsBuildingPack] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState("");
   const [isPending, startTransition] = useTransition();
+
+  async function handleEmailPlantPack() {
+    if (docs.length === 0) {
+      setError("No documents to send.");
+      return;
+    }
+    setIsBuildingPack(true);
+    setError(null);
+    try {
+      const links = await getPlantPackLinks(pumpId);
+      if (links.length === 0) {
+        setError("No documents to send.");
+        return;
+      }
+      const subject = `Plant Pack — ${pumpName}`;
+      const lines = [
+        `Plant pack for ${pumpName}.`,
+        "",
+        "Links below are valid for 7 days:",
+        "",
+        ...links.flatMap((l, i) => [
+          `${i + 1}. ${l.file_name}`,
+          `   ${l.url}`,
+          "",
+        ]),
+      ];
+      const href = `mailto:?subject=${encodeURIComponent(
+        subject,
+      )}&body=${encodeURIComponent(lines.join("\n"))}`;
+      window.location.href = href;
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not build plant pack");
+    } finally {
+      setIsBuildingPack(false);
+    }
+  }
 
   function startRename(doc: PumpDoc) {
     setEditingId(doc.id);
@@ -126,27 +166,37 @@ export default function PumpDocs({
     });
   }
 
-  const busy = isUploading || isPending;
+  const busy = isUploading || isPending || isBuildingPack;
 
   return (
     <div className="mt-3 border-t border-neutral-200 pt-3">
       <div className="flex items-center justify-between gap-3">
         <h4 className="text-sm font-medium text-neutral-700">Documents</h4>
-        <label
-          className={`rounded border border-neutral-300 bg-white px-2 py-0.5 text-xs ${
-            busy
-              ? "pointer-events-none opacity-50"
-              : "cursor-pointer hover:bg-neutral-50"
-          }`}
-        >
-          {isUploading ? "Uploading…" : "+ Upload"}
-          <input
-            type="file"
-            className="hidden"
-            disabled={busy}
-            onChange={handleUpload}
-          />
-        </label>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={handleEmailPlantPack}
+            disabled={busy || docs.length === 0}
+            className="rounded border border-neutral-300 bg-white px-2 py-0.5 text-xs hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {isBuildingPack ? "Preparing…" : "Email Plant Pack"}
+          </button>
+          <label
+            className={`rounded border border-neutral-300 bg-white px-2 py-0.5 text-xs ${
+              busy
+                ? "pointer-events-none opacity-50"
+                : "cursor-pointer hover:bg-neutral-50"
+            }`}
+          >
+            {isUploading ? "Uploading…" : "+ Upload"}
+            <input
+              type="file"
+              className="hidden"
+              disabled={busy}
+              onChange={handleUpload}
+            />
+          </label>
+        </div>
       </div>
 
       {error && (

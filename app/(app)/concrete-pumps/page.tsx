@@ -242,7 +242,11 @@ export default async function ConcretePumpsPage() {
                             </p>
                           )}
 
-                          <PumpDocs pumpId={p.id} docs={docs} />
+                          <PumpDocs
+                            pumpId={p.id}
+                            pumpName={p.name}
+                            docs={docs}
+                          />
                         </div>
                       </details>
                     );

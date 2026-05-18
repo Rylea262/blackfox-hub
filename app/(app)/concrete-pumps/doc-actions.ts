@@ -16,6 +16,33 @@ export async function getPumpDocUrl(path: string): Promise<string> {
   return data.signedUrl;
 }
 
+export async function getPlantPackLinks(
+  pumpId: string,
+): Promise<{ file_name: string; url: string }[]> {
+  await requireRole(["owner", "office"]);
+  const supabase = createClient();
+
+  const { data: docs, error: docsErr } = await supabase
+    .from("concrete_pump_documents")
+    .select("file_name, file_url")
+    .eq("pump_id", pumpId)
+    .order("file_name", { ascending: true });
+
+  if (docsErr) throw new Error(docsErr.message);
+  if (!docs || docs.length === 0) return [];
+
+  const paths = docs.map((d) => d.file_url);
+  const { data: signed, error: signErr } = await supabase.storage
+    .from("concrete-pump-documents")
+    .createSignedUrls(paths, 60 * 60 * 24 * 7);
+  if (signErr) throw new Error(signErr.message);
+
+  return docs.map((d, i) => ({
+    file_name: d.file_name,
+    url: signed?.[i]?.signedUrl ?? "",
+  }));
+}
+
 export async function attachPumpDoc(
   pumpId: string,
   fileName: string,
