@@ -73,40 +73,30 @@ export default async function JobsListPage({
       )}
 
       {jobs && jobs.length > 0 && (
-        <table className="w-full border-collapse text-sm">
-          <thead>
-            <tr className="border-b text-left">
-              <th className="py-2">Name</th>
-              <th className="py-2">Client</th>
-              <th className="py-2">Status</th>
-              <th className="py-2 pl-8 pr-8 text-right">Value</th>
-              <th className="py-2 pr-8">Created</th>
-            </tr>
-          </thead>
-          <tbody>
-            {jobs.map((j) => (
-              <tr
-                key={j.id}
-                className="relative cursor-pointer border-b hover:bg-neutral-50"
-              >
-                <td className="py-2">
-                  <Link
-                    href={`/jobs/${j.id}`}
-                    aria-label={`Open ${j.name}`}
-                    className="absolute inset-0"
-                  />
-                  {j.name}
-                </td>
-                <td className="py-2">{j.client ?? "—"}</td>
-                <td className="py-2">{j.status}</td>
-                <td className="py-2 pl-8 pr-8 text-right tabular-nums">
-                  {formatCurrency(j.project_value)}
-                </td>
-                <td className="py-2 pr-8">{formatDate(j.created_at)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div className="overflow-hidden rounded border border-neutral-200">
+          <div className="grid grid-cols-[2fr_1.5fr_1fr_1fr_1fr] gap-4 border-b bg-neutral-50 px-3 py-2 text-xs font-medium uppercase tracking-wide text-neutral-500">
+            <div>Name</div>
+            <div>Client</div>
+            <div>Status</div>
+            <div className="text-right">Value</div>
+            <div>Created</div>
+          </div>
+          {jobs.map((j) => (
+            <Link
+              key={j.id}
+              href={`/jobs/${j.id}`}
+              className="grid grid-cols-[2fr_1.5fr_1fr_1fr_1fr] gap-4 border-b border-neutral-200 px-3 py-2 text-sm last:border-b-0 hover:bg-neutral-50"
+            >
+              <span className="truncate">{j.name}</span>
+              <span className="truncate">{j.client ?? "—"}</span>
+              <span className="truncate">{j.status}</span>
+              <span className="text-right tabular-nums">
+                {formatCurrency(j.project_value)}
+              </span>
+              <span className="truncate">{formatDate(j.created_at)}</span>
+            </Link>
+          ))}
+        </div>
       )}
     </main>
   );
