@@ -24,13 +24,18 @@ export default async function AppLayout({
 
   const { data: profile } = await supabase
     .from("users")
-    .select("role")
+    .select("role, name")
     .eq("id", user.id)
     .single();
 
   const role = profile?.role ?? "leading_hand";
   const dashboardHref = `/dashboard/${ROLE_TO_SLUG[role] ?? "leading-hand"}`;
   const isAdmin = role === "owner" || role === "office";
+
+  const firstName =
+    profile?.name?.trim().split(/\s+/)[0] ||
+    user.email?.split("@")[0] ||
+    "there";
 
   return (
     <ThemedShell>
@@ -41,7 +46,7 @@ export default async function AppLayout({
           </Link>
           <div className="flex items-center gap-3 text-sm">
             <span className="hidden text-neutral-600 sm:inline">
-              {user.email}
+              Hello {firstName}
             </span>
             <form action={signOut}>
               <button
