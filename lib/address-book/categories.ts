@@ -4,6 +4,7 @@ export const CONTACT_CATEGORIES = [
   { value: "developer", label: "Developer" },
   { value: "concreter", label: "Concreter" },
   { value: "pumpy", label: "Pumpy" },
+  { value: "blocklayer", label: "Blocklayer" },
 ] as const;
 
 export type ContactCategory = (typeof CONTACT_CATEGORIES)[number]["value"];
