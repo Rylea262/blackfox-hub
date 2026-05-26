@@ -28,7 +28,7 @@ export async function inviteEmployeeLogin(
   if (!profile?.email) return { error: "Employee has no email on file" };
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "");
-  const redirectTo = siteUrl ? `${siteUrl}/login` : undefined;
+  const redirectTo = siteUrl ? `${siteUrl}/auth/callback` : undefined;
 
   const admin = createAdminClient();
   const { error: inviteError } = await admin.auth.admin.inviteUserByEmail(
