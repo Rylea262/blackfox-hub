@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient, isAdminAvailable } from "@/lib/supabase/admin";
 import { requireRole } from "@/lib/auth/require-role";
 import { formatCurrency } from "@/lib/format/currency";
 import { formatDate } from "@/lib/format/date";
@@ -6,11 +7,13 @@ import AddEmployeeButton from "./add-employee-button";
 import EditEmployeeButton from "./edit-employee-button";
 import EmployeeCerts, { type EmployeeCert } from "./employee-certs";
 import EmployeeContractButton from "./employee-contract-button";
+import AccessControls from "./access-controls";
 
 type Employee = {
   id: string;
   name: string | null;
   email: string | null;
+  role: string | null;
   position: string | null;
   phone: string | null;
   emergency_contact_name: string | null;
@@ -148,14 +151,17 @@ function statusClass(status: RecordStatus): string {
 }
 
 export default async function EmployeesPage() {
-  const { user: currentUser } = await requireRole(["owner", "office"]);
+  const { user: currentUser, role: currentUserRole } = await requireRole([
+    "owner",
+    "office",
+  ]);
   const supabase = createClient();
 
   const [usersRes, certsRes] = await Promise.all([
     supabase
       .from("users")
       .select(
-        "id, name, email, position, phone, emergency_contact_name, emergency_contact_phone, start_date, date_of_birth, notes, address, licence_number, white_card_number, licence_expiry, employment_type, abn_number, tfn_number, pay_type, pay_amount, qleave_number, shirt_size, shorts_size, jacket_size, company, contract_url, created_at",
+        "id, name, email, role, position, phone, emergency_contact_name, emergency_contact_phone, start_date, date_of_birth, notes, address, licence_number, white_card_number, licence_expiry, employment_type, abn_number, tfn_number, pay_type, pay_amount, qleave_number, shirt_size, shorts_size, jacket_size, company, contract_url, created_at",
       )
       .order("name", { ascending: true, nullsFirst: false }),
     supabase
@@ -163,6 +169,24 @@ export default async function EmployeesPage() {
       .select("id, user_id, file_name, file_url, created_at")
       .order("created_at", { ascending: false }),
   ]);
+
+  // Map of public.users.id -> auth state. Only the owner sees access
+  // controls, so only the owner needs this lookup.
+  const hasLoginById = new Map<string, boolean>();
+  if (currentUserRole === "owner" && isAdminAvailable()) {
+    try {
+      const admin = createAdminClient();
+      const { data: authList } = await admin.auth.admin.listUsers({
+        page: 1,
+        perPage: 1000,
+      });
+      for (const u of authList?.users ?? []) {
+        hasLoginById.set(u.id, true);
+      }
+    } catch (e) {
+      console.error("Failed to load auth.users for access controls:", e);
+    }
+  }
 
   const { data: users, error } = usersRes;
   const employees = (users ?? []) as Employee[];
@@ -408,6 +432,16 @@ export default async function EmployeesPage() {
                 userId={u.id}
                 certs={certsByUser.get(u.id) ?? []}
               />
+
+              {currentUserRole === "owner" && (
+                <AccessControls
+                  userId={u.id}
+                  email={u.email}
+                  role={u.role}
+                  hasLogin={hasLoginById.get(u.id) ?? false}
+                  isSelf={isSelf}
+                />
+              )}
               </div>
             </details>
           );
