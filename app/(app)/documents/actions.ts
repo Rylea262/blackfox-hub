@@ -4,6 +4,18 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/require-role";
 
+export type CompanyDocCategory = "internal" | "australian_standard" | "ncc";
+
+const ALLOWED_CATEGORIES: CompanyDocCategory[] = [
+  "internal",
+  "australian_standard",
+  "ncc",
+];
+
+function isCategory(value: string): value is CompanyDocCategory {
+  return (ALLOWED_CATEGORIES as string[]).includes(value);
+}
+
 export async function getCompanyDocUrl(
   path: string,
   download?: string,
@@ -24,7 +36,9 @@ export async function attachCompanyDoc(
   fileName: string,
   filePath: string,
   description: string | null,
+  category: CompanyDocCategory = "internal",
 ): Promise<{ error?: string } | void> {
+  if (!isCategory(category)) return { error: "Invalid category" };
   const { user } = await requireRole(["owner", "office"]);
   const supabase = createClient();
 
@@ -32,11 +46,27 @@ export async function attachCompanyDoc(
     file_name: fileName,
     file_url: filePath,
     description,
+    category,
     uploaded_by: user.id,
   });
 
   if (error) return { error: error.message };
 
+  revalidatePath("/documents");
+}
+
+export async function updateCompanyDocCategory(
+  docId: string,
+  category: CompanyDocCategory,
+): Promise<{ error?: string } | void> {
+  if (!isCategory(category)) return { error: "Invalid category" };
+  await requireRole(["owner", "office"]);
+  const supabase = createClient();
+  const { error } = await supabase
+    .from("company_documents")
+    .update({ category })
+    .eq("id", docId);
+  if (error) return { error: error.message };
   revalidatePath("/documents");
 }
 

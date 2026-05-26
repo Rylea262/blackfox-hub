@@ -8,7 +8,7 @@ export default async function DocumentsPage() {
 
   const { data, error } = await supabase
     .from("company_documents")
-    .select("id, file_name, file_url, description, created_at")
+    .select("id, file_name, file_url, description, category, created_at")
     .order("created_at", { ascending: false });
 
   const docs = (data ?? []) as CompanyDoc[];

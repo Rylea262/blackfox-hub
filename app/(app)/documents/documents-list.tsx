@@ -9,7 +9,9 @@ import {
   deleteCompanyDoc,
   getCompanyDocUrl,
   renameCompanyDoc,
+  updateCompanyDocCategory,
   updateCompanyDocDescription,
+  type CompanyDocCategory,
 } from "./actions";
 
 export type CompanyDoc = {
@@ -17,7 +19,20 @@ export type CompanyDoc = {
   file_name: string;
   file_url: string;
   description: string | null;
+  category: CompanyDocCategory;
   created_at: string;
+};
+
+const CATEGORY_ORDER: CompanyDocCategory[] = [
+  "internal",
+  "australian_standard",
+  "ncc",
+];
+
+const CATEGORY_LABELS: Record<CompanyDocCategory, string> = {
+  internal: "Internal Documents",
+  australian_standard: "Australian Standards",
+  ncc: "NCC",
 };
 
 export default function DocumentsList({ docs }: { docs: CompanyDoc[] }) {
@@ -31,6 +46,8 @@ export default function DocumentsList({ docs }: { docs: CompanyDoc[] }) {
   const [editingDescId, setEditingDescId] = useState<string | null>(null);
   const [editingDesc, setEditingDesc] = useState("");
   const [pendingDescription, setPendingDescription] = useState("");
+  const [pendingCategory, setPendingCategory] =
+    useState<CompanyDocCategory>("internal");
   const [isPending, startTransition] = useTransition();
 
   async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
@@ -57,14 +74,32 @@ export default function DocumentsList({ docs }: { docs: CompanyDoc[] }) {
     }
 
     const description = pendingDescription.trim() || null;
+    const category = pendingCategory;
     startTransition(async () => {
-      const result = await attachCompanyDoc(file.name, path, description);
+      const result = await attachCompanyDoc(
+        file.name,
+        path,
+        description,
+        category,
+      );
       setIsUploading(false);
       if (result?.error) {
         setError(result.error);
         return;
       }
       setPendingDescription("");
+      router.refresh();
+    });
+  }
+
+  function handleChangeCategory(id: string, next: CompanyDocCategory) {
+    setError(null);
+    startTransition(async () => {
+      const result = await updateCompanyDocCategory(id, next);
+      if (result?.error) {
+        setError(result.error);
+        return;
+      }
       router.refresh();
     });
   }
@@ -184,6 +219,23 @@ export default function DocumentsList({ docs }: { docs: CompanyDoc[] }) {
               className="rounded border border-neutral-300 p-2"
             />
           </label>
+          <label className="flex flex-col gap-1 text-sm">
+            Section
+            <select
+              value={pendingCategory}
+              onChange={(e) =>
+                setPendingCategory(e.target.value as CompanyDocCategory)
+              }
+              disabled={busy}
+              className="rounded border border-neutral-300 p-2"
+            >
+              {CATEGORY_ORDER.map((c) => (
+                <option key={c} value={c}>
+                  {CATEGORY_LABELS[c]}
+                </option>
+              ))}
+            </select>
+          </label>
           <label
             className={`rounded bg-black px-3 py-2 text-sm text-white ${
               busy
@@ -208,17 +260,27 @@ export default function DocumentsList({ docs }: { docs: CompanyDoc[] }) {
         </p>
       )}
 
-      {docs.length === 0 ? (
-        <p className="mt-6 rounded border border-dashed border-neutral-300 p-8 text-center text-sm text-neutral-500">
-          No documents yet. Upload the first one above.
-        </p>
-      ) : (
-        <ul className="mt-4 divide-y divide-neutral-200 rounded border border-neutral-200 bg-white">
-          {docs.map((d) => {
-            const isEditing = editingId === d.id;
-            const isEditingDesc = editingDescId === d.id;
-            return (
-              <li key={d.id} className="flex flex-col gap-2 px-3 py-2 text-sm">
+      {CATEGORY_ORDER.map((cat) => {
+        const items = docs.filter((d) => d.category === cat);
+        return (
+          <section key={cat} className="mt-6">
+            <h2 className="text-lg font-semibold text-neutral-800">
+              {CATEGORY_LABELS[cat]}
+            </h2>
+            {items.length === 0 ? (
+              <p className="mt-2 rounded border border-dashed border-neutral-300 p-6 text-center text-sm text-neutral-500">
+                No files in this section yet.
+              </p>
+            ) : (
+              <ul className="mt-2 divide-y divide-neutral-200 rounded border border-neutral-200 bg-white">
+                {items.map((d) => {
+                  const isEditing = editingId === d.id;
+                  const isEditingDesc = editingDescId === d.id;
+                  return (
+                    <li
+                      key={d.id}
+                      className="flex flex-col gap-2 px-3 py-2 text-sm"
+                    >
                 <div className="flex flex-wrap items-center gap-3">
                   {isEditing ? (
                     <input
@@ -298,6 +360,24 @@ export default function DocumentsList({ docs }: { docs: CompanyDoc[] }) {
                         >
                           Delete
                         </button>
+                        <select
+                          aria-label="Move to section"
+                          value={d.category}
+                          onChange={(e) =>
+                            handleChangeCategory(
+                              d.id,
+                              e.target.value as CompanyDocCategory,
+                            )
+                          }
+                          disabled={busy}
+                          className="rounded border border-neutral-300 px-1 py-0.5 text-xs"
+                        >
+                          {CATEGORY_ORDER.map((c) => (
+                            <option key={c} value={c}>
+                              {CATEGORY_LABELS[c]}
+                            </option>
+                          ))}
+                        </select>
                       </>
                     )}
                   </div>
@@ -346,11 +426,14 @@ export default function DocumentsList({ docs }: { docs: CompanyDoc[] }) {
                     {d.description?.trim() || "+ add description"}
                   </button>
                 )}
-              </li>
-            );
-          })}
-        </ul>
-      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </section>
+        );
+      })}
     </div>
   );
 }
