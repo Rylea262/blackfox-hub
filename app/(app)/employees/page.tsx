@@ -5,6 +5,7 @@ import { formatCurrency } from "@/lib/format/currency";
 import { formatDate } from "@/lib/format/date";
 import AddEmployeeButton from "./add-employee-button";
 import EditEmployeeButton from "./edit-employee-button";
+import DeleteEmployeeButton from "./delete-employee-button";
 import EmployeeCerts, { type EmployeeCert } from "./employee-certs";
 import EmployeeContractButton from "./employee-contract-button";
 import AccessControls from "./access-controls";
@@ -14,6 +15,7 @@ type Employee = {
   name: string | null;
   email: string | null;
   role: string | null;
+  is_previous: boolean;
   position: string | null;
   phone: string | null;
   emergency_contact_name: string | null;
@@ -161,7 +163,7 @@ export default async function EmployeesPage() {
     supabase
       .from("users")
       .select(
-        "id, name, email, role, position, phone, emergency_contact_name, emergency_contact_phone, start_date, date_of_birth, notes, address, licence_number, white_card_number, licence_expiry, employment_type, abn_number, tfn_number, pay_type, pay_amount, qleave_number, shirt_size, shorts_size, jacket_size, company, contract_url, created_at",
+        "id, name, email, role, is_previous, position, phone, emergency_contact_name, emergency_contact_phone, start_date, date_of_birth, notes, address, licence_number, white_card_number, licence_expiry, employment_type, abn_number, tfn_number, pay_type, pay_amount, qleave_number, shirt_size, shorts_size, jacket_size, company, contract_url, created_at",
       )
       .order("name", { ascending: true, nullsFirst: false }),
     supabase
@@ -190,6 +192,8 @@ export default async function EmployeesPage() {
 
   const { data: users, error } = usersRes;
   const employees = (users ?? []) as Employee[];
+  const currentEmployees = employees.filter((u) => !u.is_previous);
+  const previousEmployees = employees.filter((u) => u.is_previous);
 
   const certsByUser = new Map<string, EmployeeCert[]>();
   for (const c of (certsRes.data ?? []) as (EmployeeCert & {
@@ -232,7 +236,7 @@ export default async function EmployeesPage() {
 
       {(() => {
         const groups = new Map<string, Employee[]>();
-        for (const u of employees) {
+        for (const u of currentEmployees) {
           const key = u.company ?? "unassigned";
           const arr = groups.get(key);
           if (arr) arr.push(u);
@@ -314,6 +318,13 @@ export default async function EmployeesPage() {
                       company: u.company,
                     }}
                   />
+                  {!isSelf && (
+                    <DeleteEmployeeButton
+                      userId={u.id}
+                      employeeName={u.name?.trim() || u.email || "this employee"}
+                      isPrevious={u.is_previous}
+                    />
+                  )}
                 </span>
               </summary>
               <div className="border-t border-neutral-200 p-4">
@@ -452,6 +463,56 @@ export default async function EmployeesPage() {
           );
         });
       })()}
+
+      {previousEmployees.length > 0 && (
+        <details className="mt-6 rounded border border-neutral-200 bg-white">
+          <summary className="flex cursor-pointer select-none items-center justify-between px-4 py-3">
+            <span className="text-base font-semibold">Previous employees</span>
+            <span className="text-xs text-neutral-500">
+              {previousEmployees.length}{" "}
+              {previousEmployees.length === 1 ? "employee" : "employees"}
+            </span>
+          </summary>
+          <div className="border-t border-neutral-200 bg-neutral-50/40 p-3">
+            <ul className="flex flex-col gap-2">
+              {previousEmployees.map((u) => {
+                const isSelf = u.id === currentUser.id;
+                return (
+                  <li
+                    key={u.id}
+                    className="rounded border border-neutral-200 bg-white px-3 py-2 text-sm"
+                  >
+                    <div className="flex flex-wrap items-center gap-3">
+                      <span className="font-medium text-neutral-800">
+                        {u.name?.trim() || u.email || "(no name)"}
+                      </span>
+                      {u.position && (
+                        <span className="text-xs text-neutral-500">
+                          {u.position}
+                        </span>
+                      )}
+                      <span className="text-xs text-neutral-400">
+                        {nonEmpty(u.email)}
+                      </span>
+                      {!isSelf && (
+                        <span className="ml-auto flex items-center gap-2">
+                          <DeleteEmployeeButton
+                            userId={u.id}
+                            employeeName={
+                              u.name?.trim() || u.email || "this employee"
+                            }
+                            isPrevious
+                          />
+                        </span>
+                      )}
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        </details>
+      )}
     </main>
   );
 }
