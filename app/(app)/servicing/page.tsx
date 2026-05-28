@@ -6,6 +6,7 @@ import AddAssetButton from "./add-asset-button";
 import AddServicingButton from "./add-servicing-button";
 import EditAssetButton from "./edit-asset-button";
 import DeleteAssetButton from "./delete-asset-button";
+import PdfHistoryButton from "./pdf-history-button";
 
 type DueStatus = "overdue" | "soon" | "ok" | "none";
 
@@ -170,7 +171,10 @@ export default async function ServicingPage() {
             </p>
           )}
         </div>
-        <AddAssetButton />
+        <div className="flex items-center gap-2">
+          <PdfHistoryButton assets={sortedAssets} services={services} />
+          <AddAssetButton />
+        </div>
       </div>
 
       {assetsRes.error && (
