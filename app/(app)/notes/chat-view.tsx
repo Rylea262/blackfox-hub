@@ -7,6 +7,9 @@ import {
   deleteOfficeNote,
   updateOfficeNote,
 } from "./actions";
+import CalendarDrawer from "./calendar-drawer";
+import SummaryDrawer from "./summary-drawer";
+import { formatDateLong } from "./date-helpers";
 
 type NoteAuthor = { name: string | null; email: string } | null;
 
@@ -70,11 +73,16 @@ export default function ChatView({
   notes,
   currentUserId,
   currentRole,
+  selectedDate,
+  today,
 }: {
   notes: ChatNote[];
   currentUserId: string;
   currentRole: string;
+  selectedDate: string;
+  today: string;
 }) {
+  const isToday = selectedDate === today;
   const router = useRouter();
   const [body, setBody] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -101,6 +109,7 @@ export default function ChatView({
   }, [notes.length]);
 
   function send() {
+    if (!isToday) return;
     const trimmed = body.trim();
     if (!trimmed || isPending) return;
     setError(null);
@@ -176,9 +185,15 @@ export default function ChatView({
       <header className="border-b border-neutral-200 px-6 py-3">
         <h1 className="text-lg font-bold">Notepad</h1>
         <p className="text-xs text-neutral-500">
-          Shared office log. Anyone in the office can post.
+          {isToday ? "Today" : formatDateLong(selectedDate)} ·{" "}
+          {isToday
+            ? "Anyone in the office can post."
+            : "Read-only — switch to today to post."}
         </p>
       </header>
+
+      <CalendarDrawer selectedDate={selectedDate} today={today} />
+      <SummaryDrawer anchorDate={today} />
 
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-6 py-4">
         {notes.length === 0 ? (
@@ -299,15 +314,19 @@ export default function ChatView({
             value={body}
             onChange={(e) => setBody(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Type a message…  (Enter to send, Shift+Enter for new line)"
+            placeholder={
+              isToday
+                ? "Type a message…  (Enter to send, Shift+Enter for new line)"
+                : "Switch to today to post"
+            }
             rows={1}
-            className="max-h-40 min-h-[2.5rem] flex-1 resize-y rounded border border-neutral-300 p-2 text-sm"
-            disabled={isPending}
+            className="max-h-40 min-h-[2.5rem] flex-1 resize-y rounded border border-neutral-300 p-2 text-sm disabled:bg-neutral-50 disabled:text-neutral-400"
+            disabled={isPending || !isToday}
           />
           <button
             type="button"
             onClick={send}
-            disabled={!body.trim() || isPending}
+            disabled={!body.trim() || isPending || !isToday}
             className="rounded bg-black px-3 py-2 text-sm text-white disabled:opacity-50"
           >
             {isPending ? "…" : "Send"}
