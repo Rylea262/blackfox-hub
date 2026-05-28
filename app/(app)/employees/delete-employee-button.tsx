@@ -61,7 +61,7 @@ export default function DeleteEmployeeButton({
     e.preventDefault();
     e.stopPropagation();
     const ok = window.confirm(
-      `Permanently delete "${employeeName}"? This cannot be undone. Linked records (jobs, certs, notes) will block the delete — use "Move to Previous" instead if you want to keep history.`,
+      `Permanently delete "${employeeName}"?\n\nThis cannot be undone. Their own notes and certificates will be deleted, audit attribution on jobs/suppliers/etc. will be cleared, and their login (if any) will be removed.\n\nUse "Move to Previous" instead if you want to keep history.`,
     );
     if (!ok) return;
     setError(null);

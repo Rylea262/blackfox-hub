@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient, isAdminAvailable } from "@/lib/supabase/admin";
 import { requireRole } from "@/lib/auth/require-role";
 
 async function setIsPrevious(
@@ -38,16 +39,21 @@ export async function deleteEmployeePermanently(
   }
 
   const supabase = createClient();
-  const { error } = await supabase.from("users").delete().eq("id", userId);
+  const { error } = await supabase.rpc("delete_employee_permanently", {
+    target_user_id: userId,
+  });
 
-  if (error) {
-    if (error.code === "23503") {
-      return {
-        error:
-          "This employee is still linked to jobs, certificates, notes, or other records. Move them to Previous instead, or remove those links first.",
-      };
+  if (error) return { error: error.message };
+
+  // Also remove their auth.users row so the login is fully gone.
+  // Best-effort — if it fails the public.users delete already succeeded.
+  if (isAdminAvailable()) {
+    try {
+      const admin = createAdminClient();
+      await admin.auth.admin.deleteUser(userId);
+    } catch (e) {
+      console.error("Failed to delete auth.users entry:", e);
     }
-    return { error: error.message };
   }
 
   revalidatePath("/employees");
