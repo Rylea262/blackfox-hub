@@ -2,11 +2,13 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient, isAdminAvailable } from "@/lib/supabase/admin";
 import { requireRole } from "@/lib/auth/require-role";
 import { parseDateInput } from "@/lib/format/date";
 
 const VALID_SIZES = ["S", "M", "L", "XL", "2XL", "3XL", "4XL"] as const;
 type Size = (typeof VALID_SIZES)[number];
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function parseDateField(
   value: string,
@@ -27,6 +29,13 @@ export async function updateEmployee(
   const supabase = createClient();
 
   const name = String(formData.get("name") ?? "").trim() || null;
+  const emailRaw = String(formData.get("email") ?? "")
+    .trim()
+    .toLowerCase();
+  const email = emailRaw === "" ? null : emailRaw;
+  if (email !== null && !EMAIL_RE.test(email)) {
+    return { error: "Email looks invalid" };
+  }
   const positionRaw = String(formData.get("position") ?? "").trim();
   const position = positionRaw === "" ? null : positionRaw;
   const phone = String(formData.get("phone") ?? "").trim() || null;
@@ -125,6 +134,7 @@ export async function updateEmployee(
   // (or, in practice, left at the DB default for now).
   const update: Record<string, string | number | null> = {
     name,
+    email,
     position,
     phone,
     emergency_contact_name,
@@ -153,7 +163,29 @@ export async function updateEmployee(
     .update(update)
     .eq("id", employeeId);
 
-  if (error) return { error: error.message };
+  if (error) {
+    if (error.code === "23505") {
+      return { error: "Another employee already has this email." };
+    }
+    return { error: error.message };
+  }
+
+  // If the employee has a login, keep auth.users.email in sync.
+  // Best-effort — public.users update is authoritative.
+  if (email !== null && isAdminAvailable()) {
+    try {
+      const admin = createAdminClient();
+      const { data: existing } = await admin.auth.admin.getUserById(employeeId);
+      if (existing?.user && existing.user.email !== email) {
+        await admin.auth.admin.updateUserById(employeeId, {
+          email,
+          email_confirm: true,
+        });
+      }
+    } catch (e) {
+      console.error("Failed to sync auth.users email:", e);
+    }
+  }
 
   revalidatePath("/employees");
 }

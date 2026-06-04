@@ -92,9 +92,6 @@ export default function EditEmployeeButton({
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="text-lg font-semibold">Edit employee</h2>
-            <p className="mt-1 text-xs text-neutral-500">
-              {employee.email ?? "no email"}
-            </p>
             <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-3">
               <label className="flex flex-col gap-1 text-sm">
                 Name
@@ -105,6 +102,21 @@ export default function EditEmployeeButton({
                   className="rounded border p-2"
                   disabled={isPending}
                 />
+              </label>
+              <label className="flex flex-col gap-1 text-sm">
+                Email
+                <input
+                  type="email"
+                  name="email"
+                  defaultValue={employee.email ?? ""}
+                  autoComplete="off"
+                  className="rounded border p-2"
+                  disabled={isPending}
+                />
+                <span className="text-xs text-neutral-500">
+                  Changing this also updates their login email if they have
+                  one.
+                </span>
               </label>
               <label className="flex flex-col gap-1 text-sm">
                 Company
